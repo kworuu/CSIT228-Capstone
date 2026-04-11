@@ -1,0 +1,29 @@
+#Menu_dashboard, #data_holder, #header_holder{
+ -fx-border-color: black;
+ -fx-border-width: 2;
+ -fx-border-style: solid;
+}
+
+#Menu_dashboard{
+    -fx-background-color: #778E69;
+}
+#recent_table_holder {
+    -fx-border-color: black;
+    -fx-border-style: solid;
+    -fx-border-width: 2 0 2 2; /* No Right */
+}
+
+#LS_table_holder {
+    -fx-border-color: black;
+    -fx-border-style: solid;
+    -fx-border-width: 2 0 2 2; /* No Right */
+}
+
+#capacity_table_holder {
+    -fx-border-color: black;
+    -fx-border-style: solid;
+    -fx-border-width: 2; /* All sides */
+}
+#BUTTON{
+    -fx-background-color: #778E69;
+}

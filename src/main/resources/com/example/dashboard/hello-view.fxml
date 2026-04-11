@@ -9,14 +9,14 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox alignment="CENTER" prefHeight="513.0" prefWidth="734.0" spacing="20.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard.HelloController">
+<VBox alignment="CENTER" prefHeight="513.0" prefWidth="734.0" spacing="20.0" stylesheets="@../../../../../style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard.Dashboard_Admin_Controller">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
    <children>
       <AnchorPane prefHeight="534.0" prefWidth="694.0">
          <children>
-            <AnchorPane prefHeight="52.0" prefWidth="694.0">
+            <AnchorPane id="header_holder" prefHeight="52.0" prefWidth="694.0">
                <children>
                   <Text layoutX="14.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="ReliefFlow">
                      <font>
@@ -36,7 +36,7 @@
                   </Text>
                </children>
             </AnchorPane>
-            <AnchorPane layoutY="52.0" prefHeight="421.0" prefWidth="200.0">
+            <AnchorPane id="Menu_dashboard" layoutY="52.0" prefHeight="421.0" prefWidth="200.0">
                <children>
                   <Text layoutX="17.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="MENU">
                      <font>
@@ -74,11 +74,15 @@
                      </font>
                   </Text>
                   <Text layoutX="31.0" layoutY="247.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Last sync: 2mins ago" />
-                  <Text layoutX="17.0" layoutY="395.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Log Out">
-                     <font>
-                        <Font size="15.0" />
-                     </font>
-                  </Text>
+                  <AnchorPane layoutY="386.0" prefHeight="37.0" prefWidth="198.0">
+                     <children>
+                        <Text layoutX="14.0" layoutY="24.0" lineSpacing="10.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Log Out" wrappingWidth="161.40234375">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </AnchorPane>
                </children>
             </AnchorPane>
             <Text layoutX="210.0" layoutY="97.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Dashboard">
@@ -87,9 +91,9 @@
                </font>
             </Text>
             <Text layoutX="210.0" layoutY="118.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Typhoon Enting Respone - Cebu City | Updated: 10:42 AM" />
-            <HBox layoutX="210.0" layoutY="137.0" prefHeight="73.0" prefWidth="466.0">
+            <HBox id="data_holder" layoutX="210.0" layoutY="137.0" prefHeight="73.0" prefWidth="466.0">
                <children>
-                  <AnchorPane prefHeight="64.0" prefWidth="126.0">
+                  <AnchorPane prefHeight="64.0" prefWidth="126.0" styleClass="data_holder">
                      <children>
                         <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total Evacuees" />
                         <Text layoutX="10.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="4,1231">
@@ -104,7 +108,7 @@
                         </Text>
                      </children>
                   </AnchorPane>
-                  <AnchorPane prefHeight="64.0" prefWidth="147.0">
+                  <AnchorPane id="data_holder" prefHeight="64.0" prefWidth="147.0">
                      <children>
                         <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Active Centers" />
                         <Text layoutX="10.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="6/8">
@@ -137,7 +141,7 @@
             </HBox>
             <HBox layoutX="210.0" layoutY="237.0" prefHeight="225.0" prefWidth="466.0">
                <children>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                  <AnchorPane id="recent_table_holder" prefHeight="200.0" prefWidth="200.0">
                      <children>
                         <Text layoutX="10.0" layoutY="28.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Recent Evaquee">
                            <font>
@@ -149,14 +153,14 @@
                         <Text layoutX="113.0" layoutY="56.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Center" />
                         <Label layoutX="12.0" layoutY="63.0" prefHeight="37.0" prefWidth="44.0" text="Reyes,Maria" wrapText="true" />
                         <Label layoutX="63.0" layoutY="63.0" prefHeight="20.0" prefWidth="22.0" text="5" wrapText="true" />
-                        <Label layoutX="113.0" layoutY="63.0" prefHeight="52.0" prefWidth="38.0" text="Cebu Sports Center" wrapText="true" />
+                        <Label id="data_table_holder" layoutX="113.0" layoutY="63.0" prefHeight="52.0" prefWidth="38.0" text="Cebu Sports Center" wrapText="true" />
                         <Label layoutX="12.0" layoutY="124.0" prefHeight="37.0" prefWidth="44.0" text="Reyes,Maria" wrapText="true" />
                         <Label layoutX="63.0" layoutY="124.0" prefHeight="20.0" prefWidth="22.0" text="5" wrapText="true" />
                         <Label layoutX="113.0" layoutY="124.0" prefHeight="52.0" prefWidth="38.0" text="Cebu Sports Center" wrapText="true" />
-                        <Button layoutX="49.0" layoutY="186.0" mnemonicParsing="false" text="View All" />
+                        <Button id="BUTTON" layoutX="49.0" layoutY="186.0" mnemonicParsing="false" text="View All" />
                      </children>
                   </AnchorPane>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                  <AnchorPane id="LS_table_holder" prefHeight="200.0" prefWidth="200.0">
                      <children>
                         <Text layoutX="10.0" layoutY="28.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Low stock alerts">
                            <font>
@@ -172,10 +176,10 @@
                         <Label layoutX="6.0" layoutY="124.0" prefHeight="37.0" prefWidth="44.0" text="Drinking water (5L)" wrapText="true" />
                         <Label layoutX="57.0" layoutY="124.0" prefHeight="20.0" prefWidth="40.0" text="12 jugs" wrapText="true" />
                         <Label layoutX="107.0" layoutY="124.0" prefHeight="52.0" prefWidth="38.0" text="Cebu Sports Center" wrapText="true" />
-                        <Button layoutX="44.0" layoutY="186.0" mnemonicParsing="false" text="View All" />
+                        <Button id="BUTTON" layoutX="44.0" layoutY="186.0" mnemonicParsing="false" text="View All" />
                      </children>
                   </AnchorPane>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                  <AnchorPane id="capacity_table_holder" prefHeight="200.0" prefWidth="200.0">
                      <children>
                         <Text layoutX="10.0" layoutY="28.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Capacity overview">
                            <font>
@@ -186,7 +190,7 @@
                         <Text layoutX="68.0" layoutY="55.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Barangay" />
                         <Label layoutX="10.0" layoutY="63.0" prefHeight="52.0" prefWidth="44.0" text="Cebu Sports Center" wrapText="true" />
                         <Label layoutX="68.0" layoutY="63.0" prefHeight="45.0" prefWidth="51.0" text="Brgy. Sambag II" wrapText="true" />
-                        <Button layoutX="49.0" layoutY="186.0" mnemonicParsing="false" text="View All" />
+                        <Button id="BUTTON" layoutX="49.0" layoutY="186.0" mnemonicParsing="false" text="View All" />
                         <Label layoutX="68.0" layoutY="124.0" prefHeight="45.0" prefWidth="51.0" text="Brgy. Cogon Pardo" wrapText="true" />
                         <Label layoutX="10.0" layoutY="124.0" prefHeight="52.0" prefWidth="44.0" text="Urgello Gymnasium" wrapText="true" />
                      </children>
