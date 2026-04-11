@@ -60,7 +60,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.dashboard/com.example.dashboard.HelloApplication</mainClass>
+                            <mainClass>com.example.dashboard/com.example.dashboard.Dashboard_Admin_Application</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
