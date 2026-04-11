@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="487.0" prefWidth="678.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.capstone_kioskview.KioskViewController">
+   <top>
+      <HBox prefHeight="43.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="39.0" prefWidth="692.0" text="PUBLIC INFORMATION DISPLAY" textFill="#116021">
+               <font>
+                  <Font name="System Bold" size="27.0" />
+               </font>
+            </Label>
+         </children></HBox>
+   </top>
+   <center>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox prefHeight="444.0" prefWidth="290.0">
+               <children>
+                  <Label prefHeight="17.0" prefWidth="204.0" text="EVACUATION CENTERS - CEBU CITY">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="20.0" />
+                     </VBox.margin>
+                  </Label>
+                  <ScrollPane prefHeight="477.0" prefWidth="214.0">
+                     <content>
+                        <VBox prefHeight="385.0" prefWidth="215.0">
+                           <children>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <children>
+                                    <Label text="Mabolo Elementary School">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <children>
+                                    <Label text="Abellana National HIgh School">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <children>
+                                    <Label text="Tejero Elementary School">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <children>
+                                    <Label text="Urgello Gymnasium">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <children>
+                                    <Label text="Cebu City Sports Center">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <children>
+                                    <Label text="Don Bosco Tech Center">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </Label>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="81.0" prefWidth="215.0">
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets left="1.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                     <VBox.margin>
+                        <Insets left="20.0" />
+                     </VBox.margin>
+                  </ScrollPane>
+               </children>
+            </VBox>
+            <VBox prefHeight="444.0" prefWidth="454.0">
+               <children>
+                  <Label text="LIVE EVACUATION MAP" />
+                  <StackPane fx:id="stackpaneLiveMap" prefHeight="296.0" prefWidth="401.0">
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </StackPane>
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </VBox>
+         </children>
+      </HBox>
+   </center>
+</BorderPane>
