@@ -37,3 +37,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+.idea/
+target/
+*.iml
+mvnw
+mvnw.cmd
+.mvn/
