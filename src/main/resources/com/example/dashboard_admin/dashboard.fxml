@@ -44,7 +44,6 @@
                             <padding><Insets top="24.0" /></padding>
                         </Label>
                         <Button fx:id="navActivity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item" text="Activity Log" />
-                        <Button fx:id="navSettings" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item" text="System Settings" />
                     </children>
                     <padding>
                         <Insets left="12.0" right="12.0" />
@@ -136,16 +135,6 @@
                                         <Label styleClass="stat-trend-text" text="Requires immediate restock" />
                                     </children>
                                 </VBox>
-                                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <Label styleClass="stat-label" text="SHELTER CAPACITY" />
-                                        <Label fx:id="lblCapacityValue" styleClass="stat-value" text="84%" />
-                                        <HBox styleClass="mini-progress-bg">
-                                            <children>
-                                                <Pane prefHeight="4.0" prefWidth="120.0" styleClass="mini-progress-fill" />
-                                            </children></HBox>
-                                    </children>
-                                </VBox>
                             </children>
                         </HBox>
 
@@ -221,8 +210,8 @@
                                                 <Label styleClass="alert-qty" text="12 left" />
                                             </children>
                                         </HBox>
-                                        <Label styleClass="alert-location" text="Cebu City Sports Center" />
-                                        <Button mnemonicParsing="false" styleClass="btn-link-sm" text="Dispatch Supply ›" />
+                                        <Label styleClass="alert-location" text="Cebu City Hall" />
+                                        <Button mnemonicParsing="false" styleClass="btn-link-sm" text="Restock necessary" />
                                     </children>
                                 </VBox>
                                 <VBox styleClass="alert-item">
@@ -234,8 +223,8 @@
                                                 <Label styleClass="alert-qty" text="Low" />
                                             </children>
                                         </HBox>
-                                        <Label styleClass="alert-location" text="Tejero Elementary School" />
-                                        <Button mnemonicParsing="false" styleClass="btn-link-sm" text="Dispatch Supply ›" />
+                                        <Label styleClass="alert-location" text="Cebu City Hall" />
+                                        <Button mnemonicParsing="false" styleClass="btn-link-sm" text="Restock necessary" />
                                     </children>
                                 </VBox>
                             </children>
@@ -259,26 +248,6 @@
                             </children>
                         </StackPane>
                         <HBox alignment="CENTER" spacing="8.0">
-                            <children>
-                                <HBox alignment="CENTER" spacing="4.0">
-                                    <children>
-                                        <Circle fill="#10b981" radius="3.0" />
-                                        <Label styleClass="map-legend" text="Safe" />
-                                    </children>
-                                </HBox>
-                                <HBox alignment="CENTER" spacing="4.0">
-                                    <children>
-                                        <Circle fill="#f59e0b" radius="3.0" />
-                                        <Label styleClass="map-legend" text="Warning" />
-                                    </children>
-                                </HBox>
-                                <HBox alignment="CENTER" spacing="4.0">
-                                    <children>
-                                        <Circle fill="#ef4444" radius="3.0" />
-                                        <Label styleClass="map-legend" text="Hazard" />
-                                    </children>
-                                </HBox>
-                            </children>
                             <padding>
                                 <Insets top="8.0" />
                             </padding>
