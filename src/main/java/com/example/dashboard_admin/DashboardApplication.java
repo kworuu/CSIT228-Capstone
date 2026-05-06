@@ -18,7 +18,7 @@ public class DashboardApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(DashboardApplication.class.getResource("Evacuation.fxml"));
         Parent root = fxmlLoader.load();
 
-        stage.initStyle(StageStyle.UNDECORATED);
+        //stage.initStyle(StageStyle.UNDECORATED);
 
         root.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
