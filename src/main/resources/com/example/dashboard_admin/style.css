@@ -308,3 +308,17 @@
 }
 
 .map-legend { -fx-font-size: 10; -fx-text-fill: #94a3b8; }
+
+.btn-map-overlay {
+    -fx-background-color: rgba(15, 23, 42, 0.65);
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
+}
+
+.btn-map-overlay:hover {
+    -fx-background-color: rgba(15, 23, 42, 0.88);
+}
