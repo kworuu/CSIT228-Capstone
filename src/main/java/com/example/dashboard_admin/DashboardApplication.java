@@ -15,7 +15,7 @@ public class DashboardApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(DashboardApplication.class.getResource("Evacuation.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(DashboardApplication.class.getResource("evacuation.fxml"));
         Parent root = fxmlLoader.load();
 
         //stage.initStyle(StageStyle.UNDECORATED);
