@@ -5,17 +5,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
-public class DashboardApplication extends Application {
+public class BrgyDashboardApplication extends Application {
     private double xOffset = 0;
     private double yOffset = 0;
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(DashboardApplication.class.getResource("evacuation.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(BrgyDashboardApplication.class.getResource("BrgyDashboard.fxml"));
         Parent root = fxmlLoader.load();
 
         //stage.initStyle(StageStyle.UNDECORATED);
