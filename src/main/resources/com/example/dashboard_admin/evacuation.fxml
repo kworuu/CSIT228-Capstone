@@ -239,7 +239,7 @@
                         <StackPane fx:id="g" VBox.vgrow="ALWAYS">
                             <children>
                                 <!-- The actual minimap WebView -->
-                                <WebView fx:id="miniMapWebView" />
+                                <WebView fx:id="webviewMiniMap" />
 
                                 <!-- Overlay button: bottom-right, semi-transparent -->
                                 <Button fx:id="btnExpandMap" mnemonicParsing="false" styleClass="btn-map-overlay" text="⤢ Expand" StackPane.alignment="BOTTOM_RIGHT">
