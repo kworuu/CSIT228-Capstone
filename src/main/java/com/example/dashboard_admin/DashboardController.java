@@ -1,9 +1,9 @@
 package com.example.dashboard_admin;
 
-import com.example.dashboard_admin.MapLogic.MapHtmlProvider;
+import com.example.dashboard_admin.map_logic.MapHtmlProvider;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import com.example.dashboard_admin.HelperClasses.SceneHelper;
+import com.example.dashboard_admin.helper_classes.SceneHelper;
 import javafx.scene.web.WebView;
 
 public class DashboardController {
@@ -20,11 +20,14 @@ public class DashboardController {
     @FXML
     private WebView webviewMiniMap;
 
+    @FXML
+    private Button navActivity;
+
 
     @FXML
     public void initialize() {
         navInventory.setOnAction(event -> {
-            SceneHelper.switchScene("/com/example/dashboard_admin/Inventory.fxml", navInventory);
+            SceneHelper.switchScene("/com/example/dashboard_admin/inventory.fxml", navInventory);
         });
 
         // Wire the minimap
@@ -33,12 +36,17 @@ public class DashboardController {
 
         // Wire the expand button for the minimap
         btnExpandMap.setOnAction(event -> {
-            SceneHelper.switchScene("/com/example/dashboard_admin/Map.fxml", btnExpandMap);
+            SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", btnExpandMap);
         });
 
         navMap.setOnAction(event-> {
-            SceneHelper.switchScene("/com/example/dashboard_admin/Map.fxml", btnExpandMap);
+            SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", navMap);
         });
+
+        navActivity.setOnAction(event->{
+            SceneHelper.switchScene("/com/example/dashboard_admin/activity-log.fxml", navActivity);
+        });
+
     }
 
 

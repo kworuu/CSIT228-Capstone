@@ -1,4 +1,4 @@
-package com.example.dashboard_admin.Views;
+package com.example.dashboard_admin.views;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
