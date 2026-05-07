@@ -5,13 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>Dashboard</artifactId>
+    <artifactId>dashboard_admin</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Dashboard</name>
+    <name>dashboard_admin</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.12.1</junit.version>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -23,6 +25,11 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
+            <version>21.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
             <version>21.0.6</version>
         </dependency>
 
@@ -38,6 +45,21 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- MariaDB JDBC driver: Database Connectivity -->
+        <!-- MariaDB JDBC driver — for criterion 5: Database Connectivity -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.5.4</version>
+        </dependency>
+
+        <!-- BCrypt for password hashing — security measure -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -51,6 +73,7 @@
                     <target>24</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -60,7 +83,8 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.dashboard/com.example.dashboard.Dashboard_Admin_Application</mainClass>
+                            <mainClass>com.example.dashboard_admin/com.example.dashboard_admin.DashboardApplication
+                            </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
