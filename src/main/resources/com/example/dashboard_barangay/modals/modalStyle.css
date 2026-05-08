@@ -1,0 +1,89 @@
+/* DashboardStyle.css */
+
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-base-color: #f8fafc;
+    -fx-primary-color: #059669; /* Emerald 600 */
+    -fx-dark-color: #0f172a;    /* Slate 900 */
+}
+
+/* Modal and Background */
+.modal-overlay {
+    -fx-background-color: transparent;
+}
+
+.card-container {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: white;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 30, 0, 0, 15);
+}
+
+/* Typography */
+.modal-title {
+    -fx-text-fill: #0f172a;
+}
+
+.modal-description {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
+}
+
+.field-label {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-opacity: 0.6;
+}
+
+/* Inputs */
+.search-field, .id-field {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10 15 10 15;
+    -fx-text-fill: #0f172a;
+}
+
+.search-field:focused {
+    -fx-border-color: #059669;
+    -fx-effect: dropshadow(three-pass-box, rgba(5, 150, 105, 0.2), 5, 0, 0, 0);
+}
+
+.id-field {
+    -fx-background-color: #f1f5f9;
+    -fx-font-family: "monospace";
+}
+
+/* Buttons */
+.btn-primary {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #047857;
+}
+
+.btn-primary:disabled {
+    -fx-opacity: 0.5;
+}
+
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 12px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-outline:hover {
+    -fx-background-color: #f1f5f9;
+}
