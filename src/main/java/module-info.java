@@ -9,7 +9,7 @@ module com.example.capstone {
     requires org.mariadb.jdbc;          // MariaDB JDBC driver
     requires jbcrypt;                   // password hashing
 
-    // Existing exports/opens for FXML controllers
+    // Dashboards
     opens com.example.dashboard_admin to javafx.fxml;
     exports com.example.dashboard_admin;
 
@@ -19,16 +19,16 @@ module com.example.capstone {
     exports com.example.dashboard_admin.views;
     opens com.example.dashboard_admin.views to javafx.fxml;
 
-    exports com.example.dashboard_admin.map_logic;
-    opens com.example.dashboard_admin.map_logic to javafx.fxml;
-
-    // Exports for the new barangay dashboard
     opens com.example.dashboard_barangay to javafx.fxml;
     exports com.example.dashboard_barangay;
 
-    // NEW — packages I'll be adding for database integration later
-            exports com.example.dashboard_admin.model;
-            exports com.example.dashboard_admin.dao;
-            exports com.example.dashboard_admin.service;
-            exports com.example.dashboard_admin.util;
+    // Shared UI logic
+    exports com.example.map_logic;
+    opens com.example.map_logic to javafx.fxml;
+
+    // Shared Database & Business Logic
+    exports com.example.model;
+    exports com.example.dao;
+    exports com.example.service;
+    exports com.example.util;
 }

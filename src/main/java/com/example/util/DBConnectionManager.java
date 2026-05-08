@@ -1,4 +1,4 @@
-package com.example.dashboard_admin.util;
+package com.example.util;
 
 import java.io.IOException;
 import java.io.InputStream;

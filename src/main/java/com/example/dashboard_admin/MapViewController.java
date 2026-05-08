@@ -1,7 +1,7 @@
 package com.example.dashboard_admin;
 
 import com.example.dashboard_admin.helper_classes.SceneHelper;
-import com.example.dashboard_admin.map_logic.MapHtmlProvider;
+import com.example.map_logic.MapHtmlProvider;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;

@@ -1,4 +1,4 @@
-package com.example.dashboard_admin.map_logic;
+package com.example.map_logic;
 
 public class MapHtmlProvider {
     public static String getMapHTML(){
