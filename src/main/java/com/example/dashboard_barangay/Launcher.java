@@ -1,9 +1,9 @@
-package com.example.dashboard;
+package com.example.dashboard_barangay;
 
 import javafx.application.Application;
 
 public class Launcher {
     public static void main(String[] args) {
-        Application.launch(Dashboard_Admin_Application.class, args);
+        Application.launch(BrgyDashboardApplication.class, args);
     }
 }

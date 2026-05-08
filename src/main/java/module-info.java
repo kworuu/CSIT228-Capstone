@@ -1,4 +1,4 @@
-module com.example.dashboard_admin {
+module com.example.capstone {
     // JavaFX modules (existing)
     requires javafx.controls;
     requires javafx.fxml;
@@ -21,6 +21,10 @@ module com.example.dashboard_admin {
 
     exports com.example.dashboard_admin.map_logic;
     opens com.example.dashboard_admin.map_logic to javafx.fxml;
+
+    // Exports for the new barangay dashboard
+    opens com.example.dashboard_barangay to javafx.fxml;
+    exports com.example.dashboard_barangay;
 
     // NEW — packages I'll be adding for database integration later
             exports com.example.dashboard_admin.model;
