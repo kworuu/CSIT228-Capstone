@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -160,6 +161,12 @@
                             <StackPane.margin><Insets bottom="16.0" left="16.0"/></StackPane.margin>
                             <padding><Insets bottom="16.0" left="18.0" right="18.0" top="16.0"/></padding>
                             <children>
+
+                                <ImageView fx:id="imgOverlayCenter"
+                                           fitHeight="140.0" fitWidth="284.0"
+                                           preserveRatio="false"
+                                           styleClass="brgy-overlay-img"/>
+
                                 <HBox alignment="TOP_LEFT" spacing="8.0">
                                     <children>
                                         <VBox HBox.hgrow="ALWAYS" spacing="2.0">

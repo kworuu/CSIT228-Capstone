@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.web.WebView;
@@ -97,10 +98,20 @@ public class BrgyDashboardController {
     @FXML private TableColumn<ActivityRow,String> tableColumnActBy;
     @FXML private TextField textFieldSearchActivity;
 
+    private BrgyMapBridge mapBridge;
+    private final Map<Long, HBox> mapCardByCenterId = new HashMap<>();
+    // Simulated logged-in context
+    private final String CURRENT_BARANGAY = "Lahug";
+
+    // NEW: Variables to hold the map center
+    private double currentBrgyLat = 10.3157; // Default fallback
+    private double currentBrgyLng = 123.8854;
+    private int currentBrgyZoom = 13;
+
     // ── State ──────────────────────────────────────────────────────
     private final List<CenterData> centers = new ArrayList<>();
     private CenterData selectedCenter = null;
-    private final Map<Long, VBox> cardBycenterId = new HashMap<>();
+    private final Map<Long, HBox> cardBycenterId = new HashMap<>();
 
     private static final DateTimeFormatter DISPLAY_FMT =
             DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
@@ -118,9 +129,8 @@ public class BrgyDashboardController {
     public record CenterData(
             long id, String name, String address, String barangay,
             int capacity, int occupancy, double lat, double lng,
-            // from center_status_updates (latest row)
             String eventLabel, List<String> availableItems,
-            String updatedAt) {}
+            String updatedAt, String photoPath) {} // <--- ADDED photoPath here
 
     // ══════════════════════════════════════════════════════════════
     //  INIT
@@ -128,14 +138,34 @@ public class BrgyDashboardController {
 
     @FXML
     public void initialize() {
+        labelBrgyName.setText("Brgy. " + CURRENT_BARANGAY);
+
+        loadBarangayCoordinates(); // <--- NEW!
         loadCentersFromDB();
         setupMap();
         setupCenterCards();
         setupRegistrationTable();
         setupActivityTable();
-        // Map is the default panel — already visible in FXML
     }
 
+    // NEW METHOD
+    private void loadBarangayCoordinates() {
+        String sql = "SELECT center_lat, center_lng, default_zoom FROM barangays WHERE name = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, CURRENT_BARANGAY);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    currentBrgyLat = rs.getDouble("center_lat");
+                    currentBrgyLng = rs.getDouble("center_lng");
+                    currentBrgyZoom = rs.getInt("default_zoom");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to load barangay coordinates: " + e.getMessage());
+        }
+    }
     // ══════════════════════════════════════════════════════════════
     //  SIDEBAR NAV
     // ══════════════════════════════════════════════════════════════
@@ -199,7 +229,7 @@ public class BrgyDashboardController {
         centers.clear();
         String sql = """
             SELECT
-                ec.id, ec.name, ec.address, ec.barangay,
+                ec.id, ec.name, ec.address, ec.barangay, ec.photo_path,
                 ec.capacity, ec.current_occupancy,
                 ec.latitude, ec.longitude,
                 csu.event_label, csu.available_item_ids, csu.updated_at
@@ -210,41 +240,49 @@ public class BrgyDashboardController {
                        ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
                 FROM center_status_updates
             ) csu ON csu.center_id = ec.id AND csu.rn = 1
-            WHERE ec.is_active = 1
+            WHERE ec.is_active = 1 AND ec.barangay = ?
             ORDER BY ec.name
             """;
 
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                long id          = rs.getLong("id");
-                String name      = rs.getString("name");
-                String address   = rs.getString("address");
-                String barangay  = rs.getString("barangay");
-                int capacity     = rs.getInt("capacity");
-                int occupancy    = rs.getInt("current_occupancy");
-                double lat       = rs.getDouble("latitude");
-                double lng       = rs.getDouble("longitude");
+            // 1. SET THE PARAMETER FIRST
+            ps.setString(1, CURRENT_BARANGAY);
 
-                String eventLabel     = rs.getString("event_label");
-                if (eventLabel == null) eventLabel = "No active event";
+            // 2. THEN EXECUTE THE QUERY
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    long id          = rs.getLong("id");
+                    String name      = rs.getString("name");
+                    String address   = rs.getString("address");
+                    String barangay  = rs.getString("barangay");
 
-                String itemJson       = rs.getString("available_item_ids");
-                List<String> items    = resolveItemNames(itemJson);
+                    // It is perfectly fine if this is empty/null in the DB right now!
+                    String photoPath = rs.getString("photo_path");
 
-                String updatedAtRaw   = rs.getString("updated_at");
-                String updatedAt      = formatTimestamp(updatedAtRaw);
+                    int capacity     = rs.getInt("capacity");
+                    int occupancy    = rs.getInt("current_occupancy");
+                    double lat       = rs.getDouble("latitude");
+                    double lng       = rs.getDouble("longitude");
 
-                centers.add(new CenterData(
-                        id, name, address, barangay,
-                        capacity, occupancy, lat, lng,
-                        eventLabel, items, updatedAt));
+                    String eventLabel     = rs.getString("event_label");
+                    if (eventLabel == null) eventLabel = "No active event";
+
+                    String itemJson       = rs.getString("available_item_ids");
+                    List<String> items    = resolveItemNames(itemJson);
+
+                    String updatedAtRaw   = rs.getString("updated_at");
+                    String updatedAt      = formatTimestamp(updatedAtRaw);
+
+                    centers.add(new CenterData(
+                            id, name, address, barangay,
+                            capacity, occupancy, lat, lng,
+                            eventLabel, items, updatedAt, photoPath));
+                }
             }
         } catch (SQLException e) {
             System.err.println("[BrgyDashboard] DB error loading centers: " + e.getMessage());
-            // Graceful fallback — show empty state, don't crash
         }
     }
 
@@ -274,7 +312,7 @@ public class BrgyDashboardController {
 
         List<String> names = new ArrayList<>();
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps =prepareStatement(sql)) {
             for (int i = 0; i < ids.size(); i++) ps.setLong(i + 1, ids.get(i));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) names.add(rs.getString("name"));
@@ -282,6 +320,10 @@ public class BrgyDashboardController {
             System.err.println("[BrgyDashboard] DB error resolving items: " + e.getMessage());
         }
         return names;
+    }
+    
+    private PreparedStatement prepareStatement(String sql) throws SQLException {
+        return DBConnectionManager.getInstance().getConnection().prepareStatement(sql);
     }
 
     private String formatTimestamp(String raw) {
@@ -312,13 +354,23 @@ public class BrgyDashboardController {
                     if (state == Worker.State.SUCCEEDED) {
                         JSObject win = (JSObject) webViewMap.getEngine()
                                 .executeScript("window");
-                        // Install the bridge so JS can call back into Java
-                        win.setMember("javaBridge", new BrgyMapBridge(this));
+
+                        // 1. Save it to the class variable to prevent Garbage Collection
+                        this.mapBridge = new BrgyMapBridge(this);
+
+                        // 2. Pass the saved variable to Javascript
+                        win.setMember("javaBridge", this.mapBridge);
                     }
                 });
 
         webViewMap.getEngine().loadContent(
-                BrgyMapHtmlProvider.getMapHTML(buildCentersJson()));
+                BrgyMapHtmlProvider.getMapHTML(
+                        buildCentersJson(),
+                        currentBrgyLat,
+                        currentBrgyLng,
+                        currentBrgyZoom
+                )
+        );
     }
 
     private String buildCentersJson() {
@@ -326,17 +378,18 @@ public class BrgyDashboardController {
         for (int i = 0; i < centers.size(); i++) {
             CenterData c = centers.get(i);
             if (i > 0) sb.append(",");
+
+            // We removed the capacityStatus(c) call.
+            // All markers will now use the stable high-contrast color defined in your HTML Provider.
             sb.append(String.format(
-                    "{\"id\":%d,\"name\":\"%s\",\"lat\":%s,\"lng\":%s,\"status\":\"%s\"}",
-                    c.id(), esc(c.name()), c.lat(), c.lng(),
-                    capacityStatus(c)));
+                    "{\"id\":%d,\"name\":\"%s\",\"lat\":%s,\"lng\":%s}",
+                    c.id(),
+                    esc(c.name()),
+                    c.lat(),
+                    c.lng()
+            ));
         }
         return sb.append("]").toString();
-    }
-
-    private String capacityStatus(CenterData c) {
-        if (c.capacity() <= 0) return "OPEN";
-        return ((double) c.occupancy() / c.capacity()) >= 1.0 ? "FULL" : "OPEN";
     }
 
     /** Called by the JS bridge (from FX thread via Platform.runLater) */
@@ -409,15 +462,6 @@ public class BrgyDashboardController {
                 v.getStyleClass().remove("brgy-center-card-selected"));
     }
 
-    @FXML private void handleUpdateCenter() {
-        if (selectedCenter == null) return;
-        // Phase 3: open "Update Center Info" modal
-        // For now, print to console so you can see it's wired
-        System.out.println("[BrgyDashboard] Update center: " + selectedCenter.name()
-                + " (id=" + selectedCenter.id() + ")");
-        // TODO: SceneHelper.showModal(...) with UpdateCenterController
-    }
-
     // ══════════════════════════════════════════════════════════════
     //  CENTER CARDS STRIP
     // ══════════════════════════════════════════════════════════════
@@ -428,95 +472,96 @@ public class BrgyDashboardController {
         labelCenterCount.setText(centers.size() + " center" + (centers.size() == 1 ? "" : "s"));
 
         for (CenterData c : centers) {
-            VBox card = buildCenterCard(c);
+            HBox card = buildCenterCard(c);
             hboxCenterCardsRow.getChildren().add(card);
             cardBycenterId.put(c.id(), card);
         }
     }
 
-    private VBox buildCenterCard(CenterData c) {
-        VBox card = new VBox(6);
-        card.getStyleClass().add("brgy-center-card");
-        card.setPadding(new javafx.geometry.Insets(12, 14, 12, 14));
+    private HBox buildCenterCard(CenterData c) {
+        HBox hboxCard = new HBox(12);
+        hboxCard.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        hboxCard.getStyleClass().add("brgy-center-card");
+        hboxCard.setPadding(new javafx.geometry.Insets(12, 14, 12, 14));
 
-        // Name + badge row
-        HBox nameRow = new HBox(8);
-        nameRow.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+        // 1. Left Side: Image
+        ImageView imgCard = new ImageView();
+        imgCard.setFitWidth(80);
+        imgCard.setFitHeight(80);
+        imgCard.setPreserveRatio(false);
+        imgCard.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 2);");
 
-        Label nameLabel = new Label(c.name());
-        nameLabel.getStyleClass().add("brgy-card-center-name");
-        nameLabel.setWrapText(true);
-        nameLabel.setMaxWidth(150);
-        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        if (c.photoPath() != null && !c.photoPath().isBlank()) {
+            try {
+                imgCard.setImage(new javafx.scene.image.Image(getClass().getResourceAsStream(c.photoPath())));
+            } catch (Exception ignored) {}
+        }
 
-        String status = capacityStatus(c);
-        Label badge = new Label(status);
-        badge.getStyleClass().add("OPEN".equals(status) ? "brgy-badge-open" : "brgy-badge-full");
+        // 2. Right Side: Text Content Box
+        VBox vboxContent = new VBox(6);
+        HBox.setHgrow(vboxContent, Priority.ALWAYS);
 
-        nameRow.getChildren().addAll(nameLabel, badge);
+        HBox hboxNameRow = new HBox(8);
+        hboxNameRow.setAlignment(javafx.geometry.Pos.TOP_LEFT);
 
-        // Address
-        Label addr = new Label(c.address());
-        addr.getStyleClass().add("brgy-card-center-addr");
-        addr.setWrapText(true);
-        addr.setMaxWidth(196);
+        Label lblName = new Label(c.name());
+        lblName.getStyleClass().add("brgy-card-center-name");
+        lblName.setWrapText(true);
+        lblName.setMaxWidth(150);
+        HBox.setHgrow(lblName, Priority.ALWAYS);
 
-        // Capacity mini-bar
-        StackPane track = new StackPane();
-        track.getStyleClass().add("brgy-cap-track");
-        track.setMinHeight(5); track.setMaxHeight(5);
+        // We will temporarily leave this status logic until we update the database/modal next
 
-        double pct = c.capacity() > 0 ? (double) c.occupancy() / c.capacity() : 0;
-        pct = Math.min(pct, 1.0);
-        Region fill = new Region();
-        fill.getStyleClass().add(pct >= 1.0 ? "brgy-cap-fill-full"
-                : pct >= 0.75 ? "brgy-cap-fill-warn" : "brgy-cap-fill-ok");
-        fill.setPrefWidth(196 * pct);
-        fill.setMinWidth(0);
-        track.getChildren().add(fill);
-        StackPane.setAlignment(fill, javafx.geometry.Pos.CENTER_LEFT);
+        Label lblBadge = new Label("ACTIVE");
+        lblBadge.getStyleClass().add("brgy-badge-open");
 
-        Label capLabel = new Label(c.occupancy() + " / " + c.capacity() + " evacuees");
-        capLabel.setStyle("-fx-font-size: 9; -fx-text-fill: #94a3b8;");
+        hboxNameRow.getChildren().addAll(lblName, lblBadge);
 
-        // Event
-        Label eventLabel = new Label("📌 " + c.eventLabel());
-        eventLabel.getStyleClass().add("brgy-card-center-event");
-        eventLabel.setWrapText(true);
-        eventLabel.setMaxWidth(196);
+        Label lblAddress = new Label(c.address());
+        lblAddress.getStyleClass().add("brgy-card-center-addr");
+        lblAddress.setWrapText(true);
+        lblAddress.setMaxWidth(196);
 
-        // Timestamp
-        Label ts = new Label(c.updatedAt());
-        ts.getStyleClass().add("brgy-card-center-ts");
+        // RIP OUT THE PROGRESS BAR COMPLETELY!
+        // No more stackPaneTrack or regionFill.
 
-        card.getChildren().addAll(nameRow, addr, track, capLabel, eventLabel, ts);
+        Label lblEvent = new Label("📌 " + c.eventLabel());
+        lblEvent.getStyleClass().add("brgy-card-center-event");
+        lblEvent.setWrapText(true);
+        lblEvent.setMaxWidth(196);
 
-        // Click — show overlay + highlight marker in JS
-        card.setOnMouseClicked(e -> {
+        Label lblTimestamp = new Label(c.updatedAt());
+        lblTimestamp.getStyleClass().add("brgy-card-center-ts");
+
+        // Added back everything except the capacity track
+        vboxContent.getChildren().addAll(hboxNameRow, lblAddress, lblEvent, lblTimestamp);
+
+        hboxCard.getChildren().addAll(imgCard, vboxContent);
+
+        hboxCard.setOnMouseClicked(e -> {
             showOverlay(c);
             highlightCard(c.id());
             triggerMapMarkerHighlight(c.id());
         });
 
-        return card;
+        return hboxCard;
     }
 
     private void highlightCard(long centerId) {
-        cardBycenterId.forEach((id, card) -> {
-            card.getStyleClass().remove("brgy-center-card-selected");
+        mapCardByCenterId.forEach((id, hboxCard) -> {
+            hboxCard.getStyleClass().remove("brgy-center-card-selected");
             if (id == centerId) {
-                if (!card.getStyleClass().contains("brgy-center-card-selected"))
-                    card.getStyleClass().add("brgy-center-card-selected");
+                if (!hboxCard.getStyleClass().contains("brgy-center-card-selected"))
+                    hboxCard.getStyleClass().add("brgy-center-card-selected");
                 // Scroll to this card
-                scrollCardIntoView(card);
+                scrollCardIntoView(hboxCard);
             }
         });
     }
 
-    private void scrollCardIntoView(VBox card) {
-        // Compute rough horizontal scroll position
+    private void scrollCardIntoView(HBox hboxCard) {
         Platform.runLater(() -> {
-            double cardX = card.getBoundsInParent().getMinX();
+            double cardX = hboxCard.getBoundsInParent().getMinX();
             double scrollWidth = scrollPaneCenterCards.getContent().getBoundsInLocal().getWidth()
                     - scrollPaneCenterCards.getViewportBounds().getWidth();
             if (scrollWidth > 0) {
@@ -610,11 +655,39 @@ public class BrgyDashboardController {
         }
         tableViewEvacuees.setItems(rows);
     }
+    @FXML private void handleUpdateCenter() {
+        if (selectedCenter == null) return;
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/example/dashboard_barangay/modals/update-center.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            // WE UNCOMMENTED THESE TWO LINES!
+            UpdateCenterController controller = loader.getController();
+            controller.initData(selectedCenter.id(), selectedCenter.name(), selectedCenter.address(), selectedCenter.photoPath());
+
+            // Setup and show the modal window
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Update " + selectedCenter.name());
+            stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            stage.initOwner(buttonUpdateCenter.getScene().getWindow());
+            stage.setScene(new javafx.scene.Scene(root));
+
+            stage.showAndWait();
+            handleRefresh(); // Reloads map & overlay to show new pills!
+
+        } catch (Exception e) {
+            System.err.println("Failed to open Update Center modal: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @FXML private void handleRegisterEvacuee() {
         // Phase 3: open registration modal
         System.out.println("[BrgyDashboard] Open register evacuee modal");
-        // TODO: SceneHelper.showModal(...)
+        // We will wire this up properly in Phase 3!
     }
 
     // ══════════════════════════════════════════════════════════════

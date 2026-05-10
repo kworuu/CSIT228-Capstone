@@ -35,161 +35,119 @@ public class BrgyMapHtmlProvider {
      * @param centersJson syntactically-valid JSON array of center objects (see above).
      *                    Pass {@code "[]"} for an empty map.
      */
-    public static String getMapHTML(String centersJson) {
+    // 1. UPDATE THE METHOD SIGNATURE to accept the center coordinates
+    public static String getMapHTML(String centersJson, double brgyLat, double brgyLng, int zoom) {
         String htmlTemplate = """
         <!DOCTYPE html>
         <html>
         <head>
-            <meta charset="utf-8"/>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-            <style>
-                html, body {
-                    width: 100vw; height: 100vh;
-                    margin: 0; padding: 0; overflow: hidden;
-                }
-                #map { width: 100vw; height: 100vh; background: #f8fafc; }
-
-                /* ── Marker styles ── */
-                .marker-wrap {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    cursor: pointer;
-                }
-
-                /* Pin circle */
-                .pin {
-                    width: 18px; height: 18px;
-                    border-radius: 50%;
-                    border: 3px solid white;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-                    transition: transform 0.15s ease, box-shadow 0.15s ease;
-                }
-                .pin-open { background: #10b981; }
-                .pin-full { background: #ef4444; }
-
-                /* Focal / selected bounce animation */
-                @keyframes bounce {
-                    0%,100% { transform: translateY(0); }
-                    30%     { transform: translateY(-8px); }
-                    60%     { transform: translateY(-4px); }
-                }
-                .pin-bounce { animation: bounce 0.5s ease; }
-
-                /* Subtle pulse for open centers */
-                @keyframes pulse {
-                    0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
-                    70%  { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
-                    100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-                }
-                .pin-open { animation: pulse 2.5s infinite; }
-
-                /* Label below pin */
-                .pin-label {
-                    margin-top: 3px;
-                    background: rgba(15,23,42,0.82);
-                    color: white;
-                    font-size: 10px;
-                    font-family: 'Segoe UI', sans-serif;
-                    font-weight: 600;
-                    padding: 2px 6px;
-                    border-radius: 6px;
-                    white-space: nowrap;
-                    pointer-events: none;
-                }
-
-                .custom-icon { background: transparent; border: none; }
-            </style>
-
-            <script>window.L_DISABLE_3D = true;</script>
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+            <meta charset="utf-8" />
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            <script>var L_DISABLE_3D = true;</script>
             <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <style>
+                body { padding: 0; margin: 0; background-color: #0f172a; }
+                html, body, #map { height: 100%; width: 100%; }
+                
+                .marker-wrap { 
+                    position: relative; width: 140px; height: 60px; 
+                    display: flex; flex-direction: column; align-items: center; 
+                }
+                
+                /* The Pin Container */
+                .pin-container { position: relative; width: 36px; height: 36px; }
+
+                /* The SVG Pin */
+                .custom-pin {
+                    width: 36px; height: 36px; color: #10b981; /* Emergency Green */
+                    filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+                    position: relative; z-index: 5;
+                }
+
+                /* The Pinging Radar Effect */
+                .pulse {
+                    position: absolute; top: 0; left: 0;
+                    width: 36px; height: 36px;
+                    border-radius: 50%;
+                    background: #10b981;
+                    opacity: 0.6;
+                    z-index: 1;
+                    animation: radar 2s infinite;
+                }
+
+                @keyframes radar {
+                    0% { transform: scale(1); opacity: 0.6; }
+                    100% { transform: scale(2.5); opacity: 0; }
+                }
+
+                .pin-label { 
+                    background: rgba(15,23,42,0.95); color: white; padding: 5px 10px; 
+                    border-radius: 6px; font-family: 'Segoe UI', sans-serif; font-size: 11px; font-weight: 600;
+                    white-space: nowrap; margin-top: 4px; border: 1px solid #334155; 
+                }
+                
+                .pin-bounce { animation: bounce 0.5s ease; }
+                @keyframes bounce { 
+                    0%, 100% { transform: translateY(0); } 
+                    50% { transform: translateY(-12px); } 
+                }
+            </style>
         </head>
         <body>
             <div id="map"></div>
-
             <script>
                 var centers = __CENTERS_JSON__;
-                var markerMap = {};   // centerId -> L.marker
-                var selectedId = null;
+                var markerMap = {};   
 
                 setTimeout(function () {
-
                     var map = L.map('map', {
-                        zoomControl: true,
-                        dragging: true,
-                        touchZoom: true,
-                        scrollWheelZoom: true,
-                        doubleClickZoom: true,
-                        zoomAnimation: false,
-                        fadeAnimation: false
+                        center: [__BRGY_LAT__, __BRGY_LNG__],
+                        zoom: __BRGY_ZOOM__,
+                        zoomControl: true, dragging: true, scrollWheelZoom: true,
+                        fadeAnimation: false, zoomAnimation: false
                     });
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap'
-                    }).addTo(map);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-                    // ── Build markers ──
                     centers.forEach(function (c) {
-                        var pinClass  = (c.status === 'FULL') ? 'pin pin-full' : 'pin pin-open';
                         var shortName = c.name.length > 22 ? c.name.substring(0, 20) + '…' : c.name;
+                        
+                        var svgIcon = '<div class="pin-container">' +
+                                      '  <div class="pulse"></div>' +
+                                      '  <svg class="custom-pin" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">' +
+                                      '    <path d="M12 0C5.373 0 0 5.373 0 12c0 8.438 11.125 23.336 11.535 23.893a.596.596 0 0 0 .93 0C12.875 35.336 24 20.438 24 12c0-6.627-5.373-12-12-12z" fill="currentColor" />' +
+                                      '    <path d="M12 5L7 9v6h3v-4h4v4h3V9l-5-4z" fill="#ffffff" />' + 
+                                      '  </svg>' +
+                                      '</div>';
+
                         var html = '<div class="marker-wrap">'
-                                 + '  <div id="pin-' + c.id + '" class="' + pinClass + '"></div>'
+                                 + '  <div id="pin-' + c.id + '">' + svgIcon + '</div>'
                                  + '  <div class="pin-label">' + shortName + '</div>'
                                  + '</div>';
 
-                        var icon = L.divIcon({
-                            className: 'custom-icon',
-                            html: html,
-                            iconSize: [120, 44],
-                            iconAnchor: [60, 12]
-                        });
-
+                        var icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [140, 60], iconAnchor: [70, 36] });
                         var marker = L.marker([c.lat, c.lng], { icon: icon }).addTo(map);
 
                         marker.on('click', function () {
-                            if (window.javaBridge && window.javaBridge.onMarkerClick) {
-                                window.javaBridge.onMarkerClick(String(c.id));
-                            }
+                            if (window.javaBridge) window.javaBridge.onMarkerClick(String(c.id));
                         });
-
                         markerMap[c.id] = marker;
                     });
 
-                    // ── Fit map to all center bounds ──
-                    if (centers.length > 0) {
-                        var latlngs = centers.map(function(c){ return [c.lat, c.lng]; });
-                        map.fitBounds(latlngs, { padding: [60, 60], maxZoom: 15 });
-                    } else {
-                        // Default to Cebu City if no centers loaded
-                        map.setView([10.3157, 123.8854], 12);
-                    }
-
-                    // ── Public API for Java to call ──
-
-                    // Highlight (bounce) a specific marker — called when card is clicked
-                    window.highlightMarker = function(centerId) {
-                        var pin = document.getElementById('pin-' + centerId);
-                        if (!pin) return;
-                        pin.classList.remove('pin-bounce');
-                        // Force reflow to restart animation
-                        void pin.offsetWidth;
-                        pin.classList.add('pin-bounce');
-                        // Pan map to that marker
-                        var m = markerMap[centerId];
-                        if (m) map.panTo(m.getLatLng(), { animate: true, duration: 0.5 });
+                    window.highlightMarker = function(id) {
+                        var p = document.getElementById('pin-' + id);
+                        if(p){ p.classList.remove('pin-bounce'); void p.offsetWidth; p.classList.add('pin-bounce'); }
+                        if(markerMap[id]) map.panTo(markerMap[id].getLatLng());
                     };
-
-                    // Heartbeat to recover from JavaFX resize quirks
-                    setInterval(function () { map.invalidateSize(true); }, 500);
-
                 }, 500);
             </script>
         </body>
         </html>
         """;
-
-        return htmlTemplate.replace("__CENTERS_JSON__", centersJson);
+        return htmlTemplate
+                .replace("__CENTERS_JSON__", centersJson)
+                .replace("__BRGY_LAT__", String.valueOf(brgyLat))
+                .replace("__BRGY_LNG__", String.valueOf(brgyLng))
+                .replace("__BRGY_ZOOM__", String.valueOf(zoom));
     }
 }
