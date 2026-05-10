@@ -14,6 +14,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.web.WebView?>
+<?import javafx.scene.image.ImageView?>
 
 <AnchorPane fx:id="mainRoot" prefHeight="800.0" prefWidth="1280.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_barangay.BrgyDashboardController">
     <children>
@@ -156,7 +157,12 @@
                                                     <Insets bottom="16.0" left="20.0" right="20.0" />
                                                 </padding>
                                             </HBox>
-                                    <WebView fx:id="webViewMiniMap" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                                    <StackPane VBox.vgrow="ALWAYS">
+                                        <children>
+                                            <WebView fx:id="webViewMiniMap" prefHeight="200.0" prefWidth="200.0" />
+                                            <ImageView fx:id="offlineMapImage" visible="false" preserveRatio="false" />
+                                        </children>
+                                    </StackPane>
                                         </children>
                                     </VBox>
                                 </children>
