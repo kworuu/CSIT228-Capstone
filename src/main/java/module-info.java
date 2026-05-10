@@ -39,4 +39,8 @@ module com.example.capstone {
     exports com.example.dao;
     exports com.example.service;
     exports com.example.util;
+    exports com.example.dashboard_kiosk.sample;
+    opens com.example.dashboard_kiosk.sample to javafx.fxml, javafx.graphics;
+    exports com.example.dashboard_kiosk.user;
+    opens com.example.dashboard_kiosk.user to javafx.fxml, javafx.graphics;
 }
