@@ -201,6 +201,13 @@
 .table-view .table-row-cell:odd { -fx-background-color: white; }
 .table-view .table-row-cell:even { -fx-background-color: #fcfdfe; }
 .table-view .table-row-cell:selected { -fx-background-color: #f1f5f9; }
+.table-view .table-cell{
+    -fx-text-fill: #64748b;
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER-LEFT;
+    -fx-padding: 0 15 0 15;
+}
 
 /* Buttons */
 .btn-primary {
