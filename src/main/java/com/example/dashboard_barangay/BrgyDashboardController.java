@@ -34,7 +34,7 @@ public class BrgyDashboardController {
                                         @Override
                                         public void run() {
                                             javafx.application.Platform.runLater(() -> {
-                                                 MapCache.saveMapImage(webViewMiniMap.snapshot(null, null));
+//                                                 MapCache.saveMapImage(webViewMiniMap.snapshot(null, null));
                                             });
                                         }
                                     }, 
@@ -45,20 +45,20 @@ public class BrgyDashboardController {
                 );
             } else {
                 // Try to load cached map
-                Image cachedMap = MapCache.loadMapImage();
-                if (cachedMap != null && offlineMapImage != null) {
-                    webViewMiniMap.setVisible(false);
-                    offlineMapImage.setImage(cachedMap);
-                    
-                    // Bind ImageView size to its parent StackPane
-                    offlineMapImage.fitWidthProperty().bind(webViewMiniMap.widthProperty());
-                    offlineMapImage.fitHeightProperty().bind(webViewMiniMap.heightProperty());
-                    
-                    offlineMapImage.setVisible(true);
-                } else {
-                    // Fallback to error message if no cache exists
-                    webViewMiniMap.getEngine().loadContent(getOfflineHTML());
-                }
+////                Image cachedMap = MapCache.loadMapImage();
+//                if (cachedMap != null && offlineMapImage != null) {
+//                    webViewMiniMap.setVisible(false);
+//                    offlineMapImage.setImage(cachedMap);
+//
+//                    // Bind ImageView size to its parent StackPane
+//                    offlineMapImage.fitWidthProperty().bind(webViewMiniMap.widthProperty());
+//                    offlineMapImage.fitHeightProperty().bind(webViewMiniMap.heightProperty());
+//
+//                    offlineMapImage.setVisible(true);
+//                } else {
+//                    // Fallback to error message if no cache exists
+//                    webViewMiniMap.getEngine().loadContent(getOfflineHTML());
+//                }
             }
         }
     }

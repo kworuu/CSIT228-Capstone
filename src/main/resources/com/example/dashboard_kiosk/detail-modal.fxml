@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+   Floating detail panel that overlays the bottom-left of the map area.
+   This file is loaded once at startup, kept invisible by default, and
+   shown via setVisible(true) when the user clicks a card or marker.
+
+   IMPORTANT: this is wrapped in a top-level VBox with translateX/Y baked
+   in via AnchorPane constraints from the parent — anchoring is configured
+   where this panel is included in BrgyUser.fxml.
+-->
+<VBox fx:id="modalRoot"
+      maxWidth="380.0"
+      prefWidth="360.0"
+      spacing="14.0"
+      styleClass="detail-modal"
+      style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-color: #e2e8f0; -fx-border-radius: 14; -fx-border-width: 1;"
+      visible="false"
+      managed="false"
+      xmlns="http://javafx.com/javafx/25"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.dashboard_barangay_v2.DetailModalController">
+    <padding>
+        <Insets bottom="20.0" left="22.0" right="22.0" top="20.0" />
+    </padding>
+    <children>
+
+        <!-- HEADER: title + status pill, with close button on far right -->
+        <HBox alignment="TOP_LEFT" spacing="10.0">
+            <children>
+                <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label fx:id="lblTitle"
+                               styleClass="detail-title"
+                               text="Argao Command Center"
+                               wrapText="true" />
+                        <Label fx:id="lblMeta"
+                               styleClass="detail-meta"
+                               text="EC-01 · Brgy. Poblacion" />
+                    </children>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblStatus"
+                       styleClass="status-tag, status-tag-open"
+                       text="Open" />
+                <Button fx:id="btnClose"
+                        mnemonicParsing="false"
+                        onAction="#handleClose"
+                        styleClass="btn-modal-close"
+                        text="✕" />
+            </children>
+        </HBox>
+
+        <!-- ADDRESS BLOCK -->
+        <VBox spacing="4.0">
+            <children>
+                <Label styleClass="detail-section-label" text="ADDRESS" />
+                <Label fx:id="lblAddress"
+                       styleClass="detail-section-body"
+                       text="Brgy. Poblacion, Argao, Cebu"
+                       wrapText="true" />
+            </children>
+        </VBox>
+
+        <!-- SUPPLIES BLOCK -->
+        <VBox spacing="6.0">
+            <children>
+                <Label styleClass="detail-section-label" text="SUPPLIES &amp; KITS" />
+                <FlowPane fx:id="suppliesFlow"
+                          hgap="6.0"
+                          vgap="6.0"
+                          styleClass="supplies-flow" />
+            </children>
+        </VBox>
+
+        <!-- ACTION BUTTONS -->
+        <HBox spacing="10.0">
+            <children>
+                <Button fx:id="btnShowRoute"
+                        maxWidth="1.7976931348623157E308"
+                        mnemonicParsing="false"
+                        onAction="#handleShowRoute"
+                        styleClass="btn-primary"
+                        text="Show route"
+                        HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnViewDetails"
+                        maxWidth="1.7976931348623157E308"
+                        mnemonicParsing="false"
+                        onAction="#handleViewDetails"
+                        styleClass="btn-outline"
+                        text="View details"
+                        HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
+    </children>
+</VBox>
