@@ -1,324 +1,535 @@
 /*
- * DashboardStyle.css
- * Modern, enterprise-grade JavaFX styling for CivicGuard.
+ * brgy-style.css  (replaces / extends style.css for the Barangay dashboard)
+ * Palette: slate dark sidebar, clean white content, emerald accents.
+ * Merge these rules into, or @import from, your existing style.css.
  */
 
+/* ════════════════════════════════════════════════════════
+   ROOT / GLOBAL
+   ════════════════════════════════════════════════════════ */
 .root-pane {
-    -fx-background-color: #f8fafc;
+    -fx-background-color: #f1f5f9;
     -fx-font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
-/* Sidebar */
-.sidebar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
+/* ════════════════════════════════════════════════════════
+   SIDEBAR
+   ════════════════════════════════════════════════════════ */
+.brgy-sidebar {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
     -fx-border-width: 0 1 0 0;
 }
 
-.logo-icon-bg {
-    -fx-background-color: #059669;
-    -fx-background-radius: 8;
-    -fx-min-width: 32;
-    -fx-min-height: 32;
-}
-
-.logo-icon {
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 14;
-}
-
-.logo-text {
-    -fx-font-size: 20;
-    -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
-    -fx-letter-spacing: -0.5px;
-}
-
-.nav-header {
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 10;
-    -fx-font-weight: bold;
-    -fx-padding: 0 0 4 16;
-}
-
-.nav-item {
-    -fx-background-color: transparent;
-    -fx-text-fill: #64748b;
-    -fx-alignment: center-left;
-    -fx-padding: 10 16;
-    -fx-font-size: 14;
-    -fx-cursor: hand;
-    -fx-background-radius: 8;
-}
-
-.nav-item:hover {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #1e293b;
-}
-
-.nav-active {
-    -fx-background-color: #ecfdf5;
-    -fx-text-fill: #059669;
-    -fx-font-weight: bold;
-}
-
-.profile-section {
-    -fx-border-color: #f1f5f9;
-    -fx-border-width: 1 0 0 0;
-}
-
-.avatar-circle {
-    -fx-background-color: #334155;
-    -fx-text-fill: white;
-    -fx-background-radius: 50;
-    -fx-font-weight: bold;
-}
-
-.profile-name {
-    -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
-    -fx-font-size: 14;
-}
-
-.profile-role {
-    -fx-font-size: 12;
-    -fx-text-fill: #94a3b8;
-}
-
-/* Header */
-.header-bar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
+.brgy-logo-row {
+    -fx-border-color: #1e293b;
     -fx-border-width: 0 0 1 0;
 }
 
-.header-title {
-    -fx-font-size: 20;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
+.brgy-logo-badge {
+    -fx-background-color: #059669;
+    -fx-background-radius: 10;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
 }
 
-.header-subtitle {
-    -fx-font-size: 12;
+.brgy-logo-badge-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+}
+
+.brgy-logo-name {
+    -fx-font-size: 17;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.brgy-logo-sub {
+    -fx-font-size: 10;
     -fx-text-fill: #64748b;
 }
 
-.status-pill {
-    -fx-background-color: #ecfdf5;
-    -fx-background-radius: 20;
-    -fx-min-height: 28;
-}
-
-.status-text {
-    -fx-font-size: 12;
+.brgy-nav-section-label {
+    -fx-font-size: 9;
     -fx-font-weight: bold;
-    -fx-text-fill: #059669;
+    -fx-text-fill: #475569;
+    -fx-padding: 18 0 4 0;
 }
 
-.btn-refresh {
+.brgy-nav-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #94a3b8;
-    -fx-font-size: 18;
+    -fx-alignment: center-left;
+    -fx-padding: 10 14;
+    -fx-font-size: 13;
     -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
 }
 
-/* Cards & Stats */
-.stat-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-padding: 24;
-    -fx-border-color: #f1f5f9;
-    -fx-border-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 10, 0, 0, 2);
+.brgy-nav-btn:hover {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #e2e8f0;
 }
 
-.stat-card-warning {
-    -fx-border-color: #fca5a5;
-    -fx-background-color: #fffafb;
-}
-
-.stat-label {
-    -fx-font-size: 11;
+.brgy-nav-active {
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
     -fx-font-weight: bold;
+}
+
+.brgy-nav-active:hover {
+    -fx-background-color: #065f46;
+}
+
+.brgy-sidebar-status {
+    -fx-border-color: #1e293b;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 14 0 0 0;
+}
+
+.brgy-status-text {
+    -fx-text-fill: #6ee7b7;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+}
+
+.brgy-profile-row {
+    -fx-border-color: #1e293b;
+    -fx-border-width: 1 0 0 0;
+}
+
+.brgy-avatar {
+    -fx-background-color: #334155;
+    -fx-text-fill: #e2e8f0;
+    -fx-background-radius: 50;
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
+    -fx-alignment: center;
+}
+
+.brgy-profile-name {
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 13;
+}
+
+.brgy-profile-role {
+    -fx-font-size: 11;
     -fx-text-fill: #64748b;
 }
 
-.stat-value {
-    -fx-font-size: 32;
+/* ════════════════════════════════════════════════════════
+   HEADER BAR
+   ════════════════════════════════════════════════════════ */
+.brgy-header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 8, 0, 0, 2);
+}
+
+.brgy-header-title {
+    -fx-font-size: 18;
     -fx-font-weight: bold;
     -fx-text-fill: #0f172a;
-    -fx-padding: 4 0;
 }
 
-.trend-up { -fx-text-fill: #10b981; -fx-font-weight: bold; }
-.stat-trend-text { -fx-font-size: 11; -fx-text-fill: #94a3b8; }
-
-.mini-progress-bg { -fx-background-color: #f1f5f9; -fx-background-radius: 4; }
-.mini-progress-fill { -fx-background-color: #059669; -fx-background-radius: 4; }
-
-/* Table Section */
-.card-container {
-    -fx-background-color: white;
-    -fx-background-radius: 16;
-    -fx-border-color: #f1f5f9;
-    -fx-border-radius: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 20, 0, 0, 4);
-    -fx-overflow: hidden;
+.brgy-header-sub {
+    -fx-font-size: 11;
+    -fx-text-fill: #94a3b8;
 }
 
-.card-title {
-    -fx-font-size: 16;
-    -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
-}
-
-.search-field {
-    -fx-background-color: #f8fafc;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 8 16;
-}
-
-.search-field:focused {
-    -fx-border-color: #059669;
-    -fx-background-color: white;
-}
-
-/* Table View */
-.table-view {
-    -fx-background-color: transparent;
-    -fx-border-width: 1 0 0 0;
-    -fx-border-color: #f1f5f9;
-}
-
-.table-view .column-header-background { -fx-background-color: #fbfcfd; }
-.table-view .column-header { -fx-background-color: transparent; -fx-size: 45; }
-.table-view .column-header .label { -fx-text-fill: #64748b; -fx-font-size: 11; -fx-font-weight: bold; }
-
-.table-view .table-row-cell { -fx-cell-size: 56; -fx-border-color: #f8fafc; -fx-border-width: 0 0 1 0; }
-.table-view .table-row-cell:odd { -fx-background-color: white; }
-.table-view .table-row-cell:even { -fx-background-color: #fcfdfe; }
-.table-view .table-row-cell:selected { -fx-background-color: #f1f5f9; }
-
-/* Buttons */
-.btn-primary {
-    -fx-background-color: #0f172a;
+/* ════════════════════════════════════════════════════════
+   BUTTONS
+   ════════════════════════════════════════════════════════ */
+.brgy-btn-primary {
+    -fx-background-color: #059669;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 8;
-    -fx-padding: 10 20;
+    -fx-padding: 9 18;
+    -fx-font-size: 12;
     -fx-cursor: hand;
 }
 
-.btn-primary:hover { -fx-background-color: #334155; }
+.brgy-btn-primary:hover {
+    -fx-background-color: #047857;
+}
 
-.btn-outline {
+.brgy-btn-ghost {
     -fx-background-color: transparent;
     -fx-border-color: #e2e8f0;
     -fx-border-radius: 8;
     -fx-text-fill: #475569;
-    -fx-padding: 10 20;
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
     -fx-cursor: hand;
 }
 
-.btn-outline:hover { -fx-background-color: #f8fafc; }
+.brgy-btn-ghost:hover {
+    -fx-background-color: #f8fafc;
+}
 
-/* Segmented Control */
-.segmented-control {
+/* ════════════════════════════════════════════════════════
+   MAP OVERLAY (floating card bottom-left of WebView)
+   ════════════════════════════════════════════════════════ */
+.brgy-map-overlay {
+    -fx-background-color: rgba(255, 255, 255, 0.97);
+    -fx-background-radius: 14;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.20), 28, 0, 0, 8);
+}
+
+.brgy-overlay-title {
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.brgy-overlay-address {
+    -fx-font-size: 11;
+    -fx-text-fill: #64748b;
+}
+
+.brgy-overlay-section-label {
+    -fx-font-size: 9;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+}
+
+.brgy-overlay-event {
+    -fx-font-size: 12;
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: bold;
+}
+
+.brgy-overlay-ts {
+    -fx-font-size: 10;
+    -fx-text-fill: #94a3b8;
+}
+
+.brgy-overlay-close {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+    -fx-padding: 2 6;
+    -fx-background-radius: 6;
+}
+
+.brgy-overlay-close:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+}
+
+/* Supply pills inside overlay */
+.brgy-pill {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #065f46;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 4 10 4 10;
+    -fx-border-color: #a7f3d0;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.brgy-pill-food    { -fx-background-color: #fef3c7; -fx-text-fill: #92400e; -fx-border-color: #fde68a; }
+.brgy-pill-water   { -fx-background-color: #eff6ff; -fx-text-fill: #1e40af; -fx-border-color: #bfdbfe; }
+.brgy-pill-nonfood { -fx-background-color: #ecfdf5; -fx-text-fill: #065f46; -fx-border-color: #a7f3d0; }
+.brgy-pill-other   { -fx-background-color: #f5f3ff; -fx-text-fill: #4c1d95; -fx-border-color: #ddd6fe; }
+
+/* ════════════════════════════════════════════════════════
+   CENTER CARDS STRIP (bottom of map panel)
+   ════════════════════════════════════════════════════════ */
+.brgy-cards-strip {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1 0 0 0;
+}
+
+.brgy-strip-header {
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+}
+
+.brgy-strip-count {
+    -fx-font-size: 11;
+    -fx-text-fill: #64748b;
+}
+
+.brgy-cards-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.brgy-cards-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Individual center card */
+.brgy-center-card {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-min-width: 220;
+    -fx-max-width: 220;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 6, 0, 0, 2);
+}
+
+.brgy-center-card:hover {
+    -fx-border-color: #059669;
+    -fx-effect: dropshadow(gaussian, rgba(5,150,105,0.15), 12, 0, 0, 4);
+}
+
+.brgy-center-card-selected {
+    -fx-border-color: #059669;
+    -fx-background-color: #ecfdf5;
+    -fx-effect: dropshadow(gaussian, rgba(5,150,105,0.2), 16, 0, 0, 4);
+}
+
+.brgy-card-center-name {
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-wrap-text: true;
+}
+
+.brgy-card-center-addr {
+    -fx-font-size: 10;
+    -fx-text-fill: #64748b;
+    -fx-wrap-text: true;
+}
+
+.brgy-card-center-event {
+    -fx-font-size: 10;
+    -fx-text-fill: #059669;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+.brgy-card-center-ts {
+    -fx-font-size: 9;
+    -fx-text-fill: #94a3b8;
+}
+
+/* Capacity bar inside card */
+.brgy-cap-track {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 4;
+    -fx-min-height: 5;
+    -fx-max-height: 5;
+    -fx-pref-height: 5;
+}
+
+.brgy-cap-fill-ok   { -fx-background-color: #10b981; -fx-background-radius: 4; }
+.brgy-cap-fill-warn { -fx-background-color: #f59e0b; -fx-background-radius: 4; }
+.brgy-cap-fill-full { -fx-background-color: #ef4444; -fx-background-radius: 4; }
+
+/* Status badge on card */
+.brgy-badge-open {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #059669;
+    -fx-font-size: 9;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 2 8;
+    -fx-border-color: #a7f3d0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.brgy-badge-full {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 9;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 2 8;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+/* ════════════════════════════════════════════════════════
+   CARDS (for Registrations + Activity Log panels)
+   ════════════════════════════════════════════════════════ */
+.brgy-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 14, 0, 0, 3);
+}
+
+.brgy-card-header {
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 0 0 1 0;
+}
+
+.brgy-card-title {
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.brgy-table-controls {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 0 0 1 0;
+}
+
+.brgy-search {
+    -fx-background-color: white;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 7 12;
+    -fx-font-size: 12;
+}
+
+.brgy-search:focused {
+    -fx-border-color: #059669;
+}
+
+/* Segmented control */
+.brgy-seg-control {
     -fx-background-color: #f1f5f9;
     -fx-background-radius: 8;
     -fx-padding: 2;
 }
 
-.segment {
+.brgy-seg-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #64748b;
-    -fx-font-size: 12;
-    -fx-min-height: 32;
-    -fx-padding: 0 16;
+    -fx-font-size: 11;
+    -fx-min-height: 30;
+    -fx-padding: 0 14;
     -fx-cursor: hand;
+    -fx-background-radius: 6;
 }
 
-.segment-active {
+.brgy-seg-active {
     -fx-background-color: white;
     -fx-text-fill: #0f172a;
-    -fx-background-radius: 6;
     -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);
 }
 
-/* Right Panel */
-.right-panel {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
-    -fx-border-width: 0 0 0 1;
-}
-
-.side-panel-header {
-    -fx-font-size: 11;
-    -fx-font-weight: bold;
-    -fx-text-fill: #94a3b8;
-}
-
-.alert-item {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 12;
-    -fx-padding: 16;
-    -fx-border-color: #f1f5f9;
-    -fx-border-radius: 12;
-}
-
-.alert-item-critical {
-    -fx-background-color: #fff1f2;
-    -fx-border-color: #fecaca;
-}
-
-.alert-title { -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 13; }
-.alert-qty { -fx-font-size: 11; -fx-text-fill: #ef4444; -fx-font-weight: bold; }
-.alert-location { -fx-font-size: 11; -fx-text-fill: #64748b; -fx-padding: 2 0; }
-
-.btn-link-sm {
+/* TableView overrides */
+.table-view {
     -fx-background-color: transparent;
-    -fx-text-fill: #3b82f6;
+    -fx-border-width: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f8fafc;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 42;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-row-cell {
+    -fx-cell-size: 52;
+    -fx-border-color: #f8fafc;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-view .table-row-cell:odd  { -fx-background-color: white; }
+.table-view .table-row-cell:even { -fx-background-color: #fcfdfe; }
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #ecfdf5;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #d1fae5;
+}
+
+.table-view .table-row-cell:selected .text {
+    -fx-fill: #0f172a;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 13;
+}
+
+/* Status badges in table */
+.brgy-status-verified {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #059669;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 3 10;
+    -fx-border-color: #a7f3d0;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.brgy-status-pending {
+    -fx-background-color: #fffbeb;
+    -fx-text-fill: #d97706;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 3 10;
+    -fx-border-color: #fde68a;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.brgy-status-rejected {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 3 10;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+/* Table action button */
+.brgy-tbl-action {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
     -fx-font-size: 11;
     -fx-font-weight: bold;
-    -fx-cursor: hand;
-    -fx-padding: 4 0 0 0;
-}
-
-.map-viewport {
-    -fx-background-color: #f1f5f9;
-    -fx-background-radius: 16;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 16;
-}
-
-.map-placeholder-text { -fx-text-fill: #94a3b8; -fx-font-size: 13; }
-
-.btn-map-action {
-    -fx-background-color: white;
-    -fx-text-fill: #1e293b;
-    -fx-font-size: 11;
-    -fx-background-radius: 20;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 20;
-    -fx-padding: 6 16;
+    -fx-background-radius: 6;
+    -fx-padding: 5 12;
     -fx-cursor: hand;
 }
 
-.map-legend { -fx-font-size: 10; -fx-text-fill: #94a3b8; }
-
-.btn-map-overlay {
-    -fx-background-color: rgba(15, 23, 42, 0.65);
+.brgy-tbl-action:hover {
+    -fx-background-color: #059669;
     -fx-text-fill: white;
-    -fx-font-size: 11px;
-    -fx-padding: 5 10 5 10;
-    -fx-background-radius: 6px;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
-}
-
-.btn-map-overlay:hover {
-    -fx-background-color: rgba(15, 23, 42, 0.88);
 }
