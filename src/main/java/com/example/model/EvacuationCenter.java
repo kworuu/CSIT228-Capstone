@@ -76,4 +76,25 @@ public class EvacuationCenter {
     public String toString() {
         return name + " (" + barangay + ")";
     }
+
+    // Add this inside com.example.model.EvacuationCenter
+    public String getStatusText() {
+        return active ? "Safe" : "Danger";
+    }
+
+    public String getStatus() {
+        if (capacity <= 0) return "Unknown";
+
+        double ratio = (double) currentOccupancy / capacity;
+
+        if (ratio >= 1.0) {
+            return "FULL";
+        } else if (ratio >= 0.9) {
+            return "CRITICAL"; // Or "Almost Full"
+        } else {
+            return "SAFE";
+        }
+    }
+
+
 }
