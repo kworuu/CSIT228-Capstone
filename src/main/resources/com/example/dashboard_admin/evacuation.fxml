@@ -143,9 +143,9 @@
                             <children>
                                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="card-header">
                                     <children>
-                                        <Label styleClass="card-title" text="Recent Request" />
+                                        <Label styleClass="card-title" text="Evacuation Centers" />
                                         <Region HBox.hgrow="ALWAYS" />
-                                        <Button fx:id="btnNewEntry" mnemonicParsing="false" styleClass="btn-primary" text="Reload Request" />
+                                        <Button fx:id="btnNewEvacCenter" mnemonicParsing="false" styleClass="btn-primary" text="+ New Evacuation Center" />
                                     </children>
                                     <padding>
                                         <Insets bottom="16.0" left="20.0" right="20.0" top="20.0" />
@@ -154,13 +154,13 @@
 
                                 <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="table-controls">
                                     <children>
-                                        <TextField fx:id="searchRequest" prefHeight="38.0" prefWidth="350.0" promptText="Filter by name, center, or ID..." styleClass="search-field" />
+                                        <TextField fx:id="searchEvacCenter" prefHeight="38.0" prefWidth="350.0" promptText="Filter by name, center, or ID..." styleClass="search-field" />
                                         <Region HBox.hgrow="ALWAYS" />
                                         <HBox styleClass="segmented-control">
                                             <children>
                                                 <Button fx:id="filterAll" mnemonicParsing="false" styleClass="segment, segment-first, segment-active" text="All" />
-                                                <Button fx:id="filterVerified" mnemonicParsing="false" styleClass="segment" text="Recent" />
-                                                <Button fx:id="filterPending" mnemonicParsing="false" styleClass="segment, segment-last" text="Earlier" />
+                                                <Button fx:id="filterStatusDanger" mnemonicParsing="false" styleClass="segment" text="Danger" />
+                                                <Button fx:id="filterStatusSafe" mnemonicParsing="false" styleClass="segment, segment-last" text="Safe" />
                                             </children>
                                         </HBox>
                                     </children>
@@ -169,14 +169,12 @@
                                     </padding>
                                 </HBox>
 
-                                <TableView fx:id="tableRequest" VBox.vgrow="ALWAYS">
+                                <TableView fx:id="mainTable" VBox.vgrow="ALWAYS">
                                     <columns>
-                                        <TableColumn fx:id="colID" prefWidth="100.0" text="REQUEST ID" />
-                                        <TableColumn fx:id="colCenter" prefWidth="169.0" text="EVACUATION CENTER" />
-                                        <TableColumn fx:id="colItem" prefWidth="113.0" text="ITEM" />
-                                        <TableColumn fx:id="colQty" prefWidth="92.0" text="QUANTITY" />
-                                        <TableColumn fx:id="colDate" prefWidth="105.0" text="DATE" />
-                                        <TableColumn fx:id="colStatus" prefWidth="89.0" text="STATUS" />
+                                        <TableColumn fx:id="colEvacCenter" prefWidth="198.0" text="CENTER" />
+                                        <TableColumn fx:id="colBrgy" prefWidth="221.0" text="BARANGAY" />
+                                        <TableColumn fx:id="colPopulation" prefWidth="132.0" text="POPULATION" />
+                                        <TableColumn fx:id="colStatus" prefWidth="91.0" text="STATUS" />
                                     </columns>
                                     <columnResizePolicy>
                                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

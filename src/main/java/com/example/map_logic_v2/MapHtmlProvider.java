@@ -32,10 +32,7 @@ public class MapHtmlProvider {
      *                    Pass {@code "[]"} for an empty map.
      */
     public static String getMapHTML(String centersJson) {
-        // The JSON is interpolated directly into a JS literal — callers must
-        // pass a syntactically-valid JSON array. The dashboard controller
-        // builds it from typed data, so injection isn't a concern here.
-        return """
+        String htmlTemplate = """
         <!DOCTYPE html>
         <html>
         <head>
@@ -96,8 +93,7 @@ public class MapHtmlProvider {
 
             <script>
                 // Centers list passed in from JavaFX.
-                var centers = """ + centersJson + """
-        ;
+                var centers = __CENTERS_JSON__;
 
                 // Boot delay lets JavaFX finish stretching the WebView before
                 // Leaflet measures the container.
@@ -158,5 +154,7 @@ public class MapHtmlProvider {
         </body>
         </html>
         """;
+        
+        return htmlTemplate.replace("__CENTERS_JSON__", centersJson);
     }
 }
