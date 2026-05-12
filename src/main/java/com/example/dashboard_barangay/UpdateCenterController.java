@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
@@ -21,7 +21,7 @@ public class UpdateCenterController {
     @FXML private Label labelOverlayAddress;
     @FXML private ImageView imgModalCenter;
     @FXML private TextField textFieldEvent;
-    @FXML private FlowPane flowPaneSupplies;
+    @FXML private GridPane gridPaneSupplies;
     @FXML private Button buttonCancel;
 
     private long currentCenterId;
@@ -59,7 +59,7 @@ public class UpdateCenterController {
     }
 
     private void loadInventoryItems() {
-        flowPaneSupplies.getChildren().clear();
+        gridPaneSupplies.getChildren().clear();
         listCheckBoxes.clear();
 
         String sql = "SELECT id, name FROM inventory_items ORDER BY name ASC";
@@ -68,13 +68,21 @@ public class UpdateCenterController {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
+            int row = 0;
+            int col = 0;
             while (rs.next()) {
                 CheckBox cb = new CheckBox(rs.getString("name"));
                 cb.setUserData(rs.getLong("id"));
-                cb.setStyle("-fx-text-fill: white;");
+                cb.setStyle("-fx-text-fill: #0f172a;"); // Use dark text instead of white to be visible
 
                 listCheckBoxes.add(cb);
-                flowPaneSupplies.getChildren().add(cb);
+                gridPaneSupplies.add(cb, col, row);
+                
+                col++;
+                if (col > 1) { // 2 columns
+                    col = 0;
+                    row++;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -17,50 +17,54 @@
             fx:controller="com.example.dashboard_barangay.UpdateCenterController">
 
     <children>
-        <VBox fx:id="vboxContainer" spacing="20.0"
-              AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+        <VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-            <padding>
-                <Insets top="24.0" right="28.0" bottom="24.0" left="28.0"/>
-            </padding>
             <children>
 
-                <VBox fx:id="vboxHeader" spacing="4.0">
-                    <padding><Insets right="40.0"/></padding>
-                    <children>
-                        <Label fx:id="labelTitle" text="Update Center" styleClass="brgy-card-title" wrapText="true"/>
-                        <Label fx:id="labelOverlayAddress" text="Center Address" styleClass="brgy-overlay-address" wrapText="true"/>
-                    </children>
-                </VBox>
-
                 <ImageView fx:id="imgModalCenter"
-                           fitHeight="140.0" fitWidth="394.0"
+                           fitHeight="160.0" fitWidth="450.0"
                            preserveRatio="false"
                            styleClass="brgy-overlay-img" />
 
-                <VBox fx:id="vboxEvent" spacing="8.0">
+                <VBox fx:id="vboxContainer" spacing="20.0" VBox.vgrow="ALWAYS">
+                    <padding>
+                        <Insets top="20.0" right="28.0" bottom="24.0" left="28.0"/>
+                    </padding>
                     <children>
-                        <Label text="Current Event / Disaster" styleClass="brgy-nav-section-label"/>
-                        <TextField fx:id="textFieldEvent" promptText="e.g. Typhoon Basyang" styleClass="brgy-search" prefHeight="40.0"/>
+
+                        <VBox fx:id="vboxHeader" spacing="4.0">
+                            <padding><Insets right="40.0"/></padding>
+                            <children>
+                                <Label fx:id="labelTitle" text="Update Center" styleClass="brgy-card-title" wrapText="true"/>
+                                <Label fx:id="labelOverlayAddress" text="Center Address" styleClass="brgy-overlay-address" wrapText="true"/>
+                            </children>
+                        </VBox>
+
+                        <VBox fx:id="vboxEvent" spacing="8.0">
+                            <children>
+                                <Label text="Current Event / Disaster" styleClass="brgy-nav-section-label"/>
+                                <TextField fx:id="textFieldEvent" promptText="e.g. Typhoon Basyang" styleClass="brgy-search" prefHeight="40.0"/>
+                            </children>
+                        </VBox>
+
+                        <VBox fx:id="vboxSupplies" spacing="8.0" VBox.vgrow="ALWAYS">
+                            <children>
+                                <Label text="Available Supplies" styleClass="brgy-nav-section-label"/>
+                                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                                    <content>
+                                        <GridPane fx:id="gridPaneSupplies" hgap="20.0" vgap="12.0" />
+                                    </content>
+                                </ScrollPane>
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="12.0" alignment="CENTER_RIGHT">
+                            <children>
+                                <Button fx:id="buttonSave" text="Save Update" styleClass="brgy-btn-primary" onAction="#handleSave"/>
+                            </children>
+                        </HBox>
                     </children>
                 </VBox>
-
-                <VBox fx:id="vboxSupplies" spacing="8.0" VBox.vgrow="ALWAYS">
-                    <children>
-                        <Label text="Available Supplies" styleClass="brgy-nav-section-label"/>
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
-                            <content>
-                                <FlowPane fx:id="flowPaneSupplies" hgap="15.0" vgap="12.0" prefWrapLength="380.0"/>
-                            </content>
-                        </ScrollPane>
-                    </children>
-                </VBox>
-
-                <HBox spacing="12.0" alignment="CENTER_RIGHT">
-                    <children>
-                        <Button fx:id="buttonSave" text="Save Update" styleClass="brgy-btn-primary" onAction="#handleSave"/>
-                    </children>
-                </HBox>
             </children>
         </VBox>
 

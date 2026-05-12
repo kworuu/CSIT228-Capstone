@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
@@ -58,7 +59,8 @@ public class BrgyDashboardController {
     @FXML private StackPane stackPaneMapContainer;
 
     // Overlay
-    @FXML private VBox   vboxMapOverlay;
+    @FXML private AnchorPane vboxMapOverlay; // Changed to AnchorPane to match FXML
+    @FXML private ImageView imgOverlayCenter; // Added this FXML element
     @FXML private Label  labelOverlayName;
     @FXML private Label  labelOverlayAddress;
     @FXML private VBox   vboxOverlayItemsBox;
@@ -418,6 +420,23 @@ public class BrgyDashboardController {
         labelOverlayEvent.setText(c.eventLabel());
         labelOverlayTimestamp.setText(c.updatedAt());
 
+        // NEW: Load image for the map overlay
+        if (c.photoPath() != null && !c.photoPath().isBlank()) {
+            try {
+                Image img = new Image(getClass().getResourceAsStream(c.photoPath()));
+                imgOverlayCenter.setImage(img);
+                imgOverlayCenter.setVisible(true);
+                imgOverlayCenter.setManaged(true);
+            } catch (Exception e) {
+                System.err.println("Could not load image for overlay: " + c.photoPath());
+                imgOverlayCenter.setVisible(false);
+                imgOverlayCenter.setManaged(false);
+            }
+        } else {
+            imgOverlayCenter.setVisible(false);
+            imgOverlayCenter.setManaged(false);
+        }
+
         // Rebuild pills
         flowPaneOverlayPillsRow.getChildren().clear();
         if (c.availableItems().isEmpty()) {
@@ -685,9 +704,26 @@ public class BrgyDashboardController {
     }
 
     @FXML private void handleRegisterEvacuee() {
-        // Phase 3: open registration modal
-        System.out.println("[BrgyDashboard] Open register evacuee modal");
-        // We will wire this up properly in Phase 3!
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/example/dashboard_barangay/modals/register-evacuee.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            RegisterEvacueeController controller = loader.getController();
+            controller.initData(CURRENT_BARANGAY, this::loadEvacueesFromDB);
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Register Evacuee");
+            stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            stage.initOwner(buttonRegisterEvacuee.getScene().getWindow());
+            stage.setScene(new javafx.scene.Scene(root));
+
+            stage.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Failed to open Register Evacuee modal: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ══════════════════════════════════════════════════════════════
