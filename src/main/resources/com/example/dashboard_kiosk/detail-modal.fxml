@@ -50,9 +50,6 @@
                 <Region HBox.hgrow="ALWAYS" />
                 <!-- Status pill — class toggled between status-tag-open and
                      status-tag-full by DetailModalController.show() -->
-                <Label fx:id="lblStatus"
-                       styleClass="status-tag, status-tag-open"
-                       text="Open" />
                 <!-- Close button -->
                 <Button fx:id="btnClose"
                         mnemonicParsing="false"
@@ -70,20 +67,6 @@
                        styleClass="detail-section-body"
                        text="—"
                        wrapText="true" />
-            </children>
-        </VBox>
-
-        <!-- ── OCCUPANCY ─────────────────────────────────────────────── -->
-        <VBox spacing="3.0">
-            <children>
-                <Label styleClass="detail-section-label" text="OCCUPANCY" />
-                <!--
-                    lblOccupancy is set by the controller as e.g. "145 / 300 evacuees (48%)"
-                    using a monospaced font via the detail-occupancy CSS class.
-                -->
-                <Label fx:id="lblOccupancy"
-                       styleClass="detail-occupancy"
-                       text="— / — evacuees" />
             </children>
         </VBox>
 

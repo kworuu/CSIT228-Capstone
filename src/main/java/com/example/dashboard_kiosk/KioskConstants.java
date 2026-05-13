@@ -194,8 +194,7 @@ public final class KioskConstants {
      * </ol>
      */
     public static final String JSON_CENTER_TEMPLATE =
-            "{\"id\":\"%s\",\"title\":\"%s\",\"lat\":%s,\"lng\":%s," +
-                    "\"status\":\"%s\",\"focus\":%b,\"cap\":%d,\"occ\":%d}";
+            "{\"id\":\"%s\",\"name\":\"%s\",\"lat\":%s,\"lng\":%s,\"focus\":%b}";
 
     /**
      * Prefix for the map's JavaScript call to the location marker highlight

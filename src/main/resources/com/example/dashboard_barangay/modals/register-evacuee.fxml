@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="anchorPaneRoot" prefWidth="450.0" prefHeight="480.0"
+            stylesheets="@../../dashboard_barangay/style.css" styleClass="brgy-card"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.dashboard_barangay.RegisterEvacueeController">
+
+    <children>
+        <VBox fx:id="vboxContainer" spacing="20.0"
+              AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <padding>
+                <Insets top="24.0" right="28.0" bottom="24.0" left="28.0"/>
+            </padding>
+            <children>
+
+                <VBox fx:id="vboxHeader" spacing="4.0">
+                    <padding><Insets right="40.0"/></padding>
+                    <children>
+                        <Label text="Register Evacuee" styleClass="brgy-card-title" wrapText="true"/>
+                        <Label text="Manual input from master list" styleClass="brgy-overlay-address" wrapText="true"/>
+                    </children>
+                </VBox>
+
+                <VBox spacing="16.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label text="Full Name" styleClass="brgy-nav-section-label"/>
+                                <TextField fx:id="textFieldName" promptText="e.g. Juan Dela Cruz" styleClass="brgy-search" prefHeight="40.0"/>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label text="Evacuation Center" styleClass="brgy-nav-section-label"/>
+                                <ComboBox fx:id="comboBoxCenter" promptText="Select center" styleClass="brgy-search" prefHeight="40.0" prefWidth="400.0"/>
+                            </children>
+                        </VBox>
+
+                        <HBox spacing="16.0">
+                            <children>
+                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Family Size" styleClass="brgy-nav-section-label"/>
+                                        <TextField fx:id="textFieldFamilySize" promptText="e.g. 4" styleClass="brgy-search" prefHeight="40.0"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Contact Number (Optional)" styleClass="brgy-nav-section-label"/>
+                                        <TextField fx:id="textFieldContact" promptText="e.g. 09123456789" styleClass="brgy-search" prefHeight="40.0"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <Label fx:id="labelError" textFill="#dc2626" visible="false"/>
+                    </children>
+                </VBox>
+
+                <HBox spacing="12.0" alignment="CENTER_RIGHT">
+                    <children>
+                        <Button fx:id="buttonRegister" text="Register" styleClass="brgy-btn-primary" onAction="#handleRegister"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+
+        <Button fx:id="buttonCancel"
+                text="✕"
+                onAction="#handleCancel"
+                styleClass="brgy-overlay-close"
+                AnchorPane.topAnchor="15.0"
+                AnchorPane.rightAnchor="15.0" />
+    </children>
+</AnchorPane>

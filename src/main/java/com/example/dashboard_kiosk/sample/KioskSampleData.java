@@ -53,41 +53,31 @@ public final class KioskSampleData {
                         "EC-01",
                         "Argao Command Center",
                         "Brgy. Poblacion, Argao, Cebu",
-                        "OPEN",
-                        9.8828, 123.5953,
-                        300, 145
+                        9.8828, 123.5953
                 ),
                 new SimpleCenter(
                         "EC-02",
                         "Argao Central School",
                         "Brgy. Poblacion, Argao, Cebu",
-                        "OPEN",
-                        9.8810, 123.5980,
-                        200, 88
+                        9.8810, 123.5980
                 ),
                 new SimpleCenter(
                         "EC-03",
                         "Mabolo Elementary School",
                         "Brgy. Mabolo, Argao, Cebu",
-                        "FULL",
-                        9.8870, 123.6010,
-                        150, 150
+                        9.8870, 123.6010
                 ),
                 new SimpleCenter(
                         "EC-04",
                         "Conalum Barangay Hall",
                         "Brgy. Conalum, Argao, Cebu",
-                        "OPEN",
-                        9.8760, 123.5900,
-                        100, 34
+                        9.8760, 123.5900
                 ),
                 new SimpleCenter(
                         "EC-05",
                         "Lamacan Multi-purpose Hall",
                         "Brgy. Lamacan, Argao, Cebu",
-                        "FULL",
-                        9.8850, 123.5870,
-                        120, 120
+                        9.8850, 123.5870
                 )
         );
     }

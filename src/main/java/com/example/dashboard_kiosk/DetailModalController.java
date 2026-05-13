@@ -27,9 +27,7 @@ public class DetailModalController {
     @FXML private VBox   modalRoot;
     @FXML private Label  lblTitle;
     @FXML private Label  lblMeta;
-    @FXML private Label  lblStatus;
     @FXML private Label  lblAddress;
-    @FXML private Label  lblOccupancy;
     @FXML private FlowPane suppliesFlow;
     @FXML private Button btnShowRoute;
     @FXML private Button btnViewDetails;
@@ -66,22 +64,8 @@ public class DetailModalController {
         lblTitle.setText(center.getTitle());
         lblMeta.setText(center.getId() + " · " + abbreviateBarangay(center.getAddress()));
 
-        // ── Status pill ─────────────────────────────────────────────────
-        boolean isFull = center.isFull();
-        lblStatus.setText(isFull ? "Full" : "Open");
-        lblStatus.getStyleClass().removeAll("status-tag-open", "status-tag-full");
-        lblStatus.getStyleClass().add(isFull ? "status-tag-full" : "status-tag-open");
-
-        // ── Address & occupancy ─────────────────────────────────────────
         if (lblAddress != null)   lblAddress.setText(center.getAddress());
-        if (lblOccupancy != null) {
-            int pct = center.getCapacity() == 0
-                    ? 0
-                    : (int) Math.round(100.0 * center.getOccupancy() / center.getCapacity());
-            lblOccupancy.setText(
-                    center.getOccupancy() + " / " + center.getCapacity()
-                            + " evacuees  (" + pct + "%)");
-        }
+
 
         // ── Supply tags ─────────────────────────────────────────────────
         // In production, pull from DAO; here we derive from status/occupancy
@@ -118,16 +102,13 @@ public class DetailModalController {
      */
     private java.util.List<String> deriveSupplies(SimpleCenter center) {
         java.util.List<String> tags = new java.util.ArrayList<>();
-        int occ = center.getOccupancy();
 
         tags.add("💧 Water");
         tags.add("🍱 Meals");
 
-        if (occ > 50)  tags.add("🛏 Cots");
-        if (occ > 80)  tags.add("🧰 First Aid");
-        if (occ > 100) tags.add("👕 Clothing");
-        if (!center.isFull()) tags.add("✅ Space Available");
-
+        tags.add("🛏 Cots");
+        tags.add("🧰 First Aid");
+        tags.add("👕 Clothing");
         return tags;
     }
 

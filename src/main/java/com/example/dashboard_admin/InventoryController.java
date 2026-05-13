@@ -2,7 +2,7 @@ package com.example.dashboard_admin;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import com.example.dashboard_admin.helper_classes.SceneHelper;
+import com.example.util.SceneHelper;
 
 
 public class InventoryController {

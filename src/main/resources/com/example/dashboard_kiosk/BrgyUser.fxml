@@ -30,20 +30,12 @@
       • Layout uses VBox.vgrow / HBox.hgrow="ALWAYS" throughout so it fills
         the screen properly when the stage is maximised.
 -->
-<AnchorPane fx:id="mainRoot"
-            prefHeight="800.0" prefWidth="1280.0"
-            styleClass="root-pane"
-            stylesheets="@style.css"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.dashboard_kiosk.KioskDashboardController">
+
+<AnchorPane fx:id="mainRoot" prefHeight="800.0" prefWidth="1280.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_kiosk.KioskDashboardController">
     <children>
 
         <!-- ── Outer shell: Sidebar + Main content ─────────────────────── -->
-        <HBox AnchorPane.bottomAnchor="0.0"
-              AnchorPane.leftAnchor="0.0"
-              AnchorPane.rightAnchor="0.0"
-              AnchorPane.topAnchor="0.0">
+        <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
 
                 <!-- ══════════════════════════════════════════════════════
@@ -74,18 +66,7 @@
                             </padding>
                             <children>
                                 <Label styleClass="nav-header" text="PORTAL" />
-                                <Button alignment="BASELINE_LEFT"
-                                        maxWidth="1.7976931348623157E308"
-                                        styleClass="nav-item"
-                                        text="Admin Portal" />
-                                <Button alignment="BASELINE_LEFT"
-                                        maxWidth="1.7976931348623157E308"
-                                        styleClass="nav-item"
-                                        text="LGU Portal" />
-                                <Button alignment="BASELINE_LEFT"
-                                        maxWidth="1.7976931348623157E308"
-                                        styleClass="nav-item, nav-active"
-                                        text="Evacuee Portal" />
+                                <Button alignment="BASELINE_LEFT" maxWidth="1.7976931348623157E308" styleClass="nav-item, nav-active" text="Evacuee Portal" />
                             </children>
                         </VBox>
 
@@ -116,10 +97,7 @@
                     <children>
 
                         <!-- ── Top header bar ─────────────────────────── -->
-                        <HBox alignment="CENTER_LEFT"
-                              prefHeight="72.0"
-                              spacing="20.0"
-                              styleClass="header-bar">
+                        <HBox alignment="CENTER_LEFT" prefHeight="72.0" spacing="20.0" styleClass="header-bar">
                             <padding>
                                 <Insets left="30.0" right="30.0" />
                             </padding>
@@ -127,8 +105,7 @@
                                 <VBox alignment="CENTER_LEFT">
                                     <children>
                                         <Label styleClass="header-title" text="Evacuation Status" />
-                                        <Label styleClass="header-subtitle"
-                                               text="Real-time capacity and updates" />
+                                        <Label styleClass="header-subtitle" text="Real-time capacity and updates" />
                                     </children>
                                 </VBox>
                                 <Region HBox.hgrow="ALWAYS" />
@@ -141,22 +118,18 @@
                                             <children>
                                                 <!-- Fill colour set here because JavaFX shape fill
                                                      cannot be bound to a CSS class variable -->
-                                                <Circle fill="#5A6E4F" radius="4.0" styleClass="pulse-circle" />
+                                                <Circle fill="#10b981" radius="4.0" styleClass="pulse-circle" />
                                                 <Label styleClass="status-text" text="Live" />
                                             </children>
                                         </HBox>
-                                        <Button mnemonicParsing="false"
-                                                styleClass="btn-refresh"
-                                                text="↻" />
+                                        <Button mnemonicParsing="false" styleClass="btn-refresh" text="↻" />
                                     </children>
                                 </HBox>
                             </children>
                         </HBox>
 
                         <!-- ── Scrollable body ────────────────────────── -->
-                        <VBox spacing="20.0"
-                              styleClass="content-scroll"
-                              VBox.vgrow="ALWAYS">
+                        <VBox spacing="20.0" styleClass="content-scroll" VBox.vgrow="ALWAYS">
                             <padding>
                                 <Insets bottom="28.0" left="28.0" right="28.0" top="20.0" />
                             </padding>
@@ -171,8 +144,7 @@
                                             <children>
                                                 <HBox alignment="CENTER_LEFT" styleClass="card-header">
                                                     <padding>
-                                                        <Insets bottom="14.0" left="18.0"
-                                                                right="18.0" top="16.0" />
+                                                        <Insets bottom="14.0" left="18.0" right="18.0" top="16.0" />
                                                     </padding>
                                                     <children>
                                                         <Label styleClass="card-title" text="Map Overview" />
@@ -186,33 +158,23 @@
                                                     DO NOT add children here in FXML — the controller
                                                     injects the modal programmatically.
                                                 -->
-                                                <AnchorPane fx:id="mapOverlayPane"
-                                                            styleClass="map-overlay-pane"
-                                                            VBox.vgrow="ALWAYS">
+                                                <AnchorPane fx:id="mapOverlayPane" styleClass="map-overlay-pane" VBox.vgrow="ALWAYS">
                                                     <children>
-                                                        <WebView fx:id="webViewMiniMap"
-                                                                 AnchorPane.bottomAnchor="0.0"
-                                                                 AnchorPane.leftAnchor="0.0"
-                                                                 AnchorPane.rightAnchor="0.0"
-                                                                 AnchorPane.topAnchor="0.0" />
+                                                        <WebView fx:id="webViewMiniMap" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                     </children>
                                                 </AnchorPane>
                                             </children>
                                         </VBox>
 
                                         <!-- ALERTS CARD -->
-                                        <VBox prefWidth="340.0"
-                                              styleClass="card-container"
-                                              HBox.hgrow="NEVER">
+                                        <VBox prefWidth="340.0" styleClass="card-container" HBox.hgrow="NEVER">
                                             <children>
                                                 <HBox alignment="CENTER_LEFT" styleClass="card-header">
                                                     <padding>
-                                                        <Insets bottom="14.0" left="18.0"
-                                                                right="18.0" top="16.0" />
+                                                        <Insets bottom="14.0" left="18.0" right="18.0" top="16.0" />
                                                     </padding>
                                                     <children>
-                                                        <Label styleClass="card-title"
-                                                               text="Emergency Alerts" />
+                                                        <Label styleClass="card-title" text="Events" />
                                                     </children>
                                                 </HBox>
 
@@ -221,19 +183,14 @@
                                                     controller (KioskDashboardController.setupAlerts()).
                                                     Newest alert appears first.
                                                 -->
-                                                <VBox fx:id="alertsContainer"
-                                                      spacing="10.0"
-                                                      VBox.vgrow="ALWAYS">
+                                                <VBox fx:id="alertsContainer" spacing="10.0" VBox.vgrow="ALWAYS">
                                                     <padding>
-                                                        <Insets bottom="18.0" left="18.0"
-                                                                right="18.0" top="14.0" />
+                                                        <Insets bottom="18.0" left="18.0" right="18.0" top="14.0" />
                                                     </padding>
                                                 </VBox>
 
                                                 <!-- Static footer note -->
-                                                <Label style="-fx-font-size: 11; -fx-text-fill: #A8A29E;"
-                                                       text="Call 911 for life-threatening emergencies."
-                                                       wrapText="true">
+                                                <Label style="-fx-font-size: 11; -fx-text-fill: #A8A29E;" wrapText="true">
                                                     <VBox.margin>
                                                         <Insets bottom="16.0" left="18.0" right="18.0" />
                                                     </VBox.margin>
@@ -248,71 +205,33 @@
                                 <VBox styleClass="card-container" VBox.vgrow="ALWAYS">
                                     <children>
                                         <!-- Table header -->
-                                        <HBox alignment="CENTER_LEFT"
-                                              spacing="12.0"
-                                              styleClass="card-header">
+                                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="card-header">
                                             <padding>
-                                                <Insets bottom="14.0" left="18.0"
-                                                        right="18.0" top="16.0" />
+                                                <Insets bottom="14.0" left="18.0" right="18.0" top="16.0" />
                                             </padding>
                                             <children>
-                                                <Label styleClass="card-title"
-                                                       text="Evacuation Centers" />
+                                                <Label styleClass="card-title" text="Evacuation Centers" />
                                                 <Region HBox.hgrow="ALWAYS" />
                                             </children>
                                         </HBox>
 
                                         <!-- Search + filter controls -->
-                                        <HBox alignment="CENTER_LEFT"
-                                              spacing="14.0"
-                                              styleClass="table-controls">
+                                        <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="table-controls">
                                             <padding>
-                                                <Insets bottom="14.0" left="18.0"
-                                                        right="18.0" top="14.0" />
+                                                <Insets bottom="14.0" left="18.0" right="18.0" top="14.0" />
                                             </padding>
                                             <children>
-                                                <TextField fx:id="searchField1"
-                                                           prefHeight="34.0"
-                                                           prefWidth="240.0"
-                                                           promptText="Search center or location…"
-                                                           styleClass="search-field" />
+                                                <TextField fx:id="searchField1" prefHeight="34.0" prefWidth="240.0" promptText="Search center or location…" styleClass="search-field" />
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <HBox styleClass="segmented-control">
-                                                    <children>
-                                                        <Button fx:id="filterAll1"
-                                                                mnemonicParsing="false"
-                                                                styleClass="segment, segment-first, segment-active"
-                                                                text="All" />
-                                                        <Button fx:id="filterOpen1"
-                                                                mnemonicParsing="false"
-                                                                styleClass="segment"
-                                                                text="Open" />
-                                                        <Button fx:id="filterFull1"
-                                                                mnemonicParsing="false"
-                                                                styleClass="segment, segment-last"
-                                                                text="Full" />
-                                                    </children>
-                                                </HBox>
                                             </children>
                                         </HBox>
 
                                         <!-- Data table -->
-                                        <TableView fx:id="mainTable1"
-                                                   prefHeight="240.0"
-                                                   VBox.vgrow="ALWAYS">
+                                        <TableView fx:id="mainTable1" prefHeight="240.0" VBox.vgrow="ALWAYS">
                                             <columns>
-                                                <TableColumn fx:id="colId1"
-                                                             prefWidth="200.0"
-                                                             text="CENTER NAME" />
-                                                <TableColumn fx:id="colName1"
-                                                             prefWidth="280.0"
-                                                             text="ADDRESS" />
-                                                <TableColumn fx:id="colCenter1"
-                                                             prefWidth="100.0"
-                                                             text="STATUS" />
-                                                <TableColumn fx:id="colStatus1"
-                                                             prefWidth="160.0"
-                                                             text="OCCUPANCY / ACTION" />
+                                                <TableColumn fx:id="colId1" prefWidth="200.0" text="CENTER NAME" />
+                                                <TableColumn fx:id="colName1" prefWidth="280.0" text="ADDRESS" />
+                                                <TableColumn fx:id="colStatus1" prefWidth="160.0" text="ACTION" />
                                             </columns>
                                             <columnResizePolicy>
                                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

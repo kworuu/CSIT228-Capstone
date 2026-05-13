@@ -37,8 +37,8 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .sidebar {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0D4BE;
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
     -fx-border-width: 0 1 0 0;
 }
 
@@ -61,7 +61,7 @@
 .logo-text {
     -fx-font-size: 19;
     -fx-font-weight: bold;
-    -fx-text-fill: #1C1917;
+    -fx-text-fill: #f8fafc;
 }
 
 .nav-header {
@@ -75,7 +75,7 @@
 
 .nav-item {
     -fx-background-color: transparent;
-    -fx-text-fill: #57534E;
+    -fx-text-fill: #94a3b8;
     -fx-alignment: center-left;
     -fx-padding: 10 16;
     -fx-font-size: 13;
@@ -85,19 +85,21 @@
 }
 
 .nav-item:hover {
-    -fx-background-color: #F7F5EE;
-    -fx-text-fill: #1C1917;
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #e2e8f0;
 }
 
 .nav-active {
-    -fx-background-color: #EBF0E8;
-    -fx-text-fill: #5A6E4F;
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
     -fx-font-weight: bold;
     -fx-border-color: #C8D8C0;
     -fx-border-width: 0 0 0 3;
     -fx-border-radius: 0;
     -fx-background-radius: 0 6 6 0;
 }
+
+.nav-active:hover { -fx-background-color: #065f46; }
 
 .profile-section {
     -fx-border-color: #E0D4BE;
@@ -402,16 +404,16 @@
 
 /* OPEN — muted forest green */
 .status-tag-open {
-    -fx-background-color: #EBF0E8;
-    -fx-text-fill: #4A5E40;
-    -fx-border-color: #C0D0B8;
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #059669;
+    -fx-border-color: #a7f3d0;
 }
 
 /* FULL — terracotta / brick red */
 .status-tag-full {
-    -fx-background-color: #F5EAE7;
-    -fx-text-fill: #A0432F;
-    -fx-border-color: #DDB5AC;
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-border-color: #fecaca;
 }
 
 /* PENDING — warm amber */
@@ -442,8 +444,8 @@
 
 /* Primary — forest green fill */
 .btn-primary {
-    -fx-background-color: #5A6E4F;
-    -fx-text-fill: #F7F5EE;
+    -fx-background-color: #059669;
+    -fx-text-fill: #white;
     -fx-font-weight: bold;
     -fx-background-radius: 7;
     -fx-padding: 10 20;
@@ -451,7 +453,7 @@
     -fx-font-size: 13;
 }
 .btn-primary:hover {
-    -fx-background-color: #4A5E40;
+    -fx-background-color: #047857;
 }
 .btn-primary:pressed {
     -fx-background-color: #3A4E30;

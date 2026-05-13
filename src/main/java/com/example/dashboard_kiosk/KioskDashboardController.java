@@ -56,14 +56,20 @@ public class KioskDashboardController {
     @FXML private TableView<SimpleCenter>           mainTable1;
     @FXML private TableColumn<SimpleCenter, String> colId1;      // Center name
     @FXML private TableColumn<SimpleCenter, String> colName1;    // Address
-    @FXML private TableColumn<SimpleCenter, String> colCenter1;  // Status pill
     @FXML private TableColumn<SimpleCenter, String> colStatus1;  // Occupancy + View btn
 
     @FXML private TextField searchField1;
-    @FXML private Button    filterAll1, filterOpen1, filterFull1;
 
     /** Container for dynamically generated alert cards. */
     @FXML private VBox alertsContainer;
+
+    // Coordinates for Argao
+    private double currentBrgyLat = 9.8828;
+    private double currentBrgyLng = 123.5953;
+    private int currentBrgyZoom = 13;
+
+    // Crucial: Store the bridge as a class member so it isn't garbage collected!
+    private MapBridge mapBridge;
 
     // ── Internal state ─────────────────────────────────────────────────────
 
@@ -82,7 +88,6 @@ public class KioskDashboardController {
     public void initialize() {
         seedSampleData();
         setupCentersTable();
-        setupSearchAndFilter();
         setupAlerts();
         setupMap();
         loadDetailModal();
@@ -112,31 +117,26 @@ public class KioskDashboardController {
         colName1.setCellValueFactory(c ->
                 new SimpleStringProperty(c.getValue().getAddress()));
 
-        // Status pill column — color-coded OPEN (green) / FULL (red)
-        colCenter1.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getStatus()));
-        colCenter1.setCellFactory(col -> new TableCell<>() {
+        colStatus1.setCellValueFactory(c -> new SimpleStringProperty(""));
+        colStatus1.setCellFactory(col -> new TableCell<>() {
+            private final Button btn = new Button("View");
+            {
+                btn.getStyleClass().add("btn-table-action");
+                btn.setOnAction(e -> {
+                    SimpleCenter center = getTableView().getItems().get(getIndex());
+                    showDetailModal(center);
+                });
+            }
             @Override
-            protected void updateItem(String status, boolean empty) {
-                super.updateItem(status, empty);
-                if (empty || status == null) { setGraphic(null); setText(null); return; }
-
-                Label pill = new Label(status);
-                pill.getStyleClass().add(KioskConstants.CSS_STATUS_TAG);
-                pill.getStyleClass().add(
-                        KioskConstants.FILTER_OPEN.equalsIgnoreCase(status)
-                                ? KioskConstants.CSS_STATUS_OPEN
-                                : KioskConstants.CSS_STATUS_FULL);
-                setGraphic(pill);
-                setText(null);
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) { setGraphic(null); return; }
+                HBox cell = new HBox(btn);
+                cell.setAlignment(Pos.CENTER_LEFT);
+                setGraphic(cell);
             }
         });
 
-        // Action / Occupancy column
-        colStatus1.setCellValueFactory(c -> {
-            SimpleCenter sc = c.getValue();
-            return new SimpleStringProperty(sc.getOccupancy() + "/" + sc.getCapacity());
-        });
         colStatus1.setCellFactory(col -> new TableCell<>() {
             private final Button btn = new Button("View");
             {
@@ -166,44 +166,13 @@ public class KioskDashboardController {
         mainTable1.setPlaceholder(new Label("No evacuation centers match the current filter."));
     }
 
-    // ── Search & filter ────────────────────────────────────────────────────
 
-    private void setupSearchAndFilter() {
-        if (searchField1 == null) return;
 
-        searchField1.textProperty().addListener((obs, old, text) -> applyFilter(text, activeFilter));
-
-        if (filterAll1  != null) filterAll1 .setOnAction(e -> activateFilter(KioskConstants.FILTER_ALL));
-        if (filterOpen1 != null) filterOpen1.setOnAction(e -> activateFilter(KioskConstants.FILTER_OPEN));
-        if (filterFull1 != null) filterFull1.setOnAction(e -> activateFilter(KioskConstants.FILTER_FULL));
-    }
-
-    private void activateFilter(String filter) {
-        activeFilter = filter;
-        updateSegmentStyle(filterAll1,  KioskConstants.FILTER_ALL);
-        updateSegmentStyle(filterOpen1, KioskConstants.FILTER_OPEN);
-        updateSegmentStyle(filterFull1, KioskConstants.FILTER_FULL);
-        applyFilter(searchField1 != null ? searchField1.getText() : "", filter);
-    }
 
     private void updateSegmentStyle(Button btn, String filter) {
         if (btn == null) return;
         btn.getStyleClass().removeAll(KioskConstants.CSS_SEGMENT_ACTIVE);
         if (filter.equals(activeFilter)) btn.getStyleClass().add(KioskConstants.CSS_SEGMENT_ACTIVE);
-    }
-
-    private void applyFilter(String text, String statusFilter) {
-        String query = text == null ? "" : text.trim().toLowerCase();
-        shownCenters.setAll(allCenters.stream()
-                .filter(c -> {
-                    boolean matchesText = query.isEmpty()
-                            || c.getTitle().toLowerCase().contains(query)
-                            || c.getAddress().toLowerCase().contains(query);
-                    boolean matchesStatus = KioskConstants.FILTER_ALL.equals(statusFilter)
-                            || c.getStatus().equalsIgnoreCase(statusFilter);
-                    return matchesText && matchesStatus;
-                })
-                .toList());
     }
 
     // ── Emergency Alerts ───────────────────────────────────────────────────
@@ -264,15 +233,16 @@ public class KioskDashboardController {
         if (webViewMiniMap == null) return;
 
         webViewMiniMap.getEngine().setJavaScriptEnabled(true);
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+        webViewMiniMap.getEngine().setUserAgent("CivicGuard/1.0");
+
         webViewMiniMap.getEngine().getLoadWorker().stateProperty()
                 .addListener((obs, old, state) -> {
                     if (state == Worker.State.SUCCEEDED) {
-                        JSObject win = (JSObject)
-                                webViewMiniMap.getEngine().executeScript("window");
+                        JSObject win = (JSObject) webViewMiniMap.getEngine().executeScript("window");
 
-                        // Install bridge — so Leaflet marker clicks invoke showDetailModal()
-                        // on the JavaFX Application Thread.
-                        win.setMember("javaBridge", new MapBridge() {
+                        // 1. Assign to class variable
+                        this.mapBridge = new MapBridge() {
                             @Override
                             public void onMarkerClick(String centerId) {
                                 Platform.runLater(() ->
@@ -281,12 +251,22 @@ public class KioskDashboardController {
                                                 .findFirst()
                                                 .ifPresent(KioskDashboardController.this::showDetailModal));
                             }
-                        });
+                        };
+
+                        // 2. Pass to JS window
+                        win.setMember("javaBridge", this.mapBridge);
                     }
                 });
 
-        webViewMiniMap.getEngine()
-                .loadContent(MapHtmlProvider.getMapHTML(buildCentersJson()));
+        // Use the map_logic_v2 provider matching testcase1
+        webViewMiniMap.getEngine().loadContent(
+                com.example.map_logic_v2.BrgyMapHtmlProvider.getMapHTML(
+                        buildCentersJson(),
+                        currentBrgyLat,
+                        currentBrgyLng,
+                        currentBrgyZoom
+                )
+        );
     }
 
     private String buildCentersJson() {
@@ -296,14 +276,8 @@ public class KioskDashboardController {
             if (i > 0) sb.append(",");
             sb.append(String.format(
                     KioskConstants.JSON_CENTER_TEMPLATE,
-                    esc(c.getId()),
-                    esc(c.getTitle()),
-                    c.getLat(),
-                    c.getLng(),
-                    c.getStatus(),
-                    KioskConstants.FOCAL_CENTER_ID.equals(c.getId()),
-                    c.getCapacity(),
-                    c.getOccupancy()
+                    esc(c.getId()), esc(c.getTitle()), c.getLat(), c.getLng(),
+                    KioskConstants.FOCAL_CENTER_ID.equals(c.getId())
             ));
         }
         return sb.append("]").toString();
