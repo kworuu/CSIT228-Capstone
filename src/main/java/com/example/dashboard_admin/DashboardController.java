@@ -6,11 +6,8 @@ import com.example.model.EvacuationCenter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import com.example.dashboard_admin.helper_classes.SceneHelper;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.web.WebView;
 
@@ -18,6 +15,9 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class DashboardController {
+
+    @FXML
+    private Button btnNewEvacCenter;
     @FXML
     private Button navInventory;
     @FXML
@@ -28,6 +28,9 @@ public class DashboardController {
     private WebView webviewMiniMap;
     @FXML
     private Button navActivity;
+    // Cards
+    @FXML
+    private Label lblTotalEvacValue;
 
     // Table components
     @FXML private TableView<EvacuationCenter> mainTable;
@@ -35,6 +38,9 @@ public class DashboardController {
     @FXML private TableColumn<EvacuationCenter, String> colBrgy;
     @FXML private TableColumn<EvacuationCenter, Integer> colPopulation;
     @FXML private TableColumn<EvacuationCenter, String> colStatus;
+
+    //Classes Declaration
+    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
 
     @FXML
     public void initialize() {
@@ -62,6 +68,7 @@ public class DashboardController {
         // Data Initialization
         setupTable();
         loadData();
+        refreshStats();
     }
 
     private void setupTable() {
@@ -97,11 +104,11 @@ public class DashboardController {
             EvacuationCenterDao evacDao = new EvacuationCenterDao();
 
             // Fetch records from DB
-            List<EvacuationCenter> dbList = evacDao.findAll();
-            System.out.println("DEBUG: Rows fetched: " + dbList.size()); // Check your console!
+            List<EvacuationCenter> evacCenterList = evacDao.findAll();
+            System.out.println("DEBUG: Rows fetched: " + evacCenterList.size()); // Check your console!
 
             // Wrap in ObservableList for JavaFX
-            ObservableList<EvacuationCenter> data = FXCollections.observableArrayList(dbList);
+            ObservableList<EvacuationCenter> data = FXCollections.observableArrayList(evacCenterList);
 
             // Populate Table
             mainTable.setItems(data);
@@ -109,6 +116,16 @@ public class DashboardController {
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Database connection error: Could not fetch evacuation centers.");
+        }
+    }
+
+    private void refreshStats(){
+        try{
+            int totEvacCenter = centerDao.getTotalCount();
+
+            lblTotalEvacValue.setText(String.valueOf(totEvacCenter));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
