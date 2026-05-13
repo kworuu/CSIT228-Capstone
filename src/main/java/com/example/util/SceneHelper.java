@@ -1,4 +1,4 @@
-package com.example.dashboard_admin.helper_classes;
+package com.example.util;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

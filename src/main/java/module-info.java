@@ -15,8 +15,7 @@ module com.example.capstone {
     opens com.example.dashboard_admin to javafx.fxml;
     exports com.example.dashboard_admin;
 
-    opens com.example.dashboard_admin.helper_classes to javafx.fxml;
-    exports com.example.dashboard_admin.helper_classes;
+
 
     exports com.example.dashboard_admin.views;
     opens com.example.dashboard_admin.views to javafx.fxml;
@@ -24,7 +23,7 @@ module com.example.capstone {
     opens com.example.dashboard_barangay to javafx.fxml;
     exports com.example.dashboard_barangay;
 
-    opens com.example.database to javafx.base;
+
     // Kiosk Dashboard
     opens com.example.dashboard_kiosk to javafx.fxml, javafx.graphics;
     exports com.example.dashboard_kiosk;
@@ -43,4 +42,5 @@ module com.example.capstone {
     exports com.example.dao;
     exports com.example.service;
     exports com.example.util;
+    opens com.example.util to javafx.fxml;
 }

@@ -35,4 +35,5 @@ public class DashboardApplication extends Application {
         stage.setScene(scene);
         stage.show();
     }
+
 }

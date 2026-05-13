@@ -5,4 +5,4 @@
 -----------------------------------------------------------------------------------------
 UPDATE `evacuation_centers`
 SET `photo_path` = '/images/lahug_elem.jpg'
-WHERE `id` = 1 AND `name` = 'Lahug Elementary School';
+WHERE `id` = 1 AND `name` = 'Lahug Elementary Scgit hool';
