@@ -1,4 +1,4 @@
-package com.example.dashboard_admin;
+package com.example.dashboard_admin.views;
 
 import com.example.dao.EvacuationCenterDao;
 import com.example.model.EvacuationCenter;
@@ -33,10 +33,12 @@ public class AddBrgyController {
 
 
     @FXML
-    private void handleOpenMap(ActionEvent event) {
-        SceneHelper.nestedModal("/com/example/dashboard_admin/views/add-brgy_extension.fxml",
+    private void OpenMap_extension(ActionEvent event) {
+
+        SceneHelper.nestedModal("/com/example/dashboard_admin/modals/add-brgy_extension.fxml",
                 "Select Location",
                 btnOpenMap_extension);
+
     }
 
     @FXML
