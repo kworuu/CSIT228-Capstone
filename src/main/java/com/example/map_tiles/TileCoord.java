@@ -29,15 +29,29 @@ public record TileCoord(int z, int x, int y) {
     }
 
     /**
-     * Returns the public OpenStreetMap URL for this tile. Used by
-     * {@link TileDownloader} when a tile isn't yet cached locally.
+     * Primary tile provider URL. We use CartoDB's Voyager style — a free,
+     * no-API-key tile service that closely matches OpenStreetMap's visual
+     * style while permitting moderate caching and app usage (unlike OSM's
+     * public tile servers, which forbid bulk download).
      *
-     * <p>OSM serves tiles from three subdomain rotations (a, b, c) to
-     * spread load. We pick one based on a hash of (x + y) so the same
-     * tile always hits the same subdomain — friendly to OSM's caches.</p>
+     * <p>CartoDB serves tiles from four subdomain rotations (a, b, c, d).
+     * We hash the (x + y) to keep the same tile on the same subdomain —
+     * friendly to their caches.</p>
+     *
+     * <p>Method name kept as {@code toOsmUrl()} for caller compatibility.</p>
      */
     public String toOsmUrl() {
-        char subdomain = (char) ('a' + Math.floorMod(x + y, 3));
-        return "https://" + subdomain + ".tile.openstreetmap.org/" + z + "/" + x + "/" + y + ".png";
+        char subdomain = (char) ('a' + Math.floorMod(x + y, 4));
+        return "https://" + subdomain + ".basemaps.cartocdn.com/rastertiles/voyager/"
+                + z + "/" + x + "/" + y + ".png";
+    }
+
+    /**
+     * Fallback tile URL — Stadia Maps' osm_bright style. Used when the
+     * primary CartoDB provider fails (network error, rate limit, etc).
+     */
+    public String toFallbackUrl() {
+        return "https://tiles.stadiamaps.com/tiles/osm_bright/"
+                + z + "/" + x + "/" + y + ".png";
     }
 }

@@ -17,6 +17,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import com.example.map_tiles.TilePrefetchService;
 
 /**
  * Controller for BrgyDashboard.fxml
@@ -148,6 +149,18 @@ public class BrgyDashboardController {
         setupCenterCards();
         setupRegistrationTable();
         setupActivityTable();
+
+        // Kick off background tile prefetch — runs on 8-thread pool, non-blocking.
+        // This is where the rubric multithreading lives.
+        TilePrefetchService.getInstance().prefetchAllBarangaysAsync(
+                (done, total, finalResult) -> {
+                    // This lambda runs on the JavaFX thread (Platform.runLater-wrapped)
+                    if (finalResult != null) {
+                        System.out.println("[BrgyDashboard] Tile cache warmed: " + finalResult);
+                    } else if (done % 50 == 0) {
+                        System.out.println("[BrgyDashboard] Prefetch progress: " + done + "/" + total);
+                    }
+                });
     }
 
     // NEW METHOD
@@ -365,12 +378,22 @@ public class BrgyDashboardController {
                     }
                 });
 
+        // Start the local tile server (idempotent — safe to call repeatedly)
+        int tilePort;
+        try {
+            tilePort = TilePrefetchService.getInstance().startServer();
+        } catch (Exception e) {
+            System.err.println("[BrgyDashboard] Could not start tile server: " + e.getMessage());
+            tilePort = -1;
+        }
+
         webViewMap.getEngine().loadContent(
                 BrgyMapHtmlProvider.getMapHTML(
                         buildCentersJson(),
                         currentBrgyLat,
                         currentBrgyLng,
-                        currentBrgyZoom
+                        currentBrgyZoom,
+                        tilePort
                 )
         );
     }
