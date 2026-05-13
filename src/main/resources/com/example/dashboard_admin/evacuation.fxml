@@ -172,8 +172,8 @@
                                 <TableView fx:id="mainTable" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colEvacCenter" prefWidth="198.0" text="CENTER" />
-                                        <TableColumn fx:id="colBrgy" prefWidth="221.0" text="BARANGAY" />
-                                        <TableColumn fx:id="colPopulation" prefWidth="132.0" text="POPULATION" />
+                                        <TableColumn fx:id="colBrgy" prefWidth="120.0" text="BARANGAY" />
+                                        <TableColumn fx:id="colAddress" prefWidth="233.0" text="ADDRESS" />
                                         <TableColumn fx:id="colStatus" prefWidth="91.0" text="STATUS" />
                                     </columns>
                                     <columnResizePolicy>

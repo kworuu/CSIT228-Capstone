@@ -52,7 +52,7 @@ public class SceneHelper {
             Stage stage = (Stage) triggerButton.getScene().getWindow();
 
             dragWindow(root, stage, 0);
-
+            stage.setMaximized(true);
             stage.getScene().setRoot(root);
 
         } catch (IOException e) {
@@ -83,4 +83,34 @@ public class SceneHelper {
             stage.setY(event.getScreenY() - yOffset[0]);
         });
     }
+
+    public static FXMLLoader nestedModal(String fxmlPath, String title, Button ownerButton){
+        FXMLLoader loader = new FXMLLoader(SceneHelper.class.getResource(fxmlPath));
+
+        try {
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            dragWindow(root, stage, 1);
+
+            stage.setTitle(title);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(ownerButton.getScene().getWindow());
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            stage.sizeToScene();
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+
+
+            stage.setScene(scene);
+            stage.show();
+            return loader;
+        } catch (IOException e) {
+            System.err.println("Error loading modal: " + fxmlPath);
+            e.printStackTrace();
+        }
+
+        return loader;
+    }
+
 }

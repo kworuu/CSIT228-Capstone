@@ -42,7 +42,7 @@ public class DashboardController {
     @FXML private TableView<EvacuationCenter> mainTable;
     @FXML private TableColumn<EvacuationCenter, String> colEvacCenter;
     @FXML private TableColumn<EvacuationCenter, String> colBrgy;
-    @FXML private TableColumn<EvacuationCenter, Integer> colPopulation;
+    @FXML private TableColumn<EvacuationCenter, Integer> colAddress;
     @FXML private TableColumn<EvacuationCenter, String> colStatus;
 
     private final ObservableList<EvacuationCenter> masterData = FXCollections.observableArrayList();
@@ -73,6 +73,11 @@ public class DashboardController {
             SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", btnExpandMap);
         });
 
+        // Modal Logic
+        btnNewEvacCenter.setOnAction(event ->{
+            SceneHelper.showModal("/com/example/dashboard_admin/modals/add-brgyReg.fxml", "Register Evacuation Center", btnNewEvacCenter);
+        });
+
         // Data Initialization
         setupTable();
         loadData();
@@ -83,7 +88,7 @@ public class DashboardController {
         // Link columns to Model fields
         colEvacCenter.setCellValueFactory(new PropertyValueFactory<>("name"));
         colBrgy.setCellValueFactory(new PropertyValueFactory<>("barangay"));
-        colPopulation.setCellValueFactory(new PropertyValueFactory<>("currentOccupancy"));
+        colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         // Add visual feedback to the Status column
