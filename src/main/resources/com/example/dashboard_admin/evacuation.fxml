@@ -118,8 +118,8 @@
                             <children>
                                 <VBox prefHeight="126.0" prefWidth="187.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label styleClass="stat-label" text="TOTAL EVACUEES" />
-                                        <Label fx:id="lblTotalEvacValue" styleClass="stat-value" text="0" />
+                                        <Label styleClass="stat-label" text="TOTAL EVACUATION CENTER" />
+                                        <Label fx:id="lblTotalEvacueesValue" styleClass="stat-value" text="4,218" />
                                         <HBox alignment="CENTER_LEFT" spacing="4.0">
                                             <children>
                                                 <Label styleClass="trend-indicator, trend-up" text="↑ 3.4%" />
