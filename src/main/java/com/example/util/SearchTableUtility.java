@@ -1,4 +1,4 @@
-package com.example.dashboard_admin.helper_classes;
+package com.example.util;
 
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -7,11 +7,11 @@ import javafx.scene.control.TextField;
 
 import java.util.function.BiPredicate;
 
-public class SearchUtils {
-
+public class SearchTableUtility {
     public static <T> void setupSearch(TextField searchField, TableView<T> tableView,
                                        javafx.collections.ObservableList<T> masterData,
                                        BiPredicate<T, String> filterLogic){
+
         FilteredList<T> filteredData = new FilteredList<>(masterData, p -> true);
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(item -> {

@@ -3,14 +3,12 @@ package com.example.dashboard_admin;
 import com.example.dao.EvacuationCenterDao;
 import com.example.map_logic.MapHtmlProvider;
 import com.example.model.EvacuationCenter;
+import com.example.util.SearchTableUtility;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import com.example.dashboard_admin.helper_classes.SceneHelper;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import com.example.util.SceneHelper;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.web.WebView;
 
@@ -18,6 +16,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class DashboardController {
+
+    @FXML
+    private Button btnNewEvacCenter;
+    @FXML
+    private TextField searchEvacCenter;
     @FXML
     private Button navInventory;
     @FXML
@@ -29,12 +32,23 @@ public class DashboardController {
     @FXML
     private Button navActivity;
 
+
+    // Cards
+    @FXML
+    private Label lblTotalEvacValue;
+
+
     // Table components
     @FXML private TableView<EvacuationCenter> mainTable;
     @FXML private TableColumn<EvacuationCenter, String> colEvacCenter;
     @FXML private TableColumn<EvacuationCenter, String> colBrgy;
     @FXML private TableColumn<EvacuationCenter, Integer> colPopulation;
     @FXML private TableColumn<EvacuationCenter, String> colStatus;
+
+    private final ObservableList<EvacuationCenter> masterData = FXCollections.observableArrayList();
+
+    //Classes Declaration
+    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
 
     @FXML
     public void initialize() {
@@ -62,6 +76,7 @@ public class DashboardController {
         // Data Initialization
         setupTable();
         loadData();
+        refreshStats();
     }
 
     private void setupTable() {
@@ -94,21 +109,43 @@ public class DashboardController {
 
     private void loadData() {
         try {
-            EvacuationCenterDao evacDao = new EvacuationCenterDao();
+            // 1. Fetch records from DB
+            List<EvacuationCenter> evacCenterList = centerDao.findAll();
 
-            // Fetch records from DB
-            List<EvacuationCenter> dbList = evacDao.findAll();
-            System.out.println("DEBUG: Rows fetched: " + dbList.size()); // Check your console!
+            // 2. Clear and update the class-level masterData
+            // This is critical because SearchTableUtility watches this specific list
+            masterData.setAll(evacCenterList);
 
-            // Wrap in ObservableList for JavaFX
-            ObservableList<EvacuationCenter> data = FXCollections.observableArrayList(dbList);
+            // 3. Initialize the search logic
+            // We call this here to ensure the TableView is bound to the FilteredList
+            searchEvac();
 
-            // Populate Table
-            mainTable.setItems(data);
-
+            System.out.println("DEBUG: Rows fetched and search initialized: " + masterData.size());
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Database connection error: Could not fetch evacuation centers.");
         }
+    }
+
+    private void refreshStats(){
+        try{
+            int totEvacCenter = centerDao.getTotalCount();
+
+            lblTotalEvacValue.setText(String.valueOf(totEvacCenter));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void searchEvac(){
+        SearchTableUtility.setupSearch(
+                searchEvacCenter,
+                mainTable,
+                masterData,
+                (center, query) -> {
+                    return center.getName().toLowerCase().contains(query) ||
+                            center.getBarangay().toLowerCase().contains(query);
+                }
+        );
     }
 }

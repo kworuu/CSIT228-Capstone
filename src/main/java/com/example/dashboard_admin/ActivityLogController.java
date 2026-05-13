@@ -1,6 +1,6 @@
 package com.example.dashboard_admin;
 
-import com.example.dashboard_admin.helper_classes.SceneHelper;
+import com.example.util.SceneHelper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
