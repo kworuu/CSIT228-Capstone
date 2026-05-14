@@ -1,6 +1,12 @@
 package com.example.dashboard_kiosk;
 
 import com.example.map_tiles.TilePrefetchService;
+import com.example.util.CenterEvent;
+import com.example.util.CenterEventManager;
+import com.example.util.CenterEventObserver;
+import com.example.util.DBConnectionManager;
+import com.example.util.Route;
+import com.example.util.Router;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Worker;
@@ -9,195 +15,197 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import com.example.util.Route;
-import com.example.util.Router;
+import com.example.util.SearchTableUtility;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KioskDashboardController {
+public class KioskDashboardController implements CenterEventObserver {
 
-    // ── FXML Fields ────────────────────────────────────────────────────────
     @FXML private WebView webViewMiniMap;
     @FXML private VBox detailModal;
     @FXML private Label lblModalTitle;
     @FXML private Label lblModalDesc;
     @FXML private TableView<String> tableInventory1;
-    @FXML private TableColumn<String, String> colItem1;
-    @FXML private TableColumn<String, String> colStatus1;
-    @FXML private TextField searchField1;
-
-    // Filter Buttons
-    @FXML private Button btnFilterAll;
-    @FXML private Button btnFilterSafe;
-    @FXML private Button btnFilterFull;
-
-    @FXML private VBox vboxCardsContainer;
+    @FXML private EventCellController eventCellController;
     @FXML private TableView<SimpleCenter> mainTable1;
     @FXML private TableColumn<SimpleCenter, String> colId1;
     @FXML private TableColumn<SimpleCenter, String> colName1;
+    @FXML private TableColumn<SimpleCenter, String> colCenter1;
+    @FXML private TableColumn<SimpleCenter, String> colBarangay1;
+    @FXML private TableColumn<SimpleCenter, String> colStatus1;
+    @FXML private TableColumn<SimpleCenter, String> colAction1;
+    @FXML private TextField searchField1;
 
-    // ── State ──────────────────────────────────────────────────────────────
     private final List<SimpleCenter> allCenters = new ArrayList<>();
     private final List<SimpleCenter> filteredCenters = new ArrayList<>();
-    
-    // Current Map Location
-    private double currentBrgyLat = 9.8828;
-    private double currentBrgyLng = 123.5953;
-    private int currentBrgyZoom = 13;
-    
-    private String activeFilter = KioskConstants.FILTER_ALL;
     private MapBridge mapBridge;
 
-    // ── Login navigation ──────────────────────────────────────────────────
+    // Current Map Location Default
+    private double currentBrgyLat = 10.3157;
+    private double currentBrgyLng = 123.8854;
+    private int currentBrgyZoom = 13;
 
-    @FXML
-    private void handleAdminLogin() {
-        Router.getInstance().navigate(Route.ADMIN_LOGIN);
-    }
+    // ── State ──────────────────────────────────────────────────────────────
+    private final ObservableList<SimpleCenter> masterTableData = FXCollections.observableArrayList();
 
-    @FXML
-    private void handleBarangayLogin() {
-        Router.getInstance().navigate(Route.BARANGAY_LOGIN);
-    }
     @FXML
     public void initialize() {
-        // Load dummy data
-        loadDummyData();
-        
-        // Setup initial map
-        setupMap();
         setupInventoryTable();
+
+        // ADD THIS LINE HERE:
+        setupSearch();
+
+        loadCentersFromDB();
+        loadEventsFromDB(); // Populates drawer at startup
+        setupMap();
+
+        // Subscribe to real-time events
+        CenterEventManager.getInstance().addObserver(this);
     }
 
-    // ── Data Loading ───────────────────────────────────────────────────────
-
-    private void loadDummyData() {
+    // DB Query to load centers for Table and Map
+    private void loadCentersFromDB() {
         allCenters.clear();
-        
-        // Match dummy data from BrgyDashboard
-        SimpleCenter c1 = new SimpleCenter(
-            "1", "Poblacion Argao Elementary", 
-            "M.L. Quezon St, Poblacion, Argao",
-            9.8828, 123.5953
-        );
-        c1.getItems().add("Rice Sacks");
-        c1.getItems().add("Canned Goods");
-        
-        SimpleCenter c2 = new SimpleCenter(
-            "2", "Argao Sports Complex", 
-            "Dr. T.S. Kintanar St, Bogo, Argao",
-            9.8845, 123.6001
-        );
-        c2.getItems().add("Water Bottles");
-        c2.getItems().add("Blankets");
-        
-        allCenters.add(c1);
-        allCenters.add(c2);
-        
-        // Initial state: show all
-        filteredCenters.addAll(allCenters);
+        String sql = "SELECT id, name, address, barangay, is_active, created_at, latitude, longitude FROM evacuation_centers ORDER BY name ASC";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while(rs.next()) {
+                allCenters.add(new SimpleCenter(
+                        String.valueOf(rs.getLong("id")),
+                        rs.getString("name"),
+                        rs.getString("address"),
+                        rs.getString("barangay"),
+                        rs.getBoolean("is_active") ? "ACTIVE" : "INACTIVE",
+                        formatTimestamp(rs.getString("created_at")),
+                        rs.getDouble("latitude"),
+                        rs.getDouble("longitude")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("DB Error: " + e.getMessage());
+        }
+
+        Platform.runLater(() -> {
+            masterTableData.setAll(allCenters);
+        });
     }
 
-    // ── UI Setup ───────────────────────────────────────────────────────────
+    // DB Query to prepopulate events drawer
+    private void loadEventsFromDB() {
+        List<CenterEvent> events = new ArrayList<>();
+        String sql = "SELECT csu.event_label, csu.updated_at, ec.name, ec.id " +
+                "FROM center_status_updates csu " +
+                "JOIN evacuation_centers ec ON csu.center_id = ec.id " +
+                "ORDER BY csu.updated_at DESC LIMIT 15";
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                events.add(new CenterEvent(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("event_label"),
+                        formatTimestamp(rs.getString("updated_at"))
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("DB Error loading events: " + e.getMessage());
+        }
+
+        if (eventCellController != null) {
+            eventCellController.setEvents(events);
+        }
+    }
+
+    // Observer Callback - Triggered by UpdateCenterController
+    @Override
+    public void onCenterUpdated(CenterEvent event) {
+        // Must execute on JavaFX Thread
+        Platform.runLater(() -> {
+            loadCentersFromDB(); // Refresh Table
+            if (eventCellController != null) {
+                eventCellController.addEventToTop(event); // Push new event to drawer
+            }
+            setupMap();
+        });
+    }
 
     private void setupInventoryTable() {
-        if (colId1 != null) {
-            colId1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
-        }
-        if (colName1 != null) {
-            colName1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAddress()));
-        }
-        if (colStatus1 != null) {
-            colStatus1.setCellValueFactory(c -> new SimpleStringProperty("")); // Empty string for status column
-            
-            // Add a "View" button to the status column
-            colStatus1.setCellFactory(col -> new TableCell<>() {
-                private final Button btn = new Button("View");
-                {
-                    btn.getStyleClass().add("brgy-tbl-action");
-                    btn.setOnAction(e -> {
-                        // Do nothing for now
-                    });
+        if (colId1 != null) colId1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getId()));
+        if (colName1 != null) colName1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
+        if (colCenter1 != null) colCenter1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAddress()));
+        if (colBarangay1 != null) colBarangay1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getBarangay()));
+        if (colStatus1 != null) colStatus1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatus()));
+        if (colAction1 != null) colAction1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCreatedAt()));
+    }
+
+    // Paste this right below setupInventoryTable()
+    private void setupSearch() {
+        // Safety check to ensure UI elements are loaded
+        if (searchField1 == null || mainTable1 == null) return;
+
+        // Call your existing utility class
+        SearchTableUtility.setupSearch(
+                searchField1,
+                mainTable1,
+                masterTableData,
+                (center, searchText) -> {
+                    if (searchText == null || searchText.isBlank()) return true;
+
+                    String searchLower = searchText.toLowerCase();
+
+                    // Safe checks to prevent NullPointerExceptions if a field is null
+                    boolean matchTitle = center.getTitle() != null && center.getTitle().toLowerCase().contains(searchLower);
+                    boolean matchAddress = center.getAddress() != null && center.getAddress().toLowerCase().contains(searchLower);
+                    boolean matchBarangay = center.getBarangay() != null && center.getBarangay().toLowerCase().contains(searchLower);
+
+                    return matchTitle || matchAddress || matchBarangay;
                 }
-                @Override
-                protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        setGraphic(btn);
-                    }
-                }
-            });
-        }
-        
-        if (mainTable1 != null) {
-            mainTable1.getItems().clear();
-            mainTable1.getItems().addAll(filteredCenters);
+        );
+    }
+
+    private String formatTimestamp(String raw) {
+        if (raw == null) return "—";
+        try {
+            LocalDateTime dt = LocalDateTime.parse(raw.replace(" ", "T").substring(0, 19));
+            return dt.format(DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a"));
+        } catch (Exception e) {
+            return raw;
         }
     }
 
-    // ── Interaction Logic ──────────────────────────────────────────────────
+    @FXML private void handleMenuClick() {
+        if (eventCellController != null) eventCellController.toggleDrawer();
+    }
+
+    @FXML private void handleAdminLogin() { Router.getInstance().navigate(Route.ADMIN_LOGIN); }
+    @FXML private void handleBarangayLogin() { Router.getInstance().navigate(Route.BARANGAY_LOGIN); }
 
     private void showDetailModal(SimpleCenter c) {
         if (lblModalTitle != null) lblModalTitle.setText(c.getTitle());
         if (lblModalDesc != null) lblModalDesc.setText(c.getAddress());
-        
-        if (tableInventory1 != null) {
-            tableInventory1.getItems().clear();
-            tableInventory1.getItems().addAll(c.getItems());
-        }
-        
         if (detailModal != null) {
             detailModal.setVisible(true);
             detailModal.setManaged(true);
         }
     }
 
-    @FXML
-    private void hideDetailModal() {
+    @FXML private void hideDetailModal() {
         if (detailModal != null) {
             detailModal.setVisible(false);
             detailModal.setManaged(false);
         }
-    }
-
-    // ── Filter Logic ───────────────────────────────────────────────────────
-
-    @FXML
-    private void filterAll() {
-        updateSegmentStyle(btnFilterAll, KioskConstants.FILTER_ALL);
-        filteredCenters.clear();
-        filteredCenters.addAll(allCenters);
-    }
-
-    @FXML
-    private void filterSafe() {
-        updateSegmentStyle(btnFilterSafe, KioskConstants.FILTER_SAFE);
-        filteredCenters.clear();
-        // In dummy mode, safe = odd id
-        for (SimpleCenter c : allCenters) {
-            if (Integer.parseInt(c.getId()) % 2 != 0) {
-                filteredCenters.add(c);
-            }
-        }
-    }
-
-    @FXML
-    private void filterFull() {
-        updateSegmentStyle(btnFilterFull, KioskConstants.FILTER_FULL);
-        filteredCenters.clear();
-        // In dummy mode, full = even id
-        for (SimpleCenter c : allCenters) {
-            if (Integer.parseInt(c.getId()) % 2 == 0) {
-                filteredCenters.add(c);
-            }
-        }
-    }
-
-    private void updateSegmentStyle(Button btn, String filter) {
-        // Simple mock implementation
-        this.activeFilter = filter;
     }
 
     // ── Map initialisation ─────────────────────────────────────────────────
@@ -239,7 +247,7 @@ public class KioskDashboardController {
             System.err.println("Could not start local tile server for Kiosk: " + e.getMessage());
         }
 
-        // Use the map_logic_v2 provider matching testcase1
+        // Load the map
         webViewMiniMap.getEngine().loadContent(
                 com.example.map_logic_v2.BrgyMapHtmlProvider.getMapHTML(
                         buildCentersJson(),
@@ -270,41 +278,35 @@ public class KioskDashboardController {
         return s.replace("\"", "\\\"").replace("\n", " ");
     }
 
-    // ── Helper Models ──────────────────────────────────────────────────────
 
-    public interface MapBridge {
-        void onMarkerClick(String centerId);
-    }
 
+
+    public interface MapBridge { void onMarkerClick(String centerId); }
+
+    // Updated SimpleCenter to match Real DB Schema for the TableView
     public static class SimpleCenter {
         private final String id;
         private final String title;
         private final String address;
+        private final String barangay;
+        private final String status;
+        private final String createdAt;
         private final double lat;
         private final double lng;
-        private final List<String> items = new ArrayList<>();
 
-        public SimpleCenter(String id, String title, String address, double lat, double lng) {
-            this.id = id;
-            this.title = title;
-            this.address = address;
-            this.lat = lat;
-            this.lng = lng;
+        public SimpleCenter(String id, String title, String address, String barangay, String status, String createdAt, double lat, double lng) {
+            this.id = id; this.title = title; this.address = address;
+            this.barangay = barangay; this.status = status; this.createdAt = createdAt;
+            this.lat = lat; this.lng = lng;
         }
 
         public String getId() { return id; }
         public String getTitle() { return title; }
         public String getAddress() { return address; }
+        public String getBarangay() { return barangay; }
+        public String getStatus() { return status; }
+        public String getCreatedAt() { return createdAt; }
         public double getLat() { return lat; }
         public double getLng() { return lng; }
-        public List<String> getItems() { return items; }
-    }
-
-    public static class KioskConstants {
-        public static final String FILTER_ALL = "all";
-        public static final String FILTER_SAFE = "safe";
-        public static final String FILTER_FULL = "full";
-        public static final String JSON_CENTER_TEMPLATE = "{\"id\":\"%s\",\"name\":\"%s\",\"lat\":%s,\"lng\":%s,\"isFocal\":%b}";
-        public static final String FOCAL_CENTER_ID = "1";
     }
 }

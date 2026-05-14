@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Thread-safe on-disk cache for map tile PNGs.
  *
- * <p>Stores tiles at {@code ~/.civicguard/tiles/{z}/{x}/{y}.png}. The
- * cache survives across application restarts — once a tile is downloaded,
+ * <p>Stores tiles at {@code .civicguard/tiles/{z}/{x}/{y}.png} inside the project directory.
+ * The cache survives across application restarts — once a tile is downloaded,
  * it never needs to be downloaded again (until the user manually clears
  * the cache directory).</p>
  *
@@ -60,7 +60,7 @@ public final class MapCache {
 
     // ─── State ──────────────────────────────────────────────────
 
-    /** Root directory for all cached tiles, e.g. /home/user/.civicguard/tiles */
+    /** Root directory for all cached tiles */
     private final Path cacheRoot;
 
     /**
@@ -76,9 +76,9 @@ public final class MapCache {
     private final AtomicLong misses = new AtomicLong(0);
 
     private MapCache() {
-        // Resolve "~/.civicguard/tiles" portably
-        String home = System.getProperty("user.home");
-        this.cacheRoot = Paths.get(home, ".civicguard", "tiles");
+        // Use the current working directory to avoid Windows permission issues with user.home
+        String localDir = System.getProperty("user.dir");
+        this.cacheRoot = Paths.get(localDir, ".civicguard", "tiles");
         try {
             Files.createDirectories(cacheRoot);
             System.out.println("[MapCache] Cache root: " + cacheRoot);

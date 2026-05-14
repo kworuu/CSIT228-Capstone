@@ -103,9 +103,18 @@ public class UpdateCenterController {
             ps.setLong(1, currentCenterId);
             ps.setString(2, textFieldEvent.getText().isEmpty() ? "No active event" : textFieldEvent.getText());
             ps.setString(3, selectedIds.toString());
+            // existing code ...
             ps.executeUpdate();
 
+            // NEW: Notify all Kiosk screens (Observers) that a center update happened
+            String eventLabel = textFieldEvent.getText().isEmpty() ? "No active event" : textFieldEvent.getText();
+            String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a"));
+
+            com.example.util.CenterEvent event = new com.example.util.CenterEvent(currentCenterId, labelTitle.getText(), eventLabel, timestamp);
+            com.example.util.CenterEventManager.getInstance().notifyObservers(event);
+
             closeModal();
+// existing code ...
         } catch (SQLException e) {
             e.printStackTrace();
         }
