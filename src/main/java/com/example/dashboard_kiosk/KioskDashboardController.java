@@ -1,230 +1,203 @@
 package com.example.dashboard_kiosk;
 
-import com.example.dashboard_kiosk.sample.KioskSampleData;
-import com.example.dashboard_kiosk.user.EmergencyAlert;
-import com.example.dashboard_kiosk.user.SimpleCenter;
-import com.example.map_logic_v2.MapHtmlProvider;
-import com.example.map_logic_v2.MapBridge;
-
+import com.example.map_tiles.TilePrefetchService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
-import java.io.IOException;
+import com.example.util.Route;
+import com.example.util.Router;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-/**
- * Controller for the public-facing Kiosk / Barangay dashboard.
- *
- * <p>Key responsibilities:
- * <ul>
- *   <li>Seeds and displays evacuation center data in the TableView.</li>
- *   <li>Populates the Emergency Alerts panel, sorted newest-first.</li>
- *   <li>Bridges JavaScript map-marker clicks to the floating DetailModal
- *       overlay via {@link MapBridge}.</li>
- *   <li>Applies OPEN/FULL status styling consistently to table pills and
- *       map marker colors.</li>
- * </ul>
- * </p>
- *
- * <p>All view models use the top-level {@link SimpleCenter} and
- * {@link EmergencyAlert} classes in this package. Seed data comes from
- * {@link KioskSampleData}; replace those calls with a DAO/service for
- * production. All magic strings and numbers are sourced from
- * {@link KioskConstants}.</p>
- */
 public class KioskDashboardController {
 
-    // ── FXML injections ────────────────────────────────────────────────────
-
-    @FXML private WebView    webViewMiniMap;
-    @FXML private AnchorPane mapOverlayPane;
-
-    @FXML private TableView<SimpleCenter>           mainTable1;
-    @FXML private TableColumn<SimpleCenter, String> colId1;      // Center name
-    @FXML private TableColumn<SimpleCenter, String> colName1;    // Address
-    @FXML private TableColumn<SimpleCenter, String> colStatus1;  // Occupancy + View btn
-
+    // ── FXML Fields ────────────────────────────────────────────────────────
+    @FXML private WebView webViewMiniMap;
+    @FXML private VBox detailModal;
+    @FXML private Label lblModalTitle;
+    @FXML private Label lblModalDesc;
+    @FXML private TableView<String> tableInventory1;
+    @FXML private TableColumn<String, String> colItem1;
+    @FXML private TableColumn<String, String> colStatus1;
     @FXML private TextField searchField1;
 
-    /** Container for dynamically generated alert cards. */
-    @FXML private VBox alertsContainer;
+    // Filter Buttons
+    @FXML private Button btnFilterAll;
+    @FXML private Button btnFilterSafe;
+    @FXML private Button btnFilterFull;
 
-    // Coordinates for Argao
+    @FXML private VBox vboxCardsContainer;
+    @FXML private TableView<SimpleCenter> mainTable1;
+    @FXML private TableColumn<SimpleCenter, String> colId1;
+    @FXML private TableColumn<SimpleCenter, String> colName1;
+
+    // ── State ──────────────────────────────────────────────────────────────
+    private final List<SimpleCenter> allCenters = new ArrayList<>();
+    private final List<SimpleCenter> filteredCenters = new ArrayList<>();
+    
+    // Current Map Location
     private double currentBrgyLat = 9.8828;
     private double currentBrgyLng = 123.5953;
     private int currentBrgyZoom = 13;
-
-    // Crucial: Store the bridge as a class member so it isn't garbage collected!
+    
+    private String activeFilter = KioskConstants.FILTER_ALL;
     private MapBridge mapBridge;
 
-    // ── Internal state ─────────────────────────────────────────────────────
-
-    private final ObservableList<SimpleCenter> allCenters   = FXCollections.observableArrayList();
-    private final ObservableList<SimpleCenter> shownCenters = FXCollections.observableArrayList();
-
-    /** Tracks the active filter token (ALL / OPEN / FULL). */
-    private String activeFilter = KioskConstants.FILTER_ALL;
-
-    /** Reference kept so we can call show() from the map bridge. */
-    private DetailModalController detailModalController;
-
-    // ── Lifecycle ──────────────────────────────────────────────────────────
+    // ── Login navigation ──────────────────────────────────────────────────
 
     @FXML
+    private void handleAdminLogin() {
+        Router.getInstance().navigate(Route.ADMIN_LOGIN);
+    }
+
+    @FXML
+    private void handleBarangayLogin() {
+        Router.getInstance().navigate(Route.BARANGAY_LOGIN);
+    }
+    @FXML
     public void initialize() {
-        seedSampleData();
-        setupCentersTable();
-        setupAlerts();
+        // Load dummy data
+        loadDummyData();
+        
+        // Setup initial map
         setupMap();
-        loadDetailModal();
+        setupInventoryTable();
     }
 
-    // ── Sample data ────────────────────────────────────────────────────────
+    // ── Data Loading ───────────────────────────────────────────────────────
 
-    /**
-     * Loads seed evacuation centers from {@link KioskSampleData}.
-     * Replace with a DAO/service call in production.
-     */
-    private void seedSampleData() {
-        allCenters.addAll(KioskSampleData.getSampleCenters());
-        shownCenters.setAll(allCenters);
+    private void loadDummyData() {
+        allCenters.clear();
+        
+        // Match dummy data from BrgyDashboard
+        SimpleCenter c1 = new SimpleCenter(
+            "1", "Poblacion Argao Elementary", 
+            "M.L. Quezon St, Poblacion, Argao",
+            9.8828, 123.5953
+        );
+        c1.getItems().add("Rice Sacks");
+        c1.getItems().add("Canned Goods");
+        
+        SimpleCenter c2 = new SimpleCenter(
+            "2", "Argao Sports Complex", 
+            "Dr. T.S. Kintanar St, Bogo, Argao",
+            9.8845, 123.6001
+        );
+        c2.getItems().add("Water Bottles");
+        c2.getItems().add("Blankets");
+        
+        allCenters.add(c1);
+        allCenters.add(c2);
+        
+        // Initial state: show all
+        filteredCenters.addAll(allCenters);
     }
 
-    // ── Centers TableView ──────────────────────────────────────────────────
+    // ── UI Setup ───────────────────────────────────────────────────────────
 
-    private void setupCentersTable() {
-        if (mainTable1 == null) return;
-
-        // Center Name column
-        colId1.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getTitle()));
-
-        // Address column
-        colName1.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getAddress()));
-
-        colStatus1.setCellValueFactory(c -> new SimpleStringProperty(""));
-        colStatus1.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("View");
-            {
-                btn.getStyleClass().add("btn-table-action");
-                btn.setOnAction(e -> {
-                    SimpleCenter center = getTableView().getItems().get(getIndex());
-                    showDetailModal(center);
-                });
-            }
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) { setGraphic(null); return; }
-                HBox cell = new HBox(btn);
-                cell.setAlignment(Pos.CENTER_LEFT);
-                setGraphic(cell);
-            }
-        });
-
-        colStatus1.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("View");
-            {
-                btn.getStyleClass().add("btn-table-action");
-                btn.setOnAction(e -> {
-                    SimpleCenter center = getTableView().getItems().get(getIndex());
-                    showDetailModal(center);
-                });
-            }
-
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) { setGraphic(null); setText(null); return; }
-
-                Label occ = new Label(item);
-                occ.getStyleClass().add(KioskConstants.CSS_OCCUPANCY_LABEL);
-
-                HBox cell = new HBox(8, occ, btn);
-                cell.setAlignment(Pos.CENTER_LEFT);
-                setGraphic(cell);
-                setText(null);
-            }
-        });
-
-        mainTable1.setItems(shownCenters);
-        mainTable1.setPlaceholder(new Label("No evacuation centers match the current filter."));
+    private void setupInventoryTable() {
+        if (colId1 != null) {
+            colId1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
+        }
+        if (colName1 != null) {
+            colName1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAddress()));
+        }
+        if (colStatus1 != null) {
+            colStatus1.setCellValueFactory(c -> new SimpleStringProperty("")); // Empty string for status column
+            
+            // Add a "View" button to the status column
+            colStatus1.setCellFactory(col -> new TableCell<>() {
+                private final Button btn = new Button("View");
+                {
+                    btn.getStyleClass().add("brgy-tbl-action");
+                    btn.setOnAction(e -> {
+                        // Do nothing for now
+                    });
+                }
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(btn);
+                    }
+                }
+            });
+        }
+        
+        if (mainTable1 != null) {
+            mainTable1.getItems().clear();
+            mainTable1.getItems().addAll(filteredCenters);
+        }
     }
 
+    // ── Interaction Logic ──────────────────────────────────────────────────
 
+    private void showDetailModal(SimpleCenter c) {
+        if (lblModalTitle != null) lblModalTitle.setText(c.getTitle());
+        if (lblModalDesc != null) lblModalDesc.setText(c.getAddress());
+        
+        if (tableInventory1 != null) {
+            tableInventory1.getItems().clear();
+            tableInventory1.getItems().addAll(c.getItems());
+        }
+        
+        if (detailModal != null) {
+            detailModal.setVisible(true);
+            detailModal.setManaged(true);
+        }
+    }
 
+    @FXML
+    private void hideDetailModal() {
+        if (detailModal != null) {
+            detailModal.setVisible(false);
+            detailModal.setManaged(false);
+        }
+    }
+
+    // ── Filter Logic ───────────────────────────────────────────────────────
+
+    @FXML
+    private void filterAll() {
+        updateSegmentStyle(btnFilterAll, KioskConstants.FILTER_ALL);
+        filteredCenters.clear();
+        filteredCenters.addAll(allCenters);
+    }
+
+    @FXML
+    private void filterSafe() {
+        updateSegmentStyle(btnFilterSafe, KioskConstants.FILTER_SAFE);
+        filteredCenters.clear();
+        // In dummy mode, safe = odd id
+        for (SimpleCenter c : allCenters) {
+            if (Integer.parseInt(c.getId()) % 2 != 0) {
+                filteredCenters.add(c);
+            }
+        }
+    }
+
+    @FXML
+    private void filterFull() {
+        updateSegmentStyle(btnFilterFull, KioskConstants.FILTER_FULL);
+        filteredCenters.clear();
+        // In dummy mode, full = even id
+        for (SimpleCenter c : allCenters) {
+            if (Integer.parseInt(c.getId()) % 2 == 0) {
+                filteredCenters.add(c);
+            }
+        }
+    }
 
     private void updateSegmentStyle(Button btn, String filter) {
-        if (btn == null) return;
-        btn.getStyleClass().removeAll(KioskConstants.CSS_SEGMENT_ACTIVE);
-        if (filter.equals(activeFilter)) btn.getStyleClass().add(KioskConstants.CSS_SEGMENT_ACTIVE);
-    }
-
-    // ── Emergency Alerts ───────────────────────────────────────────────────
-
-    /**
-     * Populates the alerts panel from {@link KioskSampleData}.
-     * Alerts are sorted newest-first so responders see the most urgent
-     * information at the top without scrolling.
-     */
-    private void setupAlerts() {
-        if (alertsContainer == null) return;
-
-        List<EmergencyAlert> alerts = new ArrayList<>(KioskSampleData.getSampleAlerts());
-
-        // Sort: newest timestamp first
-        alerts.sort(Comparator.comparing(EmergencyAlert::getIssuedAt).reversed());
-
-        alertsContainer.getChildren().clear();
-        for (EmergencyAlert alert : alerts) {
-            alertsContainer.getChildren().add(buildAlertCard(alert));
-        }
-    }
-
-    /**
-     * Builds a styled VBox card for a single alert.
-     * Severity determines the left-border accent color via CSS class.
-     */
-    private VBox buildAlertCard(EmergencyAlert alert) {
-        VBox card = new VBox(4);
-        card.getStyleClass().add(KioskConstants.CSS_ALERT_ITEM);
-
-        switch (alert.getSeverity()) {
-            case CRITICAL -> card.getStyleClass().add(KioskConstants.CSS_ALERT_CRITICAL);
-            case WARNING  -> card.getStyleClass().add(KioskConstants.CSS_ALERT_WARNING);
-            case INFO     -> card.getStyleClass().add(KioskConstants.CSS_ALERT_INFO);
-        }
-
-        Label time = new Label(alert.getIssuedAt().format(KioskConstants.ALERT_FORMATTER));
-        time.getStyleClass().add(KioskConstants.CSS_ALERT_TIME);
-
-        Label title = new Label(alert.getTitle());
-        title.getStyleClass().add(KioskConstants.CSS_ALERT_TITLE);
-
-        Label loc = new Label(KioskConstants.LOCATION_ICON_PREFIX + alert.getLocation());
-        loc.getStyleClass().add(KioskConstants.CSS_ALERT_LOCATION);
-
-        Label body = new Label(alert.getBody());
-        body.getStyleClass().add(KioskConstants.CSS_ALERT_BODY);
-        body.setWrapText(true);
-
-        card.getChildren().addAll(time, title, loc, body);
-        return card;
+        // Simple mock implementation
+        this.activeFilter = filter;
     }
 
     // ── Map initialisation ─────────────────────────────────────────────────
@@ -258,13 +231,22 @@ public class KioskDashboardController {
                     }
                 });
 
+        // Ensure the local tile server is started
+        int tilePort = -1;
+        try {
+            tilePort = TilePrefetchService.getInstance().startServer();
+        } catch (Exception e) {
+            System.err.println("Could not start local tile server for Kiosk: " + e.getMessage());
+        }
+
         // Use the map_logic_v2 provider matching testcase1
         webViewMiniMap.getEngine().loadContent(
                 com.example.map_logic_v2.BrgyMapHtmlProvider.getMapHTML(
                         buildCentersJson(),
                         currentBrgyLat,
                         currentBrgyLng,
-                        currentBrgyZoom
+                        currentBrgyZoom,
+                        tilePort
                 )
         );
     }
@@ -283,58 +265,46 @@ public class KioskDashboardController {
         return sb.append("]").toString();
     }
 
-    // ── Detail modal (overlay) ─────────────────────────────────────────────
-
-    /**
-     * Loads the detail-modal FXML, positions it as an AnchorPane overlay,
-     * and wires the controller reference so the map bridge can call show().
-     */
-    private void loadDetailModal() {
-        if (mapOverlayPane == null) return;
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource(KioskConstants.DETAIL_MODAL_FXML));
-            VBox modal = loader.load();
-            detailModalController = loader.getController();
-
-            // Anchor modal to bottom-left of the map overlay pane
-            AnchorPane.setBottomAnchor(modal, KioskConstants.MODAL_ANCHOR_BOTTOM);
-            AnchorPane.setLeftAnchor(modal,   KioskConstants.MODAL_ANCHOR_LEFT);
-
-            mapOverlayPane.getChildren().add(modal);
-
-            detailModalController.setOnShowRoute(() ->
-                    System.out.println(KioskConstants.LOG_SHOW_ROUTE));
-            detailModalController.setOnViewDetails(() ->
-                    System.out.println(KioskConstants.LOG_VIEW_DETAILS));
-
-        } catch (IOException ex) {
-            System.err.println(KioskConstants.LOG_MODAL_ERROR + ex.getMessage());
-        }
-    }
-
-    /**
-     * Delegates to the modal controller to display center info.
-     * Also bounces the corresponding map marker via JavaScript.
-     */
-    private void showDetailModal(SimpleCenter center) {
-        if (detailModalController == null) return;
-        detailModalController.show(center);
-
-        // Bounce matching marker on the map
-        if (webViewMiniMap != null) {
-            try {
-                webViewMiniMap.getEngine().executeScript(
-                        String.format(KioskConstants.JS_HIGHLIGHT_MARKER, esc(center.getId())));
-            } catch (Exception ignored) { /* map may still be loading */ }
-        }
-    }
-
-    // ── Utilities ──────────────────────────────────────────────────────────
-
     private static String esc(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("'", "\\'");
+        return s.replace("\"", "\\\"").replace("\n", " ");
+    }
+
+    // ── Helper Models ──────────────────────────────────────────────────────
+
+    public interface MapBridge {
+        void onMarkerClick(String centerId);
+    }
+
+    public static class SimpleCenter {
+        private final String id;
+        private final String title;
+        private final String address;
+        private final double lat;
+        private final double lng;
+        private final List<String> items = new ArrayList<>();
+
+        public SimpleCenter(String id, String title, String address, double lat, double lng) {
+            this.id = id;
+            this.title = title;
+            this.address = address;
+            this.lat = lat;
+            this.lng = lng;
+        }
+
+        public String getId() { return id; }
+        public String getTitle() { return title; }
+        public String getAddress() { return address; }
+        public double getLat() { return lat; }
+        public double getLng() { return lng; }
+        public List<String> getItems() { return items; }
+    }
+
+    public static class KioskConstants {
+        public static final String FILTER_ALL = "all";
+        public static final String FILTER_SAFE = "safe";
+        public static final String FILTER_FULL = "full";
+        public static final String JSON_CENTER_TEMPLATE = "{\"id\":\"%s\",\"name\":\"%s\",\"lat\":%s,\"lng\":%s,\"isFocal\":%b}";
+        public static final String FOCAL_CENTER_ID = "1";
     }
 }

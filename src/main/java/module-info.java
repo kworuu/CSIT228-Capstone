@@ -12,22 +12,26 @@ module com.example.capstone {
     requires jdk.httpserver;
     requires java.net.http;                   // password hashing
 
+    // Main package
+    opens com.example to javafx.graphics, javafx.fxml;
+    exports com.example;
+
     // Dashboards
     opens com.example.dashboard_admin to javafx.fxml;
     exports com.example.dashboard_admin;
 
-
-
-    exports com.example.dashboard_admin.views;
     opens com.example.dashboard_admin.views to javafx.fxml;
+    exports com.example.dashboard_admin.views;
 
     opens com.example.dashboard_barangay to javafx.fxml;
     exports com.example.dashboard_barangay;
 
-
     // Kiosk Dashboard
     opens com.example.dashboard_kiosk to javafx.fxml, javafx.graphics;
     exports com.example.dashboard_kiosk;
+
+    // Authentication package
+    opens com.example.auth to javafx.fxml; // <--- ADDED THIS LINE
 
     // Shared UI logic
     exports com.example.map_logic;

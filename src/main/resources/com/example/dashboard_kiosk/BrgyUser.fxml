@@ -122,6 +122,20 @@
                                                 <Label styleClass="status-text" text="Live" />
                                             </children>
                                         </HBox>
+
+                                        <!-- NEW: Login buttons -->
+                                        <Button fx:id="btnBarangayLogin"
+                                                text="Barangay Login"
+                                                mnemonicParsing="false"
+                                                styleClass="btn-outline"
+                                                onAction="#handleBarangayLogin" />
+                                        <Button fx:id="btnAdminLogin"
+                                                text="Admin Login"
+                                                mnemonicParsing="false"
+                                                styleClass="btn-primary"
+                                                onAction="#handleAdminLogin" />
+
+                                        <!-- NEW: Refresh buttons -->
                                         <Button mnemonicParsing="false" styleClass="btn-refresh" text="↻" />
                                     </children>
                                 </HBox>
