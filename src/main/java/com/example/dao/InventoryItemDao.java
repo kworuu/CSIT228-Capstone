@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,16 +18,15 @@ import java.util.Optional;
 /**
  * Data Access Object for {@link InventoryItem} entities.
  * Implements all CRUD operations against the {@code inventory_items} table.
- *
- * <p>All SQL is parameterized via {@link PreparedStatement} to prevent
- * SQL injection (rubric criterion 5: data validation and security).</p>
  */
+
 public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
 
     // ── SQL constants ───────────────────────────────────────────
 
+    // Updated to include created_by_user_id and stock_quantity
     private static final String COLS =
-            "id, name, category, unit, critical_threshold, low_threshold, created_at";
+            "id, name, category, unit, critical_threshold, low_threshold, created_at, created_by_user_id, stock_quantity";
 
     private static final String SQL_FIND_BY_ID =
             "SELECT " + COLS + " FROM inventory_items WHERE id = ?";
@@ -37,19 +37,30 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
     private static final String SQL_FIND_BY_CATEGORY =
             "SELECT " + COLS + " FROM inventory_items WHERE category = ? ORDER BY name";
 
+    // Updated INSERT to track the user who created the record and initial stock
     private static final String SQL_INSERT =
             "INSERT INTO inventory_items " +
-            "(name, category, unit, critical_threshold, low_threshold) " +
-            "VALUES (?, ?, ?, ?, ?)";
+                    "(name, category, unit, critical_threshold, low_threshold, created_by_user_id, stock_quantity) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+    // Updated UPDATE to allow modifying the assigned user if necessary
     private static final String SQL_UPDATE =
             "UPDATE inventory_items SET " +
-            "name = ?, category = ?, unit = ?, " +
-            "critical_threshold = ?, low_threshold = ? " +
-            "WHERE id = ?";
+                    "name = ?, category = ?, unit = ?, " +
+                    "critical_threshold = ?, low_threshold = ?, created_by_user_id = ?, stock_quantity = ? " +
+                    "WHERE id = ?";
 
     private static final String SQL_DELETE =
             "DELETE FROM inventory_items WHERE id = ?";
+
+    // Get Number of Critical Item on admin side
+    private static final String SQL_COUNT_CRITICAL_GLOBAL =
+            "SELECT COUNT(*) FROM inventory_items WHERE stock_quantity <= critical_threshold";
+
+    // Get Number of Critical Item on brgy side
+    private static final String SQL_COUNT_CRITICAL_BY_USER =
+            "SELECT COUNT(*) FROM inventory_items WHERE created_by_user_id = ? AND stock_quantity <= critical_threshold";
+
 
     // ── CRUD operations ─────────────────────────────────────────
 
@@ -82,10 +93,6 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
         return items;
     }
 
-    /**
-     * Returns items in a given category (e.g. "food", "water", "non-food"),
-     * sorted by name. Used by the inventory dashboard's category filter.
-     */
     public List<InventoryItem> findByCategory(String category) throws SQLException {
         List<InventoryItem> items = new ArrayList<>();
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
@@ -112,6 +119,16 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
             stmt.setString(3, item.getUnit());
             stmt.setInt(4, item.getCriticalThreshold());
             stmt.setInt(5, item.getLowThreshold());
+
+            // Handle nullable creator ID
+            if (item.getCreatedByUserId() != null) {
+                stmt.setLong(6, item.getCreatedByUserId());
+            } else {
+                stmt.setNull(6, Types.BIGINT);
+            }
+
+            // Set initial stock (Parameter 7)
+            stmt.setInt(7, item.getStockQuantity());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -141,7 +158,15 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
             stmt.setString(3, item.getUnit());
             stmt.setInt(4, item.getCriticalThreshold());
             stmt.setInt(5, item.getLowThreshold());
-            stmt.setLong(6, item.getId());
+
+            if (item.getCreatedByUserId() != null) {
+                stmt.setLong(6, item.getCreatedByUserId());
+            } else {
+                stmt.setNull(6, Types.BIGINT);
+            }
+
+            stmt.setInt(7, item.getStockQuantity()); // Update current stock
+            stmt.setLong(8, item.getId());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -170,6 +195,10 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
         Timestamp createdAt = rs.getTimestamp("created_at");
         LocalDateTime created = createdAt == null ? null : createdAt.toLocalDateTime();
 
+        // Extracting Long which could be NULL in DB
+        long userIdVal = rs.getLong("created_by_user_id");
+        Long createdByUserId = rs.wasNull() ? null : userIdVal;
+
         return new InventoryItem(
                 rs.getLong("id"),
                 rs.getString("name"),
@@ -177,7 +206,31 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
                 rs.getString("unit"),
                 rs.getInt("critical_threshold"),
                 rs.getInt("low_threshold"),
-                created
+                created,
+                rs.getInt("stock_quantity"), // Passing integrated stock to constructor
+                createdByUserId // Passing the creator ID field
         );
     }
+
+    /** Returns total number of critical items across the whole system (Admin view) */
+    public static int getAdminCriticalCount() throws SQLException {
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(SQL_COUNT_CRITICAL_GLOBAL)) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    /** Returns number of critical items for a specific barangay/user */
+    public int getCriticalCountByUser(Long userId) throws SQLException {
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL_COUNT_CRITICAL_BY_USER)) {
+            stmt.setLong(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+
 }

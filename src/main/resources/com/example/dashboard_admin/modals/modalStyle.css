@@ -87,3 +87,27 @@
 .btn-outline:hover {
     -fx-background-color: #f1f5f9;
 }
+
+/* Back Button Specific Styling */
+.btn-back {
+    -fx-background-color: transparent;
+    -fx-border-color: #e2e8f0; /* Softer slate than btn-outline */
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-text-fill: #64748b;    /* Muted text color */
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s;
+}
+
+.btn-back:hover {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #0f172a;    /* Darkens text on hover to show focus */
+}
+
+.btn-back:pressed {
+    -fx-background-color: #f1f5f9;
+    -fx-scale-x: 0.98;         /* Subtle "click" shrink effect */
+    -fx-scale-y: 0.98;
+}
