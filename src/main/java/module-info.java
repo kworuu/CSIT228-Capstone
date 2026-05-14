@@ -8,18 +8,22 @@ module com.example.capstone {
     requires java.sql;                  // JDBC core (Connection, ResultSet, etc.)
     requires org.mariadb.jdbc;          // MariaDB JDBC driver
     requires jbcrypt;
-    requires jdk.jsobject;                   // password hashing
+    requires jdk.jsobject;
+    requires jdk.httpserver;                   // password hashing
 
     // Dashboards
     opens com.example.dashboard_admin to javafx.fxml;
     exports com.example.dashboard_admin;
+
+
 
     exports com.example.dashboard_admin.views;
     opens com.example.dashboard_admin.views to javafx.fxml;
 
     opens com.example.dashboard_barangay to javafx.fxml;
     exports com.example.dashboard_barangay;
-    
+
+
     // Kiosk Dashboard
     opens com.example.dashboard_kiosk to javafx.fxml, javafx.graphics;
     exports com.example.dashboard_kiosk;
@@ -33,11 +37,10 @@ module com.example.capstone {
 
     // Shared Database & Business Logic
     exports com.example.model;
+    opens com.example.model to javafx.base;
+
     exports com.example.dao;
     exports com.example.service;
     exports com.example.util;
-    exports com.example.dashboard_kiosk.sample;
-    opens com.example.dashboard_kiosk.sample to javafx.fxml, javafx.graphics;
-    exports com.example.dashboard_kiosk.user;
-    opens com.example.dashboard_kiosk.user to javafx.fxml, javafx.graphics;
+    opens com.example.util to javafx.fxml;
 }
