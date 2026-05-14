@@ -36,7 +36,7 @@ public class BrgyMapHtmlProvider {
      *                    Pass {@code "[]"} for an empty map.
      */
     // 1. UPDATE THE METHOD SIGNATURE to accept the center coordinates
-    public static String getMapHTML(String centersJson, double brgyLat, double brgyLng, int zoom) {
+    public static String getMapHTML(String centersJson, double brgyLat, double brgyLng, int zoom, int tilePort) {
         String htmlTemplate = """
         <!DOCTYPE html>
         <html>
@@ -100,14 +100,27 @@ public class BrgyMapHtmlProvider {
                 var markerMap = {};   
 
                 setTimeout(function () {
-                    var map = L.map('map', {
-                        center: [__BRGY_LAT__, __BRGY_LNG__],
-                        zoom: __BRGY_ZOOM__,
-                        zoomControl: true, dragging: true, scrollWheelZoom: true,
-                        fadeAnimation: false, zoomAnimation: false
-                    });
+                   // Compute a bounding box around the barangay center — this is the
+                               // area the user is allowed to pan within. ~0.012 degrees ≈ 1.3 km radius.
+                               var brgyLat = __BRGY_LAT__;
+                               var brgyLng = __BRGY_LNG__;
+                               var brgyZoom = __BRGY_ZOOM__;
+                               var panRadius = 0.012;
+                
+                               var southWest = L.latLng(brgyLat - panRadius, brgyLng - panRadius);
+                               var northEast = L.latLng(brgyLat + panRadius, brgyLng + panRadius);
+                               var bounds = L.latLngBounds(southWest, northEast);
+                
+                               var map = L.map('map', {
+                                   center: [brgyLat, brgyLng],
+                                   zoom: brgyZoom,
+                                   minZoom: brgyZoom,       // can never zoom out past the default
+                                   maxZoom: 17,             // can zoom in for detail
+                                   maxBounds: bounds,       // rigid pan border
+                                   maxBoundsViscosity: 0.5  // 1.0 = completely rigid; 0.5 = elastic
+                               });
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                    L.tileLayer('http://localhost:__TILE_PORT__/{z}/{x}/{y}.png').addTo(map);
 
                     centers.forEach(function (c) {
                         var shortName = c.name.length > 22 ? c.name.substring(0, 20) + '…' : c.name;
@@ -148,6 +161,7 @@ public class BrgyMapHtmlProvider {
                 .replace("__CENTERS_JSON__", centersJson)
                 .replace("__BRGY_LAT__", String.valueOf(brgyLat))
                 .replace("__BRGY_LNG__", String.valueOf(brgyLng))
-                .replace("__BRGY_ZOOM__", String.valueOf(zoom));
+                .replace("__BRGY_ZOOM__", String.valueOf(zoom))
+                .replace("__TILE_PORT__", String.valueOf(tilePort));
     }
 }

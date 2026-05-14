@@ -9,7 +9,8 @@ module com.example.capstone {
     requires org.mariadb.jdbc;          // MariaDB JDBC driver
     requires jbcrypt;
     requires jdk.jsobject;
-    requires jdk.httpserver;                   // password hashing
+    requires jdk.httpserver;
+    requires java.net.http;                   // password hashing
 
     // Dashboards
     opens com.example.dashboard_admin to javafx.fxml;
