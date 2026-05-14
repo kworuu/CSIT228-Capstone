@@ -1,481 +1,749 @@
 /*
- * DashboardStyle.css
- * Modern, enterprise-grade JavaFX styling for CivicGuard.
+ * CivicGuard — "Trustworthy Municipal Tool" Design System
+ * =========================================================
+ * Palette:
+ *   Canvas    #F7F5EE  — Soft linen / aged paper
+ *   Surface   #FFFFFF  — Pure white for cards and panels
+ *   Border    #E0D4BE  — Warm taupe dividers
+ *   Accent    #5A6E4F  — Muted forest green  (primary actions, active states)
+ *   Accent-2  #8FA882  — Lighter sage (hover, secondary)
+ *   Danger    #A0432F  — Terracotta red (FULL status, critical alerts)
+ *   Warning   #B07D3C  — Amber ochre (warning alerts)
+ *   Text-1    #1C1917  — Near-black headings
+ *   Text-2    #57534E  — Warm mid-grey body
+ *   Text-3    #A8A29E  — Muted captions
+ *
+ * Fonts:
+ *   Primary  : IBM Plex Sans (loaded via @font-face if available, else Segoe UI)
+ *   Mono     : JetBrains Mono (for coordinates and data values)
+ *
+ * Notes:
+ *   JavaFX CSS does not support @import or Google Fonts. Fonts should be
+ *   bundled under resources/fonts/ and loaded in the Application start()
+ *   via Font.loadFont(). The stack below falls back gracefully.
  */
 
+/* ═══════════════════════════════════════════════════════════════
+   ROOT / CANVAS
+   ═══════════════════════════════════════════════════════════════ */
+
 .root-pane {
-    -fx-background-color: #f8fafc;
-    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-background-color: #F7F5EE;
+    -fx-font-family: 'IBM Plex Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
 }
 
-/* Sidebar */
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════════════ */
+
 .sidebar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1e293b;
     -fx-border-width: 0 1 0 0;
 }
 
 .logo-icon-bg {
-    -fx-background-color: #059669;
+    -fx-background-color: #5A6E4F;
     -fx-background-radius: 8;
-    -fx-min-width: 32;
-    -fx-min-height: 32;
+    -fx-min-width: 34;
+    -fx-min-height: 34;
+    -fx-max-width: 34;
+    -fx-max-height: 34;
 }
 
 .logo-icon {
-    -fx-text-fill: white;
+    -fx-text-fill: #F7F5EE;
     -fx-font-weight: bold;
-    -fx-font-size: 14;
+    -fx-font-size: 13;
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
 }
 
 .logo-text {
-    -fx-font-size: 20;
+    -fx-font-size: 19;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
-    -fx-letter-spacing: -0.5px;
+    -fx-text-fill: #f8fafc;
 }
 
 .nav-header {
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 10;
+    -fx-text-fill: #A8A29E;
+    -fx-font-size: 9;
     -fx-font-weight: bold;
-    -fx-padding: 0 0 4 16;
+    -fx-padding: 0 0 4 12;
+    /* Simulate letter-spacing with extra padding not fully possible in FX CSS,
+       but 'bold + muted' gives the right institutional feel */
 }
 
 .nav-item {
     -fx-background-color: transparent;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #94a3b8;
     -fx-alignment: center-left;
     -fx-padding: 10 16;
-    -fx-font-size: 14;
+    -fx-font-size: 13;
     -fx-cursor: hand;
-    -fx-background-radius: 8;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
 }
 
 .nav-item:hover {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #1e293b;
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #e2e8f0;
 }
 
 .nav-active {
-    -fx-background-color: #ecfdf5;
-    -fx-text-fill: #059669;
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
     -fx-font-weight: bold;
+    -fx-border-color: #C8D8C0;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0 6 6 0;
 }
 
+.nav-active:hover { -fx-background-color: #065f46; }
+
 .profile-section {
-    -fx-border-color: #f1f5f9;
+    -fx-border-color: #E0D4BE;
     -fx-border-width: 1 0 0 0;
+    -fx-background-color: #FDFCF9;
 }
 
 .avatar-circle {
-    -fx-background-color: #334155;
-    -fx-text-fill: white;
+    -fx-background-color: #5A6E4F;
     -fx-background-radius: 50;
-    -fx-font-weight: bold;
 }
 
 .profile-name {
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
-    -fx-font-size: 14;
+    -fx-text-fill: #1C1917;
+    -fx-font-size: 13;
 }
 
 .profile-role {
-    -fx-font-size: 12;
-    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11;
+    -fx-text-fill: #A8A29E;
 }
 
-/* Header */
+/* ═══════════════════════════════════════════════════════════════
+   HEADER BAR
+   ═══════════════════════════════════════════════════════════════ */
+
 .header-bar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0D4BE;
     -fx-border-width: 0 0 1 0;
 }
 
 .header-title {
-    -fx-font-size: 20;
+    -fx-font-size: 18;
     -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
+    -fx-text-fill: #1C1917;
 }
 
 .header-subtitle {
     -fx-font-size: 12;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #A8A29E;
 }
 
 .status-pill {
-    -fx-background-color: #ecfdf5;
+    -fx-background-color: #EBF0E8;
     -fx-background-radius: 20;
+    -fx-border-color: #C8D8C0;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
     -fx-min-height: 28;
 }
 
 .status-text {
-    -fx-font-size: 12;
+    -fx-font-size: 11;
     -fx-font-weight: bold;
-    -fx-text-fill: #059669;
+    -fx-text-fill: #5A6E4F;
 }
 
 .btn-refresh {
     -fx-background-color: transparent;
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 18;
+    -fx-text-fill: #A8A29E;
+    -fx-font-size: 16;
     -fx-cursor: hand;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
 }
 
-/* Cards & Stats */
-.stat-card {
-    -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-padding: 24;
-    -fx-border-color: #f1f5f9;
-    -fx-border-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 10, 0, 0, 2);
+.btn-refresh:hover {
+    -fx-background-color: #F7F5EE;
+    -fx-text-fill: #5A6E4F;
 }
 
-.stat-card-warning {
-    -fx-border-color: #fca5a5;
-    -fx-background-color: #fffafb;
+/* ═══════════════════════════════════════════════════════════════
+   CONTENT SCROLL AREA
+   ═══════════════════════════════════════════════════════════════ */
+
+.content-scroll {
+    -fx-background-color: #F7F5EE;
 }
 
-.stat-label {
-    -fx-font-size: 11;
-    -fx-font-weight: bold;
-    -fx-text-fill: #64748b;
-}
+/* ═══════════════════════════════════════════════════════════════
+   CARD CONTAINERS
+   ═══════════════════════════════════════════════════════════════ */
 
-.stat-value {
-    -fx-font-size: 32;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
-    -fx-padding: 4 0;
-}
-
-.trend-up { -fx-text-fill: #10b981; -fx-font-weight: bold; }
-.stat-trend-text { -fx-font-size: 11; -fx-text-fill: #94a3b8; }
-
-.mini-progress-bg { -fx-background-color: #f1f5f9; -fx-background-radius: 4; }
-.mini-progress-fill { -fx-background-color: #059669; -fx-background-radius: 4; }
-
-/* Table Section */
 .card-container {
-    -fx-background-color: white;
-    -fx-background-radius: 16;
-    -fx-border-color: #f1f5f9;
-    -fx-border-radius: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 20, 0, 0, 4);
-    -fx-overflow: hidden;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(28,25,23,0.05), 12, 0, 0, 3);
+}
+
+.card-header {
+    -fx-border-color: #F0EBE0;
+    -fx-border-width: 0 0 1 0;
 }
 
 .card-title {
-    -fx-font-size: 16;
+    -fx-font-size: 14;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #1C1917;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   STAT CARDS
+   ═══════════════════════════════════════════════════════════════ */
+
+.stat-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.stat-card-warning {
+    -fx-border-color: #D4A76A;
+    -fx-background-color: #FEFCF5;
+}
+
+.stat-label {
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-text-fill: #A8A29E;
+}
+
+.stat-value {
+    -fx-font-size: 28;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1C1917;
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+    -fx-padding: 4 0;
+}
+
+.trend-up           { -fx-text-fill: #5A6E4F; -fx-font-weight: bold; }
+.stat-trend-text    { -fx-font-size: 11; -fx-text-fill: #A8A29E; }
+.mini-progress-bg   { -fx-background-color: #F0EBE0; -fx-background-radius: 4; }
+.mini-progress-fill { -fx-background-color: #5A6E4F; -fx-background-radius: 4; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH FIELD
+   ═══════════════════════════════════════════════════════════════ */
+
 .search-field {
-    -fx-background-color: #f8fafc;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 8 16;
+    -fx-background-color: #F7F5EE;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 8 14;
+    -fx-font-size: 13;
+    -fx-text-fill: #1C1917;
+    -fx-prompt-text-fill: #A8A29E;
 }
 
 .search-field:focused {
-    -fx-border-color: #059669;
-    -fx-background-color: white;
+    -fx-border-color: #5A6E4F;
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(90,110,79,0.15), 6, 0, 0, 1);
 }
 
-/* Table View */
+/* ═══════════════════════════════════════════════════════════════
+   TABLE VIEW
+   ═══════════════════════════════════════════════════════════════ */
+
 .table-view {
     -fx-background-color: transparent;
     -fx-border-width: 1 0 0 0;
-    -fx-border-color: #f1f5f9;
+    -fx-border-color: #F0EBE0;
+    -fx-table-cell-border-color: transparent;
 }
 
-.table-view .column-header-background { -fx-background-color: #fbfcfd; }
-.table-view .column-header { -fx-background-color: transparent; -fx-size: 45; }
-.table-view .column-header .label { -fx-text-fill: #64748b; -fx-font-size: 11; -fx-font-weight: bold; }
+.table-view .column-header-background {
+    -fx-background-color: #FDFCF8;
+    -fx-border-color: #F0EBE0;
+    -fx-border-width: 0 0 1 0;
+}
 
-.table-view .table-row-cell { -fx-cell-size: 56; -fx-border-color: #f8fafc; -fx-border-width: 0 0 1 0; }
-.table-view .table-row-cell:odd { -fx-background-color: white; }
-.table-view .table-row-cell:even { -fx-background-color: #fcfdfe; }
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 42;
+}
 
-/*
-   Hover / selected / focused states.
-   Force text color to dark slate explicitly — without this, JavaFX's default
-   theme flips text to white on selection, making rows unreadable on the
-   light background we use here.
-*/
+.table-view .column-header .label {
+    -fx-text-fill: #A8A29E;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+}
+
+.table-view .filler {
+    -fx-background-color: #FDFCF8;
+}
+
+.table-view .table-row-cell {
+    -fx-cell-size: 52;
+    -fx-border-color: #F5F0E8;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-color: #FFFFFF;
+}
+
+.table-view .table-row-cell:odd  { -fx-background-color: #FFFFFF; }
+.table-view .table-row-cell:even { -fx-background-color: #FDFCF9; }
+
 .table-view .table-row-cell:hover {
-    -fx-background-color: #f1f5f9;
+    -fx-background-color: #F0EDE5;
 }
 .table-view .table-row-cell:hover .text {
-    -fx-fill: #679970;
+    -fx-fill: #1C1917;
 }
+
 .table-view .table-row-cell:selected {
-    -fx-background-color: #e2e8f0;
+    -fx-background-color: #EBF0E8;
 }
-.table-view .table-row-cell:selected .text {
-    -fx-fill: #0f172a;
-}
-.table-view .table-row-cell:selected:focused {
-    -fx-background-color: #e2e8f0;
-    -fx-text-fill: #0f172a;
-}
+.table-view .table-row-cell:selected .text,
 .table-view .table-row-cell:selected:focused .text {
-    -fx-fill: #0f172a;
+    -fx-fill: #1C1917;
 }
+
 .table-view .table-row-cell:focused {
-    -fx-background-color: #f1f5f9;
+    -fx-background-color: #F0EDE5;
 }
-.table-view .table-row-cell:focused .text {
-    -fx-fill: #0f172a;
-}
-/* The cell itself (not just the row) — make sure cell-level selected state also keeps text dark. */
+
 .table-view .table-cell {
-    -fx-text-fill: #0f172a;
+    -fx-text-fill: #1C1917;
+    -fx-font-size: 13;
+    -fx-padding: 0 12;
+    -fx-alignment: center-left;
 }
+
 .table-view .table-row-cell:selected .table-cell {
-    -fx-text-fill: #0f172a;
+    -fx-text-fill: #1C1917;
 }
 
-/* Buttons */
-.btn-primary {
-    -fx-background-color: #0f172a;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
-    -fx-cursor: hand;
-}
-
-.btn-primary:hover { -fx-background-color: #334155; }
-
-.btn-outline {
+/* Remove focus ring on TableView itself */
+.table-view:focused {
     -fx-background-color: transparent;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 8;
-    -fx-text-fill: #475569;
-    -fx-padding: 10 20;
-    -fx-cursor: hand;
 }
 
-.btn-outline:hover { -fx-background-color: #f8fafc; }
+/* Scroll bar — muted, minimal */
+.table-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 6;
+}
+.table-view .scroll-bar:vertical .thumb {
+    -fx-background-color: #D0C9BE;
+    -fx-background-radius: 3;
+}
 
-/* Segmented Control */
+/* ═══════════════════════════════════════════════════════════════
+   TABLE CONTROLS / SEGMENTED FILTER
+   ═══════════════════════════════════════════════════════════════ */
+
+.table-controls {
+    -fx-border-color: #F0EBE0;
+    -fx-border-width: 0 0 1 0;
+}
+
 .segmented-control {
-    -fx-background-color: #f1f5f9;
-    -fx-background-radius: 8;
-    -fx-padding: 2;
+    -fx-background-color: #F0EBE0;
+    -fx-background-radius: 7;
+    -fx-padding: 3;
 }
 
 .segment {
     -fx-background-color: transparent;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #57534E;
     -fx-font-size: 12;
-    -fx-min-height: 32;
+    -fx-min-height: 30;
     -fx-padding: 0 16;
     -fx-cursor: hand;
+    -fx-background-radius: 5;
+}
+
+.segment:hover {
+    -fx-background-color: #E8E2D8;
+    -fx-text-fill: #1C1917;
 }
 
 .segment-active {
-    -fx-background-color: white;
-    -fx-text-fill: #0f172a;
-    -fx-background-radius: 6;
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #5A6E4F;
+    -fx-background-radius: 5;
     -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(28,25,23,0.08), 4, 0, 0, 1);
 }
 
-/* Right Panel */
-.right-panel {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e2e8f0;
-    -fx-border-width: 0 0 0 1;
-}
+/* ═══════════════════════════════════════════════════════════════
+   STATUS PILLS  (Open / Full / Pending)
+   ═══════════════════════════════════════════════════════════════ */
 
-.side-panel-header {
-    -fx-font-size: 11;
-    -fx-font-weight: bold;
-    -fx-text-fill: #94a3b8;
-}
-
-.alert-item {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 12;
-    -fx-padding: 16;
-    -fx-border-color: #f1f5f9;
-    -fx-border-radius: 12;
-}
-
-.alert-item-critical {
-    -fx-background-color: #fff1f2;
-    -fx-border-color: #fecaca;
-}
-
-.alert-title { -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 13; }
-.alert-qty { -fx-font-size: 11; -fx-text-fill: #ef4444; -fx-font-weight: bold; }
-.alert-location { -fx-font-size: 11; -fx-text-fill: #64748b; -fx-padding: 2 0; }
-
-.btn-link-sm {
-    -fx-background-color: transparent;
-    -fx-text-fill: #3b82f6;
-    -fx-font-size: 11;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-    -fx-padding: 4 0 0 0;
-}
-
-.map-viewport {
-    -fx-background-color: #f1f5f9;
-    -fx-background-radius: 16;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 16;
-}
-
-.map-placeholder-text { -fx-text-fill: #94a3b8; -fx-font-size: 13; }
-
-.btn-map-action {
-    -fx-background-color: white;
-    -fx-text-fill: #1e293b;
-    -fx-font-size: 11;
-    -fx-background-radius: 20;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 20;
-    -fx-padding: 6 16;
-    -fx-cursor: hand;
-}
-
-.map-legend { -fx-font-size: 10; -fx-text-fill: #94a3b8; }
-
-.btn-map-overlay {
-    -fx-background-color: rgba(15, 23, 42, 0.65);
-    -fx-text-fill: white;
-    -fx-font-size: 11px;
-    -fx-padding: 5 10 5 10;
-    -fx-background-radius: 6px;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
-}
-
-.btn-map-overlay:hover {
-    -fx-background-color: rgba(15, 23, 42, 0.88);
-}
-
-/* ════════════════════════════════════════════════════════════════════════
-   ADDITIONS — status pills, supply tags, table action button, detail modal
-   ──────────────────────────────────────────────────────────────────────── */
-
-/* ─── Status pill (Open / Full) — used in table cells AND the modal header ─ */
 .status-tag {
     -fx-font-size: 10;
     -fx-font-weight: bold;
     -fx-padding: 3 10 3 10;
     -fx-background-radius: 12;
     -fx-border-radius: 12;
+    -fx-border-width: 1;
 }
 
+/* OPEN — muted forest green */
 .status-tag-open {
     -fx-background-color: #ecfdf5;
     -fx-text-fill: #059669;
     -fx-border-color: #a7f3d0;
-    -fx-border-width: 1;
 }
 
+/* FULL — terracotta / brick red */
 .status-tag-full {
     -fx-background-color: #fef2f2;
     -fx-text-fill: #dc2626;
     -fx-border-color: #fecaca;
-    -fx-border-width: 1;
 }
 
+/* PENDING — warm amber */
 .status-tag-pending {
-    -fx-background-color: #fffbeb;
-    -fx-text-fill: #d97706;
-    -fx-border-color: #fde68a;
-    -fx-border-width: 1;
+    -fx-background-color: #FDF5E6;
+    -fx-text-fill: #B07D3C;
+    -fx-border-color: #E8C98A;
 }
 
-/* ─── Supply tags (Hot meals, Med kit, Water 5L, etc.) — used in modal ─── */
+/* ═══════════════════════════════════════════════════════════════
+   SUPPLY TAGS  (inside FlowPane)
+   ═══════════════════════════════════════════════════════════════ */
+
 .supply-tag {
-    -fx-font-size: 10;
-    -fx-text-fill: #475569;
-    -fx-background-color: #f1f5f9;
+    -fx-font-size: 11;
+    -fx-text-fill: #57534E;
+    -fx-background-color: #F0EBE0;
     -fx-background-radius: 6;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
     -fx-padding: 4 10 4 10;
 }
 
-/* ─── Small "View" action button inside the table's ACTION column ─── */
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Primary — forest green fill */
+.btn-primary {
+    -fx-background-color: #059669;
+    -fx-text-fill: #white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 7;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-font-size: 13;
+}
+.btn-primary:hover {
+    -fx-background-color: #047857;
+}
+.btn-primary:pressed {
+    -fx-background-color: #3A4E30;
+}
+
+/* Outline — bordered, transparent background */
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 7;
+    -fx-border-width: 1;
+    -fx-text-fill: #57534E;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-font-size: 13;
+    -fx-background-radius: 7;
+}
+.btn-outline:hover {
+    -fx-background-color: #F7F5EE;
+    -fx-border-color: #C8BCA8;
+    -fx-text-fill: #1C1917;
+}
+
+/* Small table action button */
 .btn-table-action {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #0f172a;
+    -fx-background-color: #F0EBE0;
+    -fx-text-fill: #57534E;
     -fx-font-size: 11;
     -fx-font-weight: bold;
-    -fx-background-radius: 6;
-    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-border-color: #E0D4BE;
+    -fx-border-width: 1;
+    -fx-padding: 5 12;
     -fx-cursor: hand;
 }
-
-.btn-table-action .text {
-    -fx-fill: #0f172a;
-}
+.btn-table-action .text { -fx-fill: #57534E; }
 
 .btn-table-action:hover {
-    -fx-background-color: #0f172a;
-    -fx-text-fill: #679970;
+    -fx-background-color: #5A6E4F;
+    -fx-border-color: #5A6E4F;
+    -fx-text-fill: #F7F5EE;
+}
+.btn-table-action:hover .text { -fx-fill: #F7F5EE; }
+
+/* ═══════════════════════════════════════════════════════════════
+   OCCUPANCY LABEL  (monospaced numeric feel)
+   ═══════════════════════════════════════════════════════════════ */
+
+.occupancy-label {
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+    -fx-font-size: 12;
+    -fx-text-fill: #57534E;
 }
 
-.btn-table-action:hover .text {
-    -fx-fill: white;
+/* ═══════════════════════════════════════════════════════════════
+   EMERGENCY ALERTS PANEL
+   ═══════════════════════════════════════════════════════════════ */
+
+.alert-item {
+    -fx-background-color: #FDFCF9;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
 }
 
-/* ─── Map overlay pane — transparent so clicks pass through to the map ─── */
+/* Critical — terracotta left accent */
+.alert-item-critical {
+    -fx-background-color: #FDF4F2;
+    -fx-border-color: #DDB5AC;
+    -fx-border-width: 1 1 1 4;
+}
+
+/* Warning — amber left accent */
+.alert-item-warning {
+    -fx-background-color: #FEF9F0;
+    -fx-border-color: #E8C98A;
+    -fx-border-width: 1 1 1 4;
+}
+
+/* Info — sage left accent */
+.alert-item-info {
+    -fx-background-color: #F2F5F0;
+    -fx-border-color: #C0D0B8;
+    -fx-border-width: 1 1 1 4;
+}
+
+.alert-time {
+    -fx-font-size: 10;
+    -fx-text-fill: #A8A29E;
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.alert-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: #1C1917;
+    -fx-font-size: 13;
+}
+
+.alert-location {
+    -fx-font-size: 11;
+    -fx-text-fill: #57534E;
+    -fx-padding: 1 0 2 0;
+}
+
+.alert-qty {
+    -fx-font-size: 12;
+    -fx-text-fill: #57534E;
+    -fx-wrap-text: true;
+}
+
+.btn-link-sm {
+    -fx-background-color: transparent;
+    -fx-text-fill: #5A6E4F;
+    -fx-font-size: 11;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 4 0 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAP OVERLAY PANE  (transparent pass-through layer)
+   ═══════════════════════════════════════════════════════════════ */
+
 .map-overlay-pane {
     -fx-background-color: transparent;
 }
 
-/* ─── Floating detail modal (anchored bottom-left of the map) ─── */
+/* ═══════════════════════════════════════════════════════════════
+   FLOATING DETAIL MODAL
+   ═══════════════════════════════════════════════════════════════ */
+
 .detail-modal {
-    -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-border-color: #e2e8f0;
-    -fx-border-radius: 14;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 10;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.18), 24, 0, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(28,25,23,0.18), 24, 0, 0, 8);
 }
 
 .detail-title {
-    -fx-font-size: 16;
+    -fx-font-size: 15;
     -fx-font-weight: bold;
-    -fx-text-fill: #0f172a;
+    -fx-text-fill: #1C1917;
 }
 
 .detail-meta {
     -fx-font-size: 11;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #A8A29E;
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
 }
 
 .detail-section-label {
-    -fx-font-size: 10;
+    -fx-font-size: 9;
     -fx-font-weight: bold;
-    -fx-text-fill: #94a3b8;
-    -fx-letter-spacing: 0.5px;
+    -fx-text-fill: #A8A29E;
+    -fx-padding: 0 0 2 0;
 }
 
 .detail-section-body {
     -fx-font-size: 13;
-    -fx-text-fill: #334155;
+    -fx-text-fill: #57534E;
+}
+
+.detail-occupancy {
+    -fx-font-size: 13;
+    -fx-text-fill: #1C1917;
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+    -fx-font-weight: bold;
 }
 
 .btn-modal-close {
     -fx-background-color: transparent;
-    -fx-text-fill: #94a3b8;
-    -fx-font-size: 14;
+    -fx-text-fill: #A8A29E;
+    -fx-font-size: 13;
     -fx-cursor: hand;
-    -fx-padding: 2 8 2 8;
-    -fx-background-radius: 6;
+    -fx-padding: 2 7;
+    -fx-background-radius: 5;
+}
+.btn-modal-close:hover {
+    -fx-background-color: #F0EBE0;
+    -fx-text-fill: #57534E;
 }
 
-.btn-modal-close:hover {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #679970;
+/* ═══════════════════════════════════════════════════════════════
+   EVACUATION CENTER CARD  (sidebar list cards, if used)
+   ═══════════════════════════════════════════════════════════════ */
+
+.center-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.center-card:hover {
+    -fx-border-color: #8FA882;
+    -fx-background-color: #F7F5EE;
+}
+
+.center-card-selected {
+    -fx-border-color: #5A6E4F;
+    -fx-border-width: 2;
+    -fx-background-color: #EBF0E8;
+}
+
+.center-card-title {
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1C1917;
+}
+
+.center-card-meta {
+    -fx-font-size: 11;
+    -fx-text-fill: #A8A29E;
+    -fx-font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAP VIEWPORT / PLACEHOLDER
+   ═══════════════════════════════════════════════════════════════ */
+
+.map-viewport {
+    -fx-background-color: #EDE8DF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 8;
+}
+
+.map-placeholder-text {
+    -fx-text-fill: #A8A29E;
+    -fx-font-size: 13;
+}
+
+.btn-map-action {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #1C1917;
+    -fx-font-size: 11;
+    -fx-background-radius: 20;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 20;
+    -fx-padding: 6 14;
+    -fx-cursor: hand;
+}
+.btn-map-action:hover {
+    -fx-background-color: #F7F5EE;
+    -fx-border-color: #C8BCA8;
+}
+
+.map-legend       { -fx-font-size: 10; -fx-text-fill: #A8A29E; }
+
+.btn-map-overlay {
+    -fx-background-color: rgba(28, 25, 23, 0.70);
+    -fx-text-fill: #F7F5EE;
+    -fx-font-size: 11;
+    -fx-padding: 5 10;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+.btn-map-overlay:hover {
+    -fx-background-color: rgba(28, 25, 23, 0.88);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RIGHT / SIDE PANEL
+   ═══════════════════════════════════════════════════════════════ */
+
+.right-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0D4BE;
+    -fx-border-width: 0 0 0 1;
+}
+
+.side-panel-header {
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+    -fx-text-fill: #A8A29E;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PULSE CIRCLE  (live indicator in header)
+   ═══════════════════════════════════════════════════════════════ */
+
+.pulse-circle {
+    /* JavaFX doesn't support CSS animations directly on shapes;
+       animation is applied from the controller or via Timeline if needed.
+       The fill colour is set inline in FXML as #5A6E4F. */
 }

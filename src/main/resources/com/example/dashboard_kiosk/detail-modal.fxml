@@ -9,48 +9,48 @@
 <?import javafx.scene.layout.VBox?>
 
 <!--
-   Floating detail panel that overlays the bottom-left of the map area.
-   This file is loaded once at startup, kept invisible by default, and
-   shown via setVisible(true) when the user clicks a card or marker.
-
-   IMPORTANT: this is wrapped in a top-level VBox with translateX/Y baked
-   in via AnchorPane constraints from the parent — anchoring is configured
-   where this panel is included in BrgyUser.fxml.
+    detail-modal.fxml — Floating center detail overlay
+    ───────────────────────────────────────────────────
+    • Loaded programmatically by KioskDashboardController.loadDetailModal()
+      and anchored to the bottom-left of mapOverlayPane.
+    • Starts hidden (visible="false" managed="false").
+    • Controller: com.example.dashboard_kiosk.DetailModalController
+      (NOTE: changed from dashboard_barangay_v2 to dashboard_kiosk package)
+    • Palette follows "Trustworthy Municipal Tool" design system.
 -->
 <VBox fx:id="modalRoot"
-      maxWidth="380.0"
-      prefWidth="360.0"
-      spacing="14.0"
+      maxWidth="370.0"
+      prefWidth="350.0"
+      spacing="12.0"
       styleClass="detail-modal"
-      style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-color: #e2e8f0; -fx-border-radius: 14; -fx-border-width: 1;"
       visible="false"
       managed="false"
-      xmlns="http://javafx.com/javafx/25"
+      xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.dashboard_barangay_v2.DetailModalController">
+      fx:controller="com.example.dashboard_kiosk.DetailModalController">
     <padding>
-        <Insets bottom="20.0" left="22.0" right="22.0" top="20.0" />
+        <Insets bottom="18.0" left="20.0" right="20.0" top="18.0" />
     </padding>
     <children>
 
-        <!-- HEADER: title + status pill, with close button on far right -->
-        <HBox alignment="TOP_LEFT" spacing="10.0">
+        <!-- ── HEADER: title · status pill · close ─────────────────── -->
+        <HBox alignment="TOP_LEFT" spacing="8.0">
             <children>
                 <VBox spacing="2.0" HBox.hgrow="ALWAYS">
                     <children>
                         <Label fx:id="lblTitle"
                                styleClass="detail-title"
-                               text="Argao Command Center"
+                               text="Evacuation Center"
                                wrapText="true" />
                         <Label fx:id="lblMeta"
                                styleClass="detail-meta"
-                               text="EC-01 · Brgy. Poblacion" />
+                               text="EC-00 · Brgy. —" />
                     </children>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Label fx:id="lblStatus"
-                       styleClass="status-tag, status-tag-open"
-                       text="Open" />
+                <!-- Status pill — class toggled between status-tag-open and
+                     status-tag-full by DetailModalController.show() -->
+                <!-- Close button -->
                 <Button fx:id="btnClose"
                         mnemonicParsing="false"
                         onAction="#handleClose"
@@ -59,19 +59,19 @@
             </children>
         </HBox>
 
-        <!-- ADDRESS BLOCK -->
-        <VBox spacing="4.0">
+        <!-- ── ADDRESS ──────────────────────────────────────────────── -->
+        <VBox spacing="3.0">
             <children>
                 <Label styleClass="detail-section-label" text="ADDRESS" />
                 <Label fx:id="lblAddress"
                        styleClass="detail-section-body"
-                       text="Brgy. Poblacion, Argao, Cebu"
+                       text="—"
                        wrapText="true" />
             </children>
         </VBox>
 
-        <!-- SUPPLIES BLOCK -->
-        <VBox spacing="6.0">
+        <!-- ── SUPPLIES ──────────────────────────────────────────────── -->
+        <VBox spacing="5.0">
             <children>
                 <Label styleClass="detail-section-label" text="SUPPLIES &amp; KITS" />
                 <FlowPane fx:id="suppliesFlow"
@@ -81,24 +81,25 @@
             </children>
         </VBox>
 
-        <!-- ACTION BUTTONS -->
-        <HBox spacing="10.0">
+        <!-- ── ACTION BUTTONS ────────────────────────────────────────── -->
+        <HBox spacing="8.0">
             <children>
                 <Button fx:id="btnShowRoute"
                         maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         onAction="#handleShowRoute"
                         styleClass="btn-primary"
-                        text="Show route"
+                        text="Show Route"
                         HBox.hgrow="ALWAYS" />
                 <Button fx:id="btnViewDetails"
                         maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         onAction="#handleViewDetails"
                         styleClass="btn-outline"
-                        text="View details"
+                        text="Full Details"
                         HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
+
     </children>
 </VBox>
