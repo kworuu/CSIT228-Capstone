@@ -445,7 +445,7 @@
 /* Primary — forest green fill */
 .btn-primary {
     -fx-background-color: #059669;
-    -fx-text-fill: #white;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 7;
     -fx-padding: 10 20;
