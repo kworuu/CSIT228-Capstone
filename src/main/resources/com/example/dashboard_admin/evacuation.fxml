@@ -170,12 +170,12 @@
                                 </HBox>
 
                                 <TableView fx:id="mainTable" VBox.vgrow="ALWAYS">
-                                    <columns>
-                                        <TableColumn fx:id="colEvacCenter" prefWidth="198.0" text="CENTER" />
-                                        <TableColumn fx:id="colBrgy" prefWidth="120.0" text="BARANGAY" />
-                                        <TableColumn fx:id="colStatus" prefWidth="153.0" text="ITEM" />
-                              <TableColumn fx:id="colBrgy1" prefWidth="120.0" text="BARANGAY" />
-                                    </columns>
+                                        <columns>
+                                            <TableColumn fx:id="colEvacCenter" prefWidth="198.0" text="CENTER" />
+                                            <TableColumn fx:id="colBrgy" prefWidth="120.0" text="BARANGAY" />
+                                            <TableColumn fx:id="colAddress" prefWidth="153.0" text="ADDRESS" />
+                                            <TableColumn fx:id="colStatus" prefWidth="120.0" text="STATUS" />
+                                        </columns>
                                     <columnResizePolicy>
                                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                     </columnResizePolicy>
