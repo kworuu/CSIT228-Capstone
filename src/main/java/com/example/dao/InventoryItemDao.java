@@ -62,6 +62,12 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
             "SELECT COUNT(*) FROM inventory_items WHERE created_by_user_id = ? AND stock_quantity <= critical_threshold";
 
 
+    // GET CRITICAL ITEM
+    private static final String SQL_FIND_CRITICAL_BY_USER =
+            "SELECT " + COLS + " FROM inventory_items " +
+                    "WHERE created_by_user_id = ? AND stock_quantity <= critical_threshold " +
+                    "ORDER BY stock_quantity ASC LIMIT 2";
+
     // ── CRUD operations ─────────────────────────────────────────
 
     @Override
@@ -230,6 +236,21 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
                 return rs.next() ? rs.getInt(1) : 0;
             }
         }
+    }
+
+    public List<InventoryItem> findCriticalItemsByUser(Long userId) throws SQLException {
+        List<InventoryItem> items = new ArrayList<>();
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL_FIND_CRITICAL_BY_USER)) {
+
+            stmt.setLong(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapRow(rs));
+                }
+            }
+        }
+        return items;
     }
 
 
