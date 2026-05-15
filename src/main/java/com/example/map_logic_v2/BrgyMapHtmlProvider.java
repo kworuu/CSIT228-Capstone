@@ -164,4 +164,131 @@ public class BrgyMapHtmlProvider {
                 .replace("__BRGY_ZOOM__", String.valueOf(zoom))
                 .replace("__TILE_PORT__", String.valueOf(tilePort));
     }
+
+    public static String getCityMapHTML(String centersJson,
+                                        double swLat, double swLng,
+                                        double neLat, double neLng,
+                                        double centerLat, double centerLng,
+                                        int maxZoom, int tilePort) {
+        String htmlTemplate = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            <script>var L_DISABLE_3D = true;</script>
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <style>
+                body { padding: 0; margin: 0; background-color: #0f172a; }
+                html, body, #map { height: 100%; width: 100%; }
+                
+                .marker-wrap { 
+                    position: relative; width: 140px; height: 60px; 
+                    display: flex; flex-direction: column; align-items: center; 
+                }
+                
+                .pin-container { position: relative; width: 36px; height: 36px; }
+
+                .custom-pin {
+                    width: 36px; height: 36px; color: #10b981;
+                    filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+                    position: relative; z-index: 5;
+                }
+
+                .pulse {
+                    position: absolute; top: 0; left: 0;
+                    width: 36px; height: 36px;
+                    border-radius: 50%;
+                    background: #10b981;
+                    opacity: 0.6;
+                    z-index: 1;
+                    animation: radar 2s infinite;
+                }
+
+                @keyframes radar {
+                    0% { transform: scale(1); opacity: 0.6; }
+                    100% { transform: scale(2.5); opacity: 0; }
+                }
+
+                .pin-label { 
+                    background: rgba(15,23,42,0.95); color: white; padding: 5px 10px; 
+                    border-radius: 6px; font-family: 'Segoe UI', sans-serif; font-size: 11px; font-weight: 600;
+                    white-space: nowrap; margin-top: 4px; border: 1px solid #334155; 
+                }
+                
+                .pin-bounce { animation: bounce 0.5s ease; }
+                @keyframes bounce { 
+                    0%, 100% { transform: translateY(0); } 
+                    50% { transform: translateY(-12px); } 
+                }
+            </style>
+        </head>
+        <body>
+            <div id="map"></div>
+            <script>
+                var centers = __CENTERS_JSON__;
+                var markerMap = {};   
+
+                setTimeout(function () {
+                   var southWest = L.latLng(__SW_LAT__, __SW_LNG__);
+                   var northEast = L.latLng(__NE_LAT__, __NE_LNG__);
+                   var bounds = L.latLngBounds(southWest, northEast);
+    
+                   var map = L.map('map', {
+                       center: [__CENTER_LAT__, __CENTER_LNG__],
+                       zoom: 12,
+                       minZoom: 11,
+                       maxZoom: __MAX_ZOOM__,
+                       maxBounds: bounds,
+                       maxBoundsViscosity: 0.5
+                   });
+
+                    L.tileLayer('http://localhost:__TILE_PORT__/{z}/{x}/{y}.png').addTo(map);
+
+                    centers.forEach(function (c) {
+                        var shortName = c.name.length > 22 ? c.name.substring(0, 20) + '…' : c.name;
+                        
+                        var svgIcon = '<div class="pin-container">' +
+                                      '  <div class="pulse"></div>' +
+                                      '  <svg class="custom-pin" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">' +
+                                      '    <path d="M12 0C5.373 0 0 5.373 0 12c0 8.438 11.125 23.336 11.535 23.893a.596.596 0 0 0 .93 0C12.875 35.336 24 20.438 24 12c0-6.627-5.373-12-12-12z" fill="currentColor" />' +
+                                      '    <path d="M12 5L7 9v6h3v-4h4v4h3V9l-5-4z" fill="#ffffff" />' + 
+                                      '  </svg>' +
+                                      '</div>';
+
+                        var html = '<div class="marker-wrap">'
+                                 + '  <div id="pin-' + c.id + '">' + svgIcon + '</div>'
+                                 + '  <div class="pin-label">' + shortName + '</div>'
+                                 + '</div>';
+
+                        var icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [140, 60], iconAnchor: [70, 36] });
+                        var marker = L.marker([c.lat, c.lng], { icon: icon }).addTo(map);
+
+                        marker.on('click', function () {
+                            if (window.javaBridge) window.javaBridge.onMarkerClick(String(c.id));
+                        });
+                        markerMap[c.id] = marker;
+                    });
+
+                    window.highlightMarker = function(id) {
+                        var p = document.getElementById('pin-' + id);
+                        if(p){ p.classList.remove('pin-bounce'); void p.offsetWidth; p.classList.add('pin-bounce'); }
+                        if(markerMap[id]) map.panTo(markerMap[id].getLatLng());
+                    };
+                }, 500);
+            </script>
+        </body>
+        </html>
+        """;
+        return htmlTemplate
+                .replace("__CENTERS_JSON__", centersJson)
+                .replace("__SW_LAT__", String.valueOf(swLat))
+                .replace("__SW_LNG__", String.valueOf(swLng))
+                .replace("__NE_LAT__", String.valueOf(neLat))
+                .replace("__NE_LNG__", String.valueOf(neLng))
+                .replace("__CENTER_LAT__", String.valueOf(centerLat))
+                .replace("__CENTER_LNG__", String.valueOf(centerLng))
+                .replace("__MAX_ZOOM__", String.valueOf(maxZoom))
+                .replace("__TILE_PORT__", String.valueOf(tilePort));
+    }
 }

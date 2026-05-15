@@ -11,6 +11,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.web.WebView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
 
 <BorderPane fx:id="mainRoot" prefHeight="800.0" prefWidth="1280.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.MapViewController">
 
@@ -108,8 +111,70 @@
                     </padding>
                 </HBox>
 
-                <!-- WEBVIEW MAP (Bounds removed, vgrow enabled) -->
-                <WebView fx:id="mapWebView" VBox.vgrow="ALWAYS" />
+                <!-- WEBVIEW MAP (Wrapped in StackPane with Overlay) -->
+                <StackPane VBox.vgrow="ALWAYS">
+                    <children>
+                        <WebView fx:id="mapWebView" />
+
+                        <AnchorPane fx:id="vboxMapOverlay"
+                              maxWidth="340.0"
+                              prefWidth="320.0"
+                              styleClass="brgy-map-overlay"
+                              visible="false"
+                              managed="false"
+                              StackPane.alignment="BOTTOM_LEFT">
+                            <StackPane.margin><Insets bottom="16.0" left="16.0"/></StackPane.margin>
+                            <children>
+                                <VBox spacing="10.0"
+                                      AnchorPane.topAnchor="0.0"
+                                      AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0">
+                                      <padding><Insets bottom="16.0" left="18.0" right="18.0" top="16.0"/></padding>
+                                      <children>
+                                          <ImageView fx:id="imgOverlayCenter"
+                                                     fitHeight="140.0" fitWidth="284.0"
+                                                     preserveRatio="false"
+                                                     styleClass="brgy-overlay-img"/>
+
+                                          <VBox spacing="2.0">
+                                              <children>
+                                                  <Label fx:id="labelOverlayName" text="Center Name" styleClass="brgy-overlay-title" wrapText="true"/>
+                                                  <Label fx:id="labelOverlayAddress" text="Address" styleClass="brgy-overlay-address" wrapText="true"/>
+                                              </children>
+                                              <padding><Insets right="20.0"/></padding>
+                                          </VBox>
+
+                                          <VBox spacing="6.0">
+                                              <children>
+                                                  <Label text="AVAILABLE SUPPLIES" styleClass="brgy-overlay-section-label"/>
+                                                  <FlowPane fx:id="flowPaneOverlayPillsRow" hgap="6.0" vgap="6.0" prefWrapLength="290.0"/>
+                                              </children>
+                                          </VBox>
+
+                                          <VBox spacing="4.0">
+                                              <children>
+                                                  <Label text="CURRENT EVENT" styleClass="brgy-overlay-section-label"/>
+                                                  <Label fx:id="labelOverlayEvent" text="No active event" styleClass="brgy-overlay-event" wrapText="true"/>
+                                              </children>
+                                          </VBox>
+
+                                          <Label fx:id="labelOverlayTimestamp" text="Updated: —" styleClass="brgy-overlay-ts"/>
+
+                                      </children>
+                                </VBox>
+                                <!-- The floating close button! -->
+                                <Button fx:id="buttonOverlayClose"
+                                        text="✕"
+                                        mnemonicParsing="false"
+                                        styleClass="brgy-overlay-close"
+                                        onAction="#handleOverlayClose"
+                                        AnchorPane.topAnchor="15.0"
+                                        AnchorPane.rightAnchor="15.0"/>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                </StackPane>
             </children>
         </VBox>
     </center>
