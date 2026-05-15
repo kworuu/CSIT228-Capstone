@@ -1,118 +1,140 @@
 package com.example.dashboard_barangay;
 
-import com.example.util.DBConnectionManager;
+import com.example.auth.SessionContext;
+import com.example.dao.EvacuationCenterDao;
+import com.example.dao.EvacueeDao;
+import com.example.model.EvacuationCenter;
+import com.example.model.Evacuee;
+import com.example.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class RegisterEvacueeController {
 
     @FXML private TextField textFieldName;
-    @FXML private ComboBox<CenterItem> comboBoxCenter;
-    @FXML private TextField textFieldFamilySize;
+    @FXML private ComboBox<EvacuationCenter> comboBoxCenter;
     @FXML private TextField textFieldContact;
     @FXML private Label labelError;
+    @FXML private Button buttonRegister;
     @FXML private Button buttonCancel;
 
+    // Data Access Objects for database operations
+    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
+    private final EvacueeDao evacueeDao = new EvacueeDao();
+    
     private String currentBarangay;
     private Runnable onRegistrationSuccess;
 
-    // Helper class to store center ID and Name in the ComboBox
-    private static class CenterItem {
-        final long id;
-        final String name;
-
-        CenterItem(long id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
+    @FXML
+    public void initialize() {
+        labelError.setVisible(false);
+        setupComboBox();
     }
-
+    
+    /**
+     * Initializes the modal with the current barangay and a callback to refresh the table.
+     */
     public void initData(String barangay, Runnable onSuccess) {
         this.currentBarangay = barangay;
         this.onRegistrationSuccess = onSuccess;
-        loadCenters();
+        loadEvacuationCenters();
     }
 
-    private void loadCenters() {
-        ObservableList<CenterItem> centers = FXCollections.observableArrayList();
-        String sql = "SELECT id, name FROM evacuation_centers WHERE barangay = ? ORDER BY name ASC";
-
-        try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, currentBarangay);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                centers.add(new CenterItem(rs.getLong("id"), rs.getString("name")));
+    private void setupComboBox() {
+        // This tells the ComboBox to display the Center's Name, not its Java memory address
+        comboBoxCenter.setConverter(new StringConverter<EvacuationCenter>() {
+            @Override
+            public String toString(EvacuationCenter center) {
+                return center == null ? null : center.getName();
             }
-        } catch (SQLException e) {
-            System.err.println("DB error loading centers for registration: " + e.getMessage());
-        }
 
-        comboBoxCenter.setItems(centers);
+            @Override
+            public EvacuationCenter fromString(String string) {
+                return null; // Not needed for our use case
+            }
+        });
     }
 
-    @FXML private void handleRegister() {
+    private void loadEvacuationCenters() {
+        try {
+            if (currentBarangay == null) {
+                showError("Barangay context missing.");
+                return;
+            }
+
+            // Fetch only centers belonging to this specific barangay
+            List<EvacuationCenter> centers = centerDao.findByBarangay(currentBarangay);
+
+            // Populate the dropdown
+            ObservableList<EvacuationCenter> observableCenters = FXCollections.observableArrayList(centers);
+            comboBoxCenter.setItems(observableCenters);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Failed to load evacuation centers.");
+        }
+    }
+
+    @FXML
+    private void handleRegister(ActionEvent event) {
         labelError.setVisible(false);
 
         String name = textFieldName.getText().trim();
-        CenterItem selectedCenter = comboBoxCenter.getValue();
-        String familySizeStr = textFieldFamilySize.getText().trim();
         String contact = textFieldContact.getText().trim();
+        EvacuationCenter selectedCenter = comboBoxCenter.getValue();
 
-        // Basic verification logic
-        if (name.isEmpty() || selectedCenter == null || familySizeStr.isEmpty()) {
-            showError("Please fill in all required fields (Name, Center, Family Size).");
+        // 1. Validation
+        if (name.isEmpty()) {
+            showError("Full Name is required.");
+            return;
+        }
+        if (selectedCenter == null) {
+            showError("Please assign an Evacuation Center.");
             return;
         }
 
-        int familySize;
+        // 2. Save to Database
         try {
-            familySize = Integer.parseInt(familySizeStr);
-            if (familySize <= 0) throw new NumberFormatException();
-        } catch (NumberFormatException e) {
-            showError("Family size must be a positive number.");
-            return;
-        }
+            Evacuee newEvacuee = new Evacuee();
+            newEvacuee.setFullNameEnc(name);
+            newEvacuee.setContactEnc(contact.isEmpty() ? null : contact);
+            newEvacuee.setBarangay(currentBarangay);
+            newEvacuee.setEvacuationCenterId(selectedCenter.getId());
 
-        // Insert into database
-        String sql = "INSERT INTO evacuee_registrations (full_name, center_id, barangay, contact_number, family_size, verification_status) VALUES (?, ?, ?, ?, ?, 'Verified')";
+            // Assuming verification_status defaults to 'pending' in your DB/Model
 
-        try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            evacueeDao.save(newEvacuee); // Saves to the database!
 
-            ps.setString(1, name);
-            ps.setLong(2, selectedCenter.id);
-            ps.setString(3, currentBarangay);
-            ps.setString(4, contact);
-            ps.setInt(5, familySize);
-
-            ps.executeUpdate();
+            // 3. Show Success & Close
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Registration Successful");
+            alert.setHeaderText(null);
+            alert.setContentText(name + " has been successfully assigned to " + selectedCenter.getName() + ".");
+            alert.showAndWait();
 
             if (onRegistrationSuccess != null) {
                 onRegistrationSuccess.run();
             }
-            closeModal();
 
-        } catch (SQLException e) {
-            System.err.println("Error saving evacuee registration: " + e.getMessage());
-            showError("Database error occurred while saving.");
+            closeWindow();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Database error: Failed to register evacuee.");
         }
+    }
+
+    @FXML
+    private void handleCancel(ActionEvent event) {
+        closeWindow();
     }
 
     private void showError(String message) {
@@ -120,11 +142,7 @@ public class RegisterEvacueeController {
         labelError.setVisible(true);
     }
 
-    @FXML private void handleCancel() {
-        closeModal();
-    }
-
-    private void closeModal() {
+    private void closeWindow() {
         Stage stage = (Stage) buttonCancel.getScene().getWindow();
         stage.close();
     }

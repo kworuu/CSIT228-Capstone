@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 14, 2026 at 03:21 PM
+-- Generation Time: May 15, 2026 at 04:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -88,7 +88,9 @@ INSERT INTO `center_status_updates` (`id`, `center_id`, `event_label`, `availabl
 (5, 1, 'No active event', '[6]', NULL, NULL, '2026-05-11 04:43:47'),
 (6, 1, '\"gwapo andre\"', '[4, 1]', NULL, NULL, '2026-05-11 04:43:56'),
 (7, 1, 'No active event', '[5, 4, 6, 2, 1, 3]', NULL, NULL, '2026-05-12 17:03:46'),
-(8, 1, 'No active event', '[5]', NULL, NULL, '2026-05-13 02:14:04');
+(8, 1, 'No active event', '[5]', NULL, NULL, '2026-05-13 02:14:04'),
+(9, 1, 'No active event', '[]', NULL, NULL, '2026-05-14 16:28:58'),
+(10, 1, 'No active event', '[]', NULL, NULL, '2026-05-14 16:29:22');
 
 -- --------------------------------------------------------
 
@@ -102,8 +104,6 @@ CREATE TABLE `evacuation_centers` (
   `address` varchar(500) NOT NULL,
   `barangay` varchar(128) NOT NULL,
   `photo_path` varchar(500) DEFAULT NULL,
-  `capacity` int(11) NOT NULL,
-  `current_occupancy` int(11) NOT NULL DEFAULT 0,
   `latitude` decimal(10,6) DEFAULT NULL,
   `longitude` decimal(10,6) DEFAULT NULL,
   `managed_by` bigint(20) UNSIGNED DEFAULT NULL,
@@ -119,10 +119,10 @@ CREATE TABLE `evacuation_centers` (
 -- Dumping data for table `evacuation_centers`
 --
 
-INSERT INTO `evacuation_centers` (`id`, `name`, `address`, `barangay`, `photo_path`, `capacity`, `current_occupancy`, `latitude`, `longitude`, `managed_by`, `is_active`, `structural_status`, `structural_notes`, `structural_updated_at`, `structural_updated_by`, `created_at`) VALUES
-(1, 'Lahug Elementary School', 'Salinas Drive, Lahug, Cebu City', 'Lahug', '/images/lahug_elem.jpg', 600, 0, 10.343900, 123.900000, NULL, 1, 'safe', NULL, NULL, NULL, '2026-05-07 13:04:41'),
-(2, 'Mabolo National High School', 'A. Soriano Avenue, Mabolo, Cebu City', 'Mabolo', NULL, 800, 0, 10.323200, 123.912300, NULL, 1, 'safe', NULL, NULL, NULL, '2026-05-07 13:04:41'),
-(3, 'Guadalupe Elementary School', 'V. Rama Avenue, Guadalupe, Cebu City', 'Guadalupe', NULL, 500, 0, 10.312000, 123.884300, NULL, 1, 'safe', NULL, NULL, NULL, '2026-05-07 13:04:41');
+INSERT INTO `evacuation_centers` (`id`, `name`, `address`, `barangay`, `photo_path`, `latitude`, `longitude`, `managed_by`, `is_active`, `structural_status`, `structural_notes`, `structural_updated_at`, `structural_updated_by`, `created_at`) VALUES
+(1, 'Lahug Elementary School', 'Salinas Drive, Lahug, Cebu City', 'Lahug', '/images/lahug_elem.jpg', 10.343900, 123.900000, NULL, 1, 'unsafe', NULL, '2026-05-14 16:29:22', 2, '2026-05-07 13:04:41'),
+(2, 'Mabolo National High School', 'A. Soriano Avenue, Mabolo, Cebu City', 'Mabolo', NULL, 10.323200, 123.912300, NULL, 1, 'safe', NULL, NULL, NULL, '2026-05-07 13:04:41'),
+(3, 'Guadalupe Elementary School', 'V. Rama Avenue, Guadalupe, Cebu City', 'Guadalupe', NULL, 10.312000, 123.884300, NULL, 1, 'safe', NULL, NULL, NULL, '2026-05-07 13:04:41');
 
 -- --------------------------------------------------------
 
@@ -137,27 +137,17 @@ CREATE TABLE `evacuees` (
   `barangay` varchar(128) DEFAULT NULL,
   `photo_path` varchar(500) DEFAULT NULL,
   `evacuation_center_id` bigint(20) UNSIGNED NOT NULL,
-  `family_group_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `verification_status` enum('pending','verified','rejected') NOT NULL DEFAULT 'pending',
-  `verified_by` bigint(20) UNSIGNED DEFAULT NULL,
-  `verified_at` timestamp NULL DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `family_groups`
+-- Dumping data for table `evacuees`
 --
 
-CREATE TABLE `family_groups` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `head_of_family` varchar(255) NOT NULL,
-  `member_count` int(11) NOT NULL DEFAULT 1,
-  `evacuation_center_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT INTO `evacuees` (`id`, `full_name_enc`, `contact_enc`, `barangay`, `photo_path`, `evacuation_center_id`, `notes`, `created_at`) VALUES
+(1, 'Charles Daragosa', '0922', 'Lahug', NULL, 1, NULL, '2026-05-15 14:37:19'),
+(2, 'Mark Villagonzales', '0922', 'Lahug', NULL, 1, NULL, '2026-05-15 14:54:49');
 
 -- --------------------------------------------------------
 
@@ -172,6 +162,8 @@ CREATE TABLE `inventory_items` (
   `unit` varchar(32) NOT NULL,
   `critical_threshold` int(11) NOT NULL,
   `low_threshold` int(11) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `created_by_user_id` bigint(20) UNSIGNED DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -179,13 +171,13 @@ CREATE TABLE `inventory_items` (
 -- Dumping data for table `inventory_items`
 --
 
-INSERT INTO `inventory_items` (`id`, `name`, `category`, `unit`, `critical_threshold`, `low_threshold`, `created_at`) VALUES
-(1, 'Rice (5kg sack)', 'food', 'sack', 100, 300, '2026-05-07 13:04:41'),
-(2, 'Pancit canton (pack)', 'food', 'pack', 500, 1200, '2026-05-07 13:04:41'),
-(3, 'Sardines (can)', 'food', 'can', 600, 1500, '2026-05-07 13:04:41'),
-(4, 'Drinking water (1L bottle)', 'water', 'bottle', 1000, 2500, '2026-05-07 13:04:41'),
-(5, 'Blanket', 'non-food', 'piece', 120, 300, '2026-05-07 13:04:41'),
-(6, 'Hygiene kit', 'non-food', 'kit', 200, 500, '2026-05-07 13:04:41');
+INSERT INTO `inventory_items` (`id`, `name`, `category`, `unit`, `critical_threshold`, `low_threshold`, `stock_quantity`, `created_by_user_id`, `created_at`) VALUES
+(1, 'Rice (5kg sack)', 'food', 'sack', 100, 300, 0, NULL, '2026-05-07 13:04:41'),
+(2, 'Pancit canton (pack)', 'food', 'pack', 500, 1200, 0, NULL, '2026-05-07 13:04:41'),
+(3, 'Sardines (can)', 'food', 'can', 600, 1500, 0, NULL, '2026-05-07 13:04:41'),
+(4, 'Drinking water (1L bottle)', 'water', 'bottle', 1000, 2500, 0, NULL, '2026-05-07 13:04:41'),
+(5, 'Blanket', 'non-food', 'piece', 120, 300, 0, NULL, '2026-05-07 13:04:41'),
+(6, 'Hygiene kit', 'non-food', 'kit', 200, 500, 0, NULL, '2026-05-07 13:04:41');
 
 -- --------------------------------------------------------
 
@@ -229,6 +221,16 @@ CREATE TABLE `supply_requests` (
   `admin_notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `supply_requests`
+--
+
+INSERT INTO `supply_requests` (`id`, `requesting_barangay`, `requesting_user_id`, `evacuation_center_id`, `status`, `notes`, `created_at`, `reviewed_by`, `reviewed_at`, `admin_notes`) VALUES
+(1, 'Mabolo', 3, NULL, 'pending', '', '2026-05-15 00:35:52', NULL, NULL, NULL),
+(2, 'Lahug', 2, NULL, 'pending', '', '2026-05-15 01:55:22', NULL, NULL, NULL),
+(3, 'Lahug', 2, NULL, 'pending', 'No more blankets left', '2026-05-15 02:01:56', NULL, NULL, NULL),
+(4, 'Lahug', 2, NULL, 'pending', 'Need water, no supply almost.', '2026-05-15 02:30:58', NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -242,6 +244,16 @@ CREATE TABLE `supply_request_items` (
   `quantity_requested` int(11) NOT NULL,
   `quantity_approved` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `supply_request_items`
+--
+
+INSERT INTO `supply_request_items` (`id`, `request_id`, `item_id`, `quantity_requested`, `quantity_approved`) VALUES
+(1, 1, 4, 100, 0),
+(2, 2, 5, 123, 0),
+(3, 3, 5, 12, 0),
+(4, 4, 4, 200, 0);
 
 -- --------------------------------------------------------
 
@@ -286,35 +298,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password_hash`, `email`, `display_name`, `role`, `assigned_center_id`, `assigned_barangay`, `created_at`, `last_login_at`) VALUES
-(1, 'admin', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'admin@civicguard.test', 'Cebu City Admin', 'admin', NULL, 'Lahug', '2026-05-07 13:04:41', '2026-05-14 12:12:43'),
-(2, 'brgy_lahug', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'lahug@civicguard.test', 'Brgy. Lahug', 'barangay', NULL, 'Lahug', '2026-05-14 10:31:37', NULL),
-(3, 'brgy_mabolo', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'mabolo@civicguard.test', 'Brgy. Mabolo', 'barangay', NULL, 'Mabolo', '2026-05-14 10:31:37', NULL),
-(4, 'brgy_guadalupe', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'guadalupe@civicguard.test', 'Brgy. Guadalupe', 'barangay', NULL, 'Guadalupe', '2026-05-14 10:31:37', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `warehouse_stock`
---
-
-CREATE TABLE `warehouse_stock` (
-  `warehouse_id` bigint(20) UNSIGNED NOT NULL,
-  `item_id` bigint(20) UNSIGNED NOT NULL,
-  `quantity` int(11) NOT NULL DEFAULT 0,
-  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `warehouse_stock`
---
-
-INSERT INTO `warehouse_stock` (`warehouse_id`, `item_id`, `quantity`, `last_updated`) VALUES
-(1, 1, 450, '2026-05-07 13:04:41'),
-(1, 2, 2000, '2026-05-07 13:04:41'),
-(1, 3, 2400, '2026-05-07 13:04:41'),
-(1, 4, 3500, '2026-05-07 13:04:41'),
-(1, 5, 450, '2026-05-07 13:04:41'),
-(1, 6, 650, '2026-05-07 13:04:41');
+(1, 'admin', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'admin@civicguard.test', 'Cebu City Admin', 'admin', NULL, 'Lahug', '2026-05-07 13:04:41', '2026-05-14 15:25:26'),
+(2, 'brgy_lahug', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'lahug@civicguard.test', 'Brgy. Lahug', 'barangay', NULL, 'Lahug', '2026-05-14 10:31:37', '2026-05-15 14:54:31'),
+(3, 'brgy_mabolo', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'mabolo@civicguard.test', 'Brgy. Mabolo', 'barangay', NULL, 'Mabolo', '2026-05-14 10:31:37', '2026-05-15 01:07:29'),
+(4, 'brgy_guadalupe', '$2a$10$aD.dpzxcUPA9a8Yh9Hg4tej/RuyE9AVakVaGkvFlfjQwAfTwn0L2G', 'guadalupe@civicguard.test', 'Brgy. Guadalupe', 'barangay', NULL, 'Guadalupe', '2026-05-14 10:31:37', '2026-05-15 01:29:55');
 
 --
 -- Indexes for dumped tables
@@ -358,25 +345,17 @@ ALTER TABLE `evacuation_centers`
 --
 ALTER TABLE `evacuees`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_status_center` (`verification_status`,`evacuation_center_id`),
+  ADD KEY `idx_status_center` (`evacuation_center_id`),
   ADD KEY `idx_created` (`created_at`),
-  ADD KEY `evacuation_center_id` (`evacuation_center_id`),
-  ADD KEY `family_group_id` (`family_group_id`),
-  ADD KEY `verified_by` (`verified_by`);
-
---
--- Indexes for table `family_groups`
---
-ALTER TABLE `family_groups`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_center` (`evacuation_center_id`);
+  ADD KEY `evacuation_center_id` (`evacuation_center_id`);
 
 --
 -- Indexes for table `inventory_items`
 --
 ALTER TABLE `inventory_items`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_category` (`category`);
+  ADD KEY `idx_category` (`category`),
+  ADD KEY `fk_inventory_items_user` (`created_by_user_id`);
 
 --
 -- Indexes for table `lgu_warehouses`
@@ -422,13 +401,6 @@ ALTER TABLE `users`
   ADD KEY `fk_users_assigned_center` (`assigned_center_id`);
 
 --
--- Indexes for table `warehouse_stock`
---
-ALTER TABLE `warehouse_stock`
-  ADD PRIMARY KEY (`warehouse_id`,`item_id`),
-  ADD KEY `item_id` (`item_id`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -448,7 +420,7 @@ ALTER TABLE `barangays`
 -- AUTO_INCREMENT for table `center_status_updates`
 --
 ALTER TABLE `center_status_updates`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `evacuation_centers`
@@ -460,13 +432,7 @@ ALTER TABLE `evacuation_centers`
 -- AUTO_INCREMENT for table `evacuees`
 --
 ALTER TABLE `evacuees`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `family_groups`
---
-ALTER TABLE `family_groups`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `inventory_items`
@@ -484,13 +450,13 @@ ALTER TABLE `lgu_warehouses`
 -- AUTO_INCREMENT for table `supply_requests`
 --
 ALTER TABLE `supply_requests`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `supply_request_items`
 --
 ALTER TABLE `supply_request_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `transactions`
@@ -532,15 +498,13 @@ ALTER TABLE `evacuation_centers`
 -- Constraints for table `evacuees`
 --
 ALTER TABLE `evacuees`
-  ADD CONSTRAINT `evacuees_ibfk_1` FOREIGN KEY (`evacuation_center_id`) REFERENCES `evacuation_centers` (`id`),
-  ADD CONSTRAINT `evacuees_ibfk_2` FOREIGN KEY (`family_group_id`) REFERENCES `family_groups` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `evacuees_ibfk_3` FOREIGN KEY (`verified_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `evacuees_ibfk_1` FOREIGN KEY (`evacuation_center_id`) REFERENCES `evacuation_centers` (`id`);
 
 --
--- Constraints for table `family_groups`
+-- Constraints for table `inventory_items`
 --
-ALTER TABLE `family_groups`
-  ADD CONSTRAINT `family_groups_ibfk_1` FOREIGN KEY (`evacuation_center_id`) REFERENCES `evacuation_centers` (`id`);
+ALTER TABLE `inventory_items`
+  ADD CONSTRAINT `fk_inventory_items_user` FOREIGN KEY (`created_by_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `supply_requests`
@@ -571,48 +535,8 @@ ALTER TABLE `transactions`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `fk_users_assigned_center` FOREIGN KEY (`assigned_center_id`) REFERENCES `evacuation_centers` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `warehouse_stock`
---
-ALTER TABLE `warehouse_stock`
-  ADD CONSTRAINT `warehouse_stock_ibfk_1` FOREIGN KEY (`warehouse_id`) REFERENCES `lgu_warehouses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `warehouse_stock_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `inventory_items` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-
--- 1. Add the new column to inventory_items
--- We use BIGINT(20) UNSIGNED to match the data type of users.id
-ALTER TABLE `inventory_items`
-    ADD COLUMN `created_by_user_id` bigint(20) UNSIGNED DEFAULT NULL AFTER `low_threshold`;
-
--- 2. Create an index for the new column
--- This improves performance when joining the tables later
-ALTER TABLE `inventory_items`
-    ADD KEY `fk_inventory_creator` (`created_by_user_id`);
-
--- 3. Add the Foreign Key constraint
--- We use ON DELETE SET NULL so if a user is deleted, the item remains
-ALTER TABLE `inventory_items`
-    ADD CONSTRAINT `fk_inventory_items_user`
-        FOREIGN KEY (`created_by_user_id`)
-            REFERENCES `users` (`id`)
-            ON DELETE SET NULL
-            ON UPDATE CASCADE;
-
--- 4. Optional: Assign existing items to the Admin (ID: 1)
--- Since your dump has items already, this links them to your admin account
-UPDATE `inventory_items` SET `created_by_user_id` = 1;
-
--- Modify the inventory_items Table --
-ALTER TABLE `inventory_items`
-    ADD COLUMN `stock_quantity` INT(11) NOT NULL DEFAULT 0 AFTER `low_threshold`;
-
--- Migrate the Data --
-UPDATE `inventory_items` i
-    JOIN `warehouse_stock` ws ON i.id = ws.item_id
-    SET i.stock_quantity = ws.quantity;

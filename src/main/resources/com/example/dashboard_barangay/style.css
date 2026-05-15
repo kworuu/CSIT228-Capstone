@@ -182,7 +182,7 @@
    MAP OVERLAY (floating card bottom-left of WebView)
    ════════════════════════════════════════════════════════ */
 .brgy-map-overlay {
-    -fx-background-color: rgba(255, 255, 255, 0.97);
+    -fx-background-color: #ffffff;
     -fx-background-radius: 14;
     -fx-border-color: #e2e8f0;
     -fx-border-radius: 14;
@@ -532,4 +532,254 @@
 .brgy-tbl-action:hover {
     -fx-background-color: #059669;
     -fx-text-fill: white;
+}
+
+/* ════════════════════════════════════════════════════════
+   Phase 5b — Structural Status Badges
+   ════════════════════════════════════════════════════════ */
+
+/* On supply pills (overlay) — reuses .brgy-pill base shape, overrides color */
+.brgy-pill.brgy-struct-safe {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #065f46;
+    -fx-border-color: #34d399;
+    -fx-border-width: 2;
+}
+
+.brgy-pill.brgy-struct-damaged {
+    -fx-background-color: #fffbeb;
+    -fx-text-fill: #92400e;
+    -fx-border-color: #f59e0b;
+    -fx-border-width: 2;
+}
+
+.brgy-pill.brgy-struct-unsafe {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #991b1b;
+    -fx-border-color: #ef4444;
+    -fx-border-width: 2;
+}
+
+/* On center cards (strip below map) — bolder, larger to grab attention */
+.brgy-badge-struct {
+    -fx-font-size: 9;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 2 8;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.brgy-badge-struct.brgy-struct-damaged {
+    -fx-background-color: #fffbeb;
+    -fx-text-fill: #92400e;
+    -fx-border-color: #fcd34d;
+}
+
+.brgy-badge-struct.brgy-struct-unsafe {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #991b1b;
+    -fx-border-color: #fca5a5;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLATE MODAL TYPOGRAPHY & CONTAINER
+   ════════════════════════════════════════════════════════ */
+.brgy-slate-modal {
+    -fx-background-color: #0f172a;
+    -fx-opacity: 1.0; /* Forces no transparency */
+    -fx-background-radius: 14;
+    -fx-border-color: #1e293b;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 25, 0, 8, 8);
+}
+
+.brgy-slate-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 800; /* Extra bold */
+    -fx-text-fill: #ffffff;
+    -fx-padding: 0 0 2 0;
+}
+
+.brgy-slate-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8; /* Muted slate */
+}
+
+.brgy-slate-section-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #64748b; /* Medium slate */
+    -fx-font-family: 'Segoe UI Semibold', system-ui, sans-serif;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLATE MODAL INPUTS & TABLES (Dark Mode)
+   ════════════════════════════════════════════════════════ */
+/* Transparent inputs with a light stroke */
+.brgy-slate-input {
+    -fx-background-color: transparent;
+    -fx-border-color: #94a3b8; /* Muted white/slate stroke */
+    -fx-border-radius: 8;
+    -fx-text-fill: #f8fafc; /* Crisp white text when typing */
+    -fx-padding: 7 12;
+    -fx-font-size: 12;
+}
+
+.brgy-slate-input:focused {
+    -fx-border-color: #f8fafc; /* Brighter white stroke when clicked */
+}
+
+.brgy-slate-input .list-cell {
+    -fx-text-fill: #f8fafc; /* Ensures ComboBox selected text is white */
+}
+
+/* Styles the dropdown popup background */
+.brgy-slate-input .combo-box-popup .list-view {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #334155;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+/* Styles the individual items in the dropdown */
+.brgy-slate-input .combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f8fafc;
+    -fx-padding: 8 12;
+}
+
+/* Styles the items when you hover or select them */
+.brgy-slate-input .combo-box-popup .list-cell:hover,
+.brgy-slate-input .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #10b981; /* Emerald green text on hover! */
+}
+
+/* FIX: Table container shouldn't look like the modal background */
+.brgy-slate-table-container {
+    -fx-background-color: transparent;
+    -fx-border-color: #475569;
+    -fx-border-radius: 8;
+    -fx-padding: 4;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLATE MODAL TABLES (Forced Dark Mode & White Text)
+   ════════════════════════════════════════════════════════ */
+/* 1. Force the table itself to be transparent */
+.brgy-slate-table,
+.brgy-slate-table .viewport {
+    -fx-background-color: transparent;
+}
+
+/* 2. Kill the white boxes in the scrollbar/header corners */
+.brgy-slate-table .corner,
+.brgy-slate-table .filler,
+.brgy-slate-table .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+/* 3. Dark mode headers */
+.brgy-slate-table .column-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0 0 1 0;
+}
+.brgy-slate-table .column-header .label {
+    -fx-text-fill: #94a3b8;
+}
+
+/* 4. FORCE DARK ROW BACKGROUNDS (Nuking the white) */
+.brgy-slate-table .table-row-cell,
+.brgy-slate-table .table-row-cell:even,
+.brgy-slate-table .table-row-cell:empty {
+    -fx-background-color: #0f172a; /* Hardcoded to match modal background */
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0 0 1 0;
+}
+
+.brgy-slate-table .table-row-cell:odd {
+    -fx-background-color: #1e293b; /* Slightly lighter slate for striping */
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0 0 1 0;
+}
+
+.brgy-slate-table .table-row-cell:hover {
+    -fx-background-color: #334155; /* Hover highlight */
+}
+
+.brgy-slate-table .table-row-cell:selected {
+    -fx-background-color: #064e3b; /* Dark emerald selection */
+}
+
+/* 5. FORCE CRISP WHITE TEXT BY DEFAULT (Fixing the invisible text) */
+.brgy-slate-table .table-cell {
+    -fx-text-fill: #f8fafc;
+}
+.brgy-slate-table .table-row-cell .text {
+    -fx-fill: #f8fafc; /* Overrides the internal JavaFX text node */
+}
+
+/* 6. Selected row text color */
+.brgy-slate-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #6ee7b7;
+    -fx-font-weight: bold;
+}
+.brgy-slate-table .table-row-cell:selected .text {
+    -fx-fill: #6ee7b7;
+}
+
+/* 7. Empty table text */
+.brgy-slate-table .placeholder .label {
+    -fx-text-fill: #64748b;
+}
+
+/* 8. Dark Scrollbars */
+.brgy-slate-table .scroll-bar:vertical,
+.brgy-slate-table .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.brgy-slate-table .scroll-bar:vertical .thumb {
+    -fx-background-color: #334155;
+    -fx-background-radius: 4;
+}
+.brgy-slate-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #475569;
+}
+
+/* ════════════════════════════════════════════════════════
+   SLATE MODAL BUTTONS (Dark Mode)
+   ════════════════════════════════════════════════════════ */
+.brgy-slate-btn-ghost {
+    -fx-background-color: transparent;
+    -fx-border-color: #475569;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #f8fafc; /* Crisp white text by default */
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+}
+
+.brgy-slate-btn-ghost:hover {
+    -fx-background-color: #334155;
+    -fx-text-fill: #ffffff;
+}
+
+.brgy-slate-btn-close {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 4 8;
+    -fx-font-size: 16;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+.brgy-slate-btn-close:hover {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #f8fafc;
 }
