@@ -5,13 +5,10 @@ import com.example.dao.EvacueeDao;
 import com.example.dao.InventoryItemDao;
 import com.example.dao.TransactionDao;
 import com.example.dao.UserDao;
-import com.example.dao.WarehouseStockDao;
 import com.example.model.EvacuationCenter;
 import com.example.model.InventoryItem;
 import com.example.model.Transaction;
 import com.example.model.User;
-import com.example.model.VerificationStatus;
-import com.example.model.WarehouseStock;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -32,7 +29,6 @@ public class DBConnectionSmokeTest {
             testEvacuationCenters();
             testInventoryItems();
             testUsers();
-            testWarehouseStock();
             testEvacuees();
             testTransactions();
 
@@ -50,7 +46,7 @@ public class DBConnectionSmokeTest {
         List<EvacuationCenter> all = dao.findAll();
         System.out.println("  findAll() -> " + all.size() + " centers");
         for (EvacuationCenter c : all) {
-            System.out.println("    - " + c + " (capacity " + c.getCapacity() + ")");
+            System.out.println("    - " + c );
         }
         System.out.println("  findAllActive() -> " + dao.findAllActive().size());
     }
@@ -80,30 +76,11 @@ public class DBConnectionSmokeTest {
                 (admin.isPresent() ? "found id=" + admin.get().getId() : "NOT FOUND"));
     }
 
-    private static void testWarehouseStock() throws SQLException {
-        System.out.println("\n[4] WarehouseStockDao");
-        WarehouseStockDao dao = new WarehouseStockDao();
-        List<WarehouseStock> stock = dao.findByWarehouse(1L);
-        System.out.println("  findByWarehouse(1) -> " + stock.size() + " rows");
-        for (WarehouseStock s : stock) {
-            System.out.println("    - item " + s.getItemId()
-                    + ": " + s.getQuantity() + " (last_updated=" + s.getLastUpdated() + ")");
-        }
-        // findById with composite key
-        var key = new WarehouseStockDao.StockKey(1L, 1L);
-        Optional<WarehouseStock> one = dao.findById(key);
-        System.out.println("  findById((1, 1)) -> " +
-                (one.isPresent() ? "qty=" + one.get().getQuantity() : "NOT FOUND"));
-    }
-
     private static void testEvacuees() throws SQLException {
         System.out.println("\n[5] EvacueeDao");
         EvacueeDao dao = new EvacueeDao();
         System.out.println("  findAll() -> " + dao.findAll().size());
-        System.out.println("  findByStatus(PENDING) -> "
-                + dao.findByStatus(VerificationStatus.PENDING).size());
         System.out.println("  findByCenter(1) -> " + dao.findByCenter(1L).size());
-        System.out.println("  countVerifiedAtCenter(1) -> " + dao.countVerifiedAtCenter(1L));
     }
 
     private static void testTransactions() throws SQLException {

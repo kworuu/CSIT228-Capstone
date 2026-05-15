@@ -1,6 +1,9 @@
 package com.example.dashboard_barangay;
 
+
+import com.example.dao.ActivityTimelineDao;
 import com.example.map_logic_v2.BrgyMapHtmlProvider;
+import com.example.model.ActivityTimelineItem;
 import com.example.util.DBConnectionManager;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
@@ -12,7 +15,10 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
+import javafx.collections.FXCollections;
+import com.example.dao.EvacuationCenterDao;
+import com.example.model.StructuralStatus;
+import com.example.auth.SessionContext;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,7 +75,7 @@ public class BrgyDashboardController {
     @FXML private Label  labelOverlayEvent;
     @FXML private Label  labelOverlayTimestamp;
     @FXML private Button buttonUpdateCenter;
-    @FXML private Button buttonOverlayClose;
+
 
     // Center cards strip
     @FXML private HBox   hboxCenterCardsRow;
@@ -83,28 +89,52 @@ public class BrgyDashboardController {
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacCenter;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacBrgy;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacFamily;
-    @FXML private TableColumn<EvacueeRow,String> tableColumnEvacStatus;
-    @FXML private TableColumn<EvacueeRow,String> tableColumnEvacAction;
     @FXML private Button buttonRegisterEvacuee;
     @FXML private Button buttonExportCsv;
     @FXML private TextField textFieldSearchEvacuees;
-    @FXML private Button buttonFilterRegAll;
-    @FXML private Button buttonFilterRegVerified;
-    @FXML private Button buttonFilterRegPending;
+    @FXML private Button buttonLogout;
+    @FXML private Button btnReturnHome;
 
     // ── FXML — Activity panel ─────────────────────────────────────
-    @FXML private TableView<ActivityRow>   tableViewActivity;
-    @FXML private TableColumn<ActivityRow,String> tableColumnActTime;
-    @FXML private TableColumn<ActivityRow,String> tableColumnActAction;
-    @FXML private TableColumn<ActivityRow,String> tableColumnActTarget;
-    @FXML private TableColumn<ActivityRow,String> tableColumnActCenter;
-    @FXML private TableColumn<ActivityRow,String> tableColumnActBy;
+    @FXML private TableView<ActivityTimelineItem> tableViewActivity;
+    @FXML private TableColumn<ActivityTimelineItem, String> tableColumnActTime;
+    @FXML private TableColumn<ActivityTimelineItem, String> tableColumnActAction;
+    @FXML private TableColumn<ActivityTimelineItem, String> tableColumnActTarget;
+    @FXML private TableColumn<ActivityTimelineItem, String> tableColumnActCenter;
+    @FXML private TableColumn<ActivityTimelineItem, String> tableColumnActBy;
     @FXML private TextField textFieldSearchActivity;
 
+    private final ActivityTimelineDao timelineDao = new ActivityTimelineDao();
+
+    // Phase 5b — structural status UI
+    @FXML private ComboBox<StructuralStatus> comboStructuralStatus;
+    @FXML private Label                      labelStructuralCurrent;
+    @FXML private TextField                  textFieldStructuralNotes;
+
+    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
+
+    // Cached so handleSave can decide whether to call updateStructuralStatus
+    private StructuralStatus originalStatus;
+    private String           originalNotes;
     private BrgyMapBridge mapBridge;
     private final Map<Long, HBox> mapCardByCenterId = new HashMap<>();
-    // Simulated logged-in context
-    private final String CURRENT_BARANGAY = "Lahug";
+
+    // Session-resolved on first access. Falls back to "Lahug" if no session
+    // is active (developer convenience — e.g. running the dashboard FXML
+    // directly via Scene Builder or BrgyDashboardApplication for testing
+    // without going through the full login flow).
+    private static final String FALLBACK_BARANGAY = "Lahug";
+    private final String CURRENT_BARANGAY = resolveBarangayFromSession();
+
+    private static String resolveBarangayFromSession() {
+        var session = com.example.auth.SessionContext.current();
+        if (session != null && session.getBarangay() != null) {
+            return session.getBarangay().getName();
+        }
+        System.err.println("[BrgyDashboard] No active session — falling back to '"
+                + FALLBACK_BARANGAY + "'. This is expected only in dev/test.");
+        return FALLBACK_BARANGAY;
+    }
 
     // NEW: Variables to hold the map center
     private double currentBrgyLat = 10.3157; // Default fallback
@@ -123,7 +153,7 @@ public class BrgyDashboardController {
 
     public record EvacueeRow(
             String id, String name, String center,
-            String barangay, String familySize, String status) {}
+            String barangay, String familySize) {}
 
     public record ActivityRow(
             String time, String action, String target,
@@ -131,9 +161,13 @@ public class BrgyDashboardController {
 
     public record CenterData(
             long id, String name, String address, String barangay,
-            int capacity, int occupancy, double lat, double lng,
+            double lat, double lng,
             String eventLabel, List<String> availableItems,
-            String updatedAt, String photoPath) {} // <--- ADDED photoPath here
+            String updatedAt, String photoPath,
+            // Phase 5b additions:
+            com.example.model.StructuralStatus structuralStatus,
+            String structuralNotes,
+            String structuralUpdatedAt) {}
 
     // ══════════════════════════════════════════════════════════════
     //  INIT
@@ -142,6 +176,7 @@ public class BrgyDashboardController {
     @FXML
     public void initialize() {
         labelBrgyName.setText("Brgy. " + CURRENT_BARANGAY);
+        populateSidebarFromSession();
 
         loadBarangayCoordinates(); // <--- NEW!
         loadCentersFromDB();
@@ -200,12 +235,15 @@ public class BrgyDashboardController {
         loadEvacueesFromDB();
     }
 
-    @FXML private void handleNavActivity() {
+    @FXML
+    private void handleNavActivity() {
         showPanel(vboxPanelActivity);
         setActiveNav(buttonNavActivity);
         labelHeaderTitle.setText("Activity Log");
-        labelHeaderSubtitle.setText("Recent actions and updates");
-        loadActivityFromDB();
+        labelHeaderSubtitle.setText("Recent actions and supply requests");
+
+        // Ensure you are calling the NEW method
+        refreshActivityLog();
     }
 
     @FXML private void handleRefresh() {
@@ -218,6 +256,22 @@ public class BrgyDashboardController {
                     .filter(c -> c.id() == selectedCenter.id())
                     .findFirst()
                     .ifPresent(this::showOverlay);
+        }
+    }
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
+    }
+    
+    @FXML
+    private void handleReturnHome() {
+        btnReturnHome.setVisible(false); // Hide immediately on click
+        try {
+            // Tell the Leaflet map to fly back to the center
+            webViewMap.getEngine().executeScript("if(window.flyHome) window.flyHome();");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -242,23 +296,22 @@ public class BrgyDashboardController {
 
     private void loadCentersFromDB() {
         centers.clear();
-        String sql = """
-            SELECT
-                ec.id, ec.name, ec.address, ec.barangay, ec.photo_path,
-                ec.capacity, ec.current_occupancy,
-                ec.latitude, ec.longitude,
-                csu.event_label, csu.available_item_ids, csu.updated_at
-            FROM evacuation_centers ec
-            LEFT JOIN (
-                SELECT center_id,
-                       event_label, available_item_ids, updated_at,
-                       ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
-                FROM center_status_updates
-            ) csu ON csu.center_id = ec.id AND csu.rn = 1
-            WHERE ec.is_active = 1 AND ec.barangay = ?
-            ORDER BY ec.name
-            """;
-
+            String sql = """
+        SELECT
+            ec.id, ec.name, ec.address, ec.barangay, ec.photo_path,
+            ec.latitude, ec.longitude,
+            ec.structural_status, ec.structural_notes, ec.structural_updated_at,
+            csu.event_label, csu.available_item_ids, csu.updated_at
+        FROM evacuation_centers ec
+        LEFT JOIN (
+            SELECT center_id,
+                   event_label, available_item_ids, updated_at,
+                   ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
+            FROM center_status_updates
+        ) csu ON csu.center_id = ec.id AND csu.rn = 1
+        WHERE ec.is_active = 1 AND ec.barangay = ?
+        ORDER BY ec.name
+        """;
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -276,8 +329,6 @@ public class BrgyDashboardController {
                     // It is perfectly fine if this is empty/null in the DB right now!
                     String photoPath = rs.getString("photo_path");
 
-                    int capacity     = rs.getInt("capacity");
-                    int occupancy    = rs.getInt("current_occupancy");
                     double lat       = rs.getDouble("latitude");
                     double lng       = rs.getDouble("longitude");
 
@@ -289,11 +340,20 @@ public class BrgyDashboardController {
 
                     String updatedAtRaw   = rs.getString("updated_at");
                     String updatedAt      = formatTimestamp(updatedAtRaw);
+// Existing reads stay above — just add these three:
+                    var structStatus = com.example.model.StructuralStatus.fromDb(
+                            rs.getString("structural_status"));
+                    String structNotes = rs.getString("structural_notes");
+                    String structUpdatedRaw = rs.getString("structural_updated_at");
+                    String structUpdated = structUpdatedRaw == null
+                            ? "Never inspected"
+                            : "Last inspected: " + formatTimestamp(structUpdatedRaw).replaceFirst("^Updated: ", "");
 
                     centers.add(new CenterData(
                             id, name, address, barangay,
-                            capacity, occupancy, lat, lng,
-                            eventLabel, items, updatedAt, photoPath));
+                            lat, lng,
+                            eventLabel, items, updatedAt, photoPath,
+                            structStatus, structNotes, structUpdated));
                 }
             }
         } catch (SQLException e) {
@@ -462,6 +522,18 @@ public class BrgyDashboardController {
 
         // Rebuild pills
         flowPaneOverlayPillsRow.getChildren().clear();
+
+        // Phase 5b — structural status badge always appears first
+        if (c.structuralStatus() != null) {
+            Label structBadge = new Label("🏛 " + c.structuralStatus().displayLabel());
+            structBadge.getStyleClass().addAll("brgy-pill", c.structuralStatus().cssClass());
+            if (c.structuralNotes() != null && !c.structuralNotes().isBlank()) {
+                javafx.scene.control.Tooltip.install(structBadge,
+                        new javafx.scene.control.Tooltip(c.structuralNotes()));
+            }
+            flowPaneOverlayPillsRow.getChildren().add(structBadge);
+        }
+
         if (c.availableItems().isEmpty()) {
             Label none = new Label("No supplies listed");
             none.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11;");
@@ -552,10 +624,15 @@ public class BrgyDashboardController {
         lblName.setMaxWidth(150);
         HBox.setHgrow(lblName, Priority.ALWAYS);
 
-        // We will temporarily leave this status logic until we update the database/modal next
-
-        Label lblBadge = new Label("ACTIVE");
-        lblBadge.getStyleClass().add("brgy-badge-open");
+        Label lblBadge;
+        if (c.structuralStatus() != null && c.structuralStatus() != StructuralStatus.SAFE) {
+            // Show structural concern instead of generic ACTIVE
+            lblBadge = new Label(c.structuralStatus().displayLabel().toUpperCase());
+            lblBadge.getStyleClass().addAll("brgy-badge-struct", c.structuralStatus().cssClass());
+        } else {
+            lblBadge = new Label("ACTIVE");
+            lblBadge.getStyleClass().add("brgy-badge-open");
+        }
 
         hboxNameRow.getChildren().addAll(lblName, lblBadge);
 
@@ -636,30 +713,6 @@ public class BrgyDashboardController {
                 new javafx.beans.property.SimpleStringProperty(d.getValue().barangay()));
         tableColumnEvacFamily.setCellValueFactory(d ->
                 new javafx.beans.property.SimpleStringProperty(d.getValue().familySize()));
-        tableColumnEvacStatus.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().status()));
-        tableColumnEvacStatus.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(String s, boolean empty) {
-                super.updateItem(s, empty);
-                if (empty || s == null) { setGraphic(null); return; }
-                Label lbl = new Label(s);
-                lbl.getStyleClass().add(switch (s.toLowerCase()) {
-                    case "verified" -> "brgy-status-verified";
-                    case "rejected" -> "brgy-status-rejected";
-                    default         -> "brgy-status-pending";
-                });
-                setGraphic(lbl); setText(null);
-            }
-        });
-        tableColumnEvacAction.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("View");
-            { btn.getStyleClass().add("brgy-tbl-action"); }
-            @Override protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : btn);
-                setText(null);
-            }
-        });
     }
 
     private void loadEvacueesFromDB() {
@@ -668,11 +721,9 @@ public class BrgyDashboardController {
                    e.full_name_enc,
                    ec.name AS center_name,
                    e.barangay,
-                   COALESCE(fg.member_count, 1) AS family_size,
-                   e.verification_status
+                   1 AS family_size
             FROM evacuees e
             LEFT JOIN evacuation_centers ec ON ec.id = e.evacuation_center_id
-            LEFT JOIN family_groups fg ON fg.id = e.family_group_id
             ORDER BY e.created_at DESC
             LIMIT 200
             """;
@@ -689,8 +740,7 @@ public class BrgyDashboardController {
                         rs.getString("full_name_enc"),
                         rs.getString("center_name"),
                         rs.getString("barangay"),
-                        String.valueOf(rs.getInt("family_size")),
-                        rs.getString("verification_status")));
+                        String.valueOf(rs.getInt("family_size"))));
             }
         } catch (SQLException e) {
             System.err.println("[BrgyDashboard] DB error loading evacuees: " + e.getMessage());
@@ -708,7 +758,14 @@ public class BrgyDashboardController {
 
             // WE UNCOMMENTED THESE TWO LINES!
             UpdateCenterController controller = loader.getController();
-            controller.initData(selectedCenter.id(), selectedCenter.name(), selectedCenter.address(), selectedCenter.photoPath());
+            controller.initData(
+                    selectedCenter.id(),
+                    selectedCenter.name(),
+                    selectedCenter.address(),
+                    selectedCenter.photoPath(),
+                    selectedCenter.structuralStatus(),
+                    selectedCenter.structuralNotes(),
+                    selectedCenter.structuralUpdatedAt());
 
             // Setup and show the modal window
             javafx.stage.Stage stage = new javafx.stage.Stage();
@@ -754,50 +811,30 @@ public class BrgyDashboardController {
     // ══════════════════════════════════════════════════════════════
 
     private void setupActivityTable() {
-        tableColumnActTime.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().time()));
-        tableColumnActAction.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().action()));
-        tableColumnActTarget.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().target()));
-        tableColumnActCenter.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().center()));
-        tableColumnActBy.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().by()));
+        // These now match the property names in your ActivityTimelineItem record
+        tableColumnActTime.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().timestamp()));
+        tableColumnActAction.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().action()));
+        tableColumnActTarget.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().target()));
+        tableColumnActCenter.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().center()));
+        tableColumnActBy.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().performedBy()));
+
+        refreshActivityLog();
     }
 
-    private void loadActivityFromDB() {
-        String sql = """
-            SELECT
-                al.timestamp,
-                al.action,
-                al.target_type,
-                al.target_id,
-                u.display_name
-            FROM activity_log al
-            LEFT JOIN users u ON u.id = al.user_id
-            ORDER BY al.timestamp DESC
-            LIMIT 100
-            """;
+    private void refreshActivityLog() {
+        try {
+            var session = com.example.auth.SessionContext.current();
+            String brgyName = (session != null && session.getBarangay() != null)
+                    ? session.getBarangay().getName()
+                    : CURRENT_BARANGAY;
 
-        javafx.collections.ObservableList<ActivityRow> rows =
-                javafx.collections.FXCollections.observableArrayList();
+            List<ActivityTimelineItem> logs = timelineDao.getBarangayTimeline(brgyName);
+            System.out.println("Debug: Found " + logs.size() + " activity items for " + brgyName);
 
-        try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                rows.add(new ActivityRow(
-                        formatTimestamp(rs.getString("timestamp")),
-                        rs.getString("action"),
-                        rs.getString("target_type") + " #" + rs.getLong("target_id"),
-                        "—",  // center resolution in a follow-up query if needed
-                        rs.getString("display_name")));
-            }
+            tableViewActivity.setItems(javafx.collections.FXCollections.observableArrayList(logs));
         } catch (SQLException e) {
-            System.err.println("[BrgyDashboard] DB error loading activity: " + e.getMessage());
+            e.printStackTrace();
         }
-        tableViewActivity.setItems(rows);
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -823,5 +860,62 @@ public class BrgyDashboardController {
         public void onMarkerClick(String centerId) {
             Platform.runLater(() -> ctrl.onMarkerClicked(centerId));
         }
+        
+        // NEW: Called by JavaScript when the map moves too far
+        public void toggleHomeButton(boolean show) {
+            Platform.runLater(() -> {
+                if (ctrl.btnReturnHome != null) {
+                    // Only update if the visibility actually changes to prevent UI flickering
+                    if (ctrl.btnReturnHome.isVisible() != show) {
+                        ctrl.btnReturnHome.setVisible(show);
+                    }
+                }
+            });
+        }
     }
+    /**
+     * Populates the bottom-of-sidebar staff card (display name + role)
+     * from the current session. Safe to call when no session is active —
+     * leaves the existing FXML defaults ("Brgy. Staff" / "Response Officer")
+     * in place so dev/test runs still look reasonable.
+     */
+    private void populateSidebarFromSession() {
+        var session = com.example.auth.SessionContext.current();
+        if (session == null || session.getUser() == null) return;
+
+        var user = session.getUser();
+        if (labelStaffName != null) {
+            labelStaffName.setText(user.getDisplayName());
+        }
+        if (labelStaffRole != null) {
+            labelStaffRole.setText(roleLabelFor(user.getRole()));
+        }
+    }
+
+    private static String roleLabelFor(com.example.model.UserRole role) {
+        return switch (role) {
+            case ADMIN    -> "Administrator";
+            case BARANGAY -> "Barangay Officer";
+            case STAFF    -> "Response Officer";
+        };
+    }
+    @FXML
+    private void handleOpenSupplyRequests() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/example/dashboard_barangay/modals/manage-supply-requests.fxml")
+            );
+            javafx.scene.Parent modal = loader.load();
+            ManageSupplyRequestsController controller = loader.getController();
+
+            // Assuming your dashboard root is a StackPane named rootPane
+            // Adjust the variable name to match your FXML if necessary
+            controller.setOnClose(() -> anchorPaneMainRoot.getChildren().remove(modal));
+
+            anchorPaneMainRoot.getChildren().add(modal);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

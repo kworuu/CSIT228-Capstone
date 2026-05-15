@@ -1,6 +1,7 @@
 package com.example.dashboard_admin;
 
 import com.example.dao.EvacuationCenterDao;
+import com.example.dao.InventoryItemDao;
 import com.example.map_logic.MapHtmlProvider;
 import com.example.model.EvacuationCenter;
 import com.example.util.SearchTableUtility;
@@ -33,9 +34,12 @@ public class DashboardController {
     private Button navActivity;
 
 
+
     // Cards
     @FXML
     private Label lblTotalEvacValue;
+    @FXML
+    private Label lblCriticalItem;
 
 
     // Table components
@@ -134,13 +138,20 @@ public class DashboardController {
 
     private void refreshStats(){
         try{
+            //EvacCenter
             int totEvacCenter = centerDao.getTotalCount();
-
             lblTotalEvacValue.setText(String.valueOf(totEvacCenter));
+
+            //Critical Items
+            int crit = InventoryItemDao.getAdminCriticalCount();
+            lblCriticalItem.setText(String.valueOf(crit));
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+
 
     private void searchEvac(){
         SearchTableUtility.setupSearch(

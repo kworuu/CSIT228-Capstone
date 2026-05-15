@@ -78,6 +78,11 @@
                                 mnemonicParsing="false"
                                 styleClass="brgy-nav-btn"
                                 onAction="#handleNavActivity"/>
+                        <Button text="📦 Request Supply"
+                                onAction="#handleOpenSupplyRequests"
+                                styleClass="brgy-btn-ghost"
+                                maxWidth="1.7976931348623157E308"
+                        />
                     </children>
                 </VBox>
 
@@ -133,6 +138,11 @@
                         mnemonicParsing="false"
                         styleClass="brgy-btn-ghost"
                         onAction="#handleRefresh"/>
+                <Button fx:id="buttonLogout"
+                        text="⎋  Log Out"
+                        mnemonicParsing="false"
+                        styleClass="brgy-btn-ghost"
+                        onAction="#handleLogout"/>
             </children>
         </HBox>
 
@@ -148,7 +158,22 @@
                 <StackPane fx:id="stackPaneMapContainer" VBox.vgrow="ALWAYS">
                     <children>
 
-                        <WebView fx:id="webViewMap" />
+                        <StackPane VBox.vgrow="ALWAYS">
+                            <children>
+                                <WebView fx:id="webViewMap" />
+
+                                <Button fx:id="btnReturnHome"
+                                        text="📍 Return to Barangay"
+                                        onAction="#handleReturnHome"
+                                        styleClass="brgy-btn-primary"
+                                        visible="false"
+                                        StackPane.alignment="BOTTOM_CENTER">
+                                    <StackPane.margin>
+                                        <Insets bottom="30.0" />
+                                    </StackPane.margin>
+                                </Button>
+                            </children>
+                        </StackPane>
 
                         <!-- CHANGED VBox to AnchorPane for Absolute close button positioning -->
                         <AnchorPane fx:id="vboxMapOverlay"
@@ -288,22 +313,6 @@
                                            promptText="Search by name, barangay, or center…"
                                            styleClass="brgy-search"/>
                                 <Region HBox.hgrow="ALWAYS"/>
-                                <HBox styleClass="brgy-seg-control">
-                                    <children>
-                                        <Button fx:id="buttonFilterRegAll"
-                                                text="All"
-                                                mnemonicParsing="false"
-                                                styleClass="brgy-seg-btn, brgy-seg-active"/>
-                                        <Button fx:id="buttonFilterRegVerified"
-                                                text="Verified"
-                                                mnemonicParsing="false"
-                                                styleClass="brgy-seg-btn"/>
-                                        <Button fx:id="buttonFilterRegPending"
-                                                text="Pending"
-                                                mnemonicParsing="false"
-                                                styleClass="brgy-seg-btn"/>
-                                    </children>
-                                </HBox>
                             </children>
                         </HBox>
 
@@ -314,8 +323,6 @@
                                 <TableColumn fx:id="tableColumnEvacCenter"  prefWidth="200.0" text="CENTER"/>
                                 <TableColumn fx:id="tableColumnEvacBrgy"    prefWidth="140.0" text="BARANGAY"/>
                                 <TableColumn fx:id="tableColumnEvacFamily"  prefWidth="100.0" text="FAMILY SIZE"/>
-                                <TableColumn fx:id="tableColumnEvacStatus"  prefWidth="110.0" text="STATUS"/>
-                                <TableColumn fx:id="tableColumnEvacAction"  prefWidth="90.0"  text="ACTION"/>
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

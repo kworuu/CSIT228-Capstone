@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.ComboBox?>
 <AnchorPane fx:id="anchorPaneRoot" prefWidth="450.0" prefHeight="550.0"
             stylesheets="@../../dashboard_barangay/style.css" styleClass="brgy-card"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -37,6 +38,30 @@
                             <children>
                                 <Label fx:id="labelTitle" text="Update Center" styleClass="brgy-card-title" wrapText="true"/>
                                 <Label fx:id="labelOverlayAddress" text="Center Address" styleClass="brgy-overlay-address" wrapText="true"/>
+                            </children>
+                        </VBox>
+
+                        <!-- ─── Phase 5b: Structural Integrity ─────────────────────── -->
+                        <VBox fx:id="vboxStructural" spacing="8.0">
+                            <children>
+                                <Label text="Structural Integrity" styleClass="brgy-nav-section-label"/>
+
+                                <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <ComboBox fx:id="comboStructuralStatus"
+                                                  prefWidth="160.0"
+                                                  prefHeight="36.0"
+                                                  styleClass="brgy-search"/>
+                                        <Label fx:id="labelStructuralCurrent"
+                                               text="Currently: —"
+                                               styleClass="brgy-card-center-ts"/>
+                                    </children>
+                                </HBox>
+
+                                <TextField fx:id="textFieldStructuralNotes"
+                                           promptText="Inspector notes (optional) — e.g. 'cracks in east wall, minor flooding'"
+                                           styleClass="brgy-search"
+                                           prefHeight="36.0"/>
                             </children>
                         </VBox>
 

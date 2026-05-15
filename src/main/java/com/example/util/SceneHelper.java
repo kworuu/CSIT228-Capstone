@@ -1,6 +1,8 @@
 package com.example.util;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,7 +18,6 @@ public class SceneHelper {
      * Opens a new window as a Modal (blocks the main window)
      */
     public static void showModal(String fxmlPath, String title, Button ownerButton) {
-
 
         try {
             FXMLLoader loader = new FXMLLoader(SceneHelper.class.getResource(fxmlPath));
@@ -61,7 +62,7 @@ public class SceneHelper {
         }
     }
 
-    private static void dragWindow(Parent root, Stage stage, int xy){
+    public static void dragWindow(Parent root, Stage stage, int xy){
         final double[] xOffset;
         final double[] yOffset;
 
@@ -84,33 +85,41 @@ public class SceneHelper {
         });
     }
 
-    public static FXMLLoader nestedModal(String fxmlPath, String title, Button ownerButton){
-        FXMLLoader loader = new FXMLLoader(SceneHelper.class.getResource(fxmlPath));
-
+    public static FXMLLoader openNestedModal(String fxmlPath, String title, Node triggerNode) {
         try {
+            FXMLLoader loader = new FXMLLoader(SceneHelper.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Stage stage = new Stage();
-            dragWindow(root, stage, 1);
 
-            stage.setTitle(title);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(ownerButton.getScene().getWindow());
-            stage.initStyle(StageStyle.TRANSPARENT);
+            Stage mapStage = new Stage();
+            mapStage.setTitle(title);
+            mapStage.initStyle(StageStyle.TRANSPARENT);
+
+            mapStage.initModality(Modality.APPLICATION_MODAL);
 
             Scene scene = new Scene(root);
-            stage.sizeToScene();
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            mapStage.setScene(scene);
+            mapStage.sizeToScene();
 
+            Stage currentStage = (Stage) triggerNode.getScene().getWindow();
+            currentStage.hide();
 
-            stage.setScene(scene);
-            stage.show();
+            mapStage.setOnHidden(e -> currentStage.show());
+            dragWindow(root, mapStage, 1);
+
+            mapStage.show();
+
             return loader;
         } catch (IOException e) {
-            System.err.println("Error loading modal: " + fxmlPath);
             e.printStackTrace();
+            return null;
         }
+    }
 
-        return loader;
+    public static void closeWindow(ActionEvent event) {
+        Node source = (Node) event.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
     }
 
 }

@@ -38,7 +38,7 @@
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
                         <!-- Center Name -->
@@ -69,23 +69,23 @@
                                 </HBox>
                             </children>
                         </VBox>
-                  <VBox spacing="10.0" GridPane.rowIndex="3">
-                     <children>
-                        <Label styleClass="field-label" text="CENTER PHOTO" />
-                        <HBox spacing="10.0">
-                           <children>
-                              <TextField fx:id="photoPathField" editable="false" promptText="No file selected" styleClass="search-field" HBox.hgrow="ALWAYS" />
-                              <Button mnemonicParsing="false" onAction="#handleBrowsePhoto" prefHeight="40.0" styleClass="btn-outline" text="Browse" />
-                           </children>
-                        </HBox>
-                        <StackPane prefHeight="180.0" style="-fx-border-color: #ddd; -fx-background-color: #f9f9f9; -fx-border-radius: 5; -fx-background-radius: 5;">
-                           <children>
-                              <ImageView fx:id="photoPreview1" fitHeight="170.0" fitWidth="450.0" pickOnBounds="true" preserveRatio="true" />
-                              <Label fx:id="placeholderLabel1" text="No Image Selected" textFill="#aaa" />
-                           </children>
-                        </StackPane>
-                     </children>
-                  </VBox>
+                        <VBox spacing="10.0" GridPane.rowIndex="3">
+                            <children>
+                                <Label styleClass="field-label" text="CENTER PHOTO" />
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <TextField fx:id="photoPathField" editable="false" promptText="No file selected" styleClass="search-field" HBox.hgrow="ALWAYS" />
+                                        <Button mnemonicParsing="false" onAction="#handleBrowsePhoto" prefHeight="40.0" styleClass="btn-outline" text="Browse" />
+                                    </children>
+                                </HBox>
+                                <StackPane prefHeight="180.0" style="-fx-border-color: #ddd; -fx-background-color: #f9f9f9; -fx-border-radius: 5; -fx-background-radius: 5;">
+                                    <children>
+                                        <ImageView fx:id="photoPreview1" fitHeight="170.0" fitWidth="450.0" pickOnBounds="true" preserveRatio="true" />
+                                        <Label fx:id="placeholderLabel1" text="No Image Selected" textFill="#aaa" />
+                                    </children>
+                                </StackPane>
+                            </children>
+                        </VBox>
                     </children>
                 </GridPane>
 
@@ -93,7 +93,7 @@
                 <HBox spacing="15.0">
                     <children>
                         <Button fx:id="insertButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleInsert" prefHeight="45.0" styleClass="btn-primary" text="Register Center" HBox.hgrow="ALWAYS" />
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleCancel" prefHeight="45.0" styleClass="btn-outline" text="Cancel" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnCancel" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-outline" text="Cancel" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
             </children>
