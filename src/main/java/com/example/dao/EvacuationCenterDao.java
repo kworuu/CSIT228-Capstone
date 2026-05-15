@@ -25,6 +25,11 @@
     public class EvacuationCenterDao implements GenericDao<EvacuationCenter, Long> {
 
         // ── SQL constants ───────────────────────────────────────────
+        private static final String SQL_UPDATE_STRUCTURAL =
+                "UPDATE evacuation_centers SET " +
+                        "structural_status = ?, structural_notes = ?, " +
+                        "structural_updated_at = ?, structural_updated_by = ? " +
+                        "WHERE id = ?";
 
         private static final String SQL_FIND_BY_ID =
                 "SELECT id, name, address, barangay, capacity, current_occupancy, " +
@@ -165,6 +170,49 @@
             }
         }
 
+        /**
+         * Targeted update for the structural-status workflow. The barangay
+         * staff sets the status and (optionally) inspector notes — only those
+         * four fields change. Keeping this method separate from the general
+         * {@link #update(EvacuationCenter)} avoids overwriting other fields
+         * with stale in-memory values and gives a cleaner audit trail.
+         *
+         * <p>This is invoked from {@code UpdateCenterController} when the
+         * barangay user saves the modal. The {@code userId} comes from the
+         * current session and is persisted to {@code structural_updated_by}
+         * so the activity log can attribute changes to a specific person.</p>
+         *
+         * @param centerId the evacuation center being updated
+         * @param status   the new structural status
+         * @param notes    optional inspector notes (may be null/blank)
+         * @param userId   the id of the user performing the update (for audit)
+         * @throws SQLException if no row with this id exists, or the update fails
+         */
+        public void updateStructuralStatus(long centerId,
+                                           com.example.model.StructuralStatus status,
+                                           String notes,
+                                           long userId) throws SQLException {
+            try (Connection conn = DBConnectionManager.getInstance().getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(SQL_UPDATE_STRUCTURAL)) {
+
+                stmt.setString(1, status.toDb());
+                // Treat blank notes as NULL — keeps the column tidy.
+                if (notes == null || notes.isBlank()) {
+                    stmt.setNull(2, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(2, notes.trim());
+                }
+                stmt.setTimestamp(3, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+                stmt.setLong(4, userId);
+                stmt.setLong(5, centerId);
+
+                int rows = stmt.executeUpdate();
+                if (rows == 0) {
+                    throw new SQLException(
+                            "Structural-status update failed — no row with id " + centerId);
+                }
+            }
+        }
         @Override
         public boolean deleteById(Long id) throws SQLException {
             try (Connection conn = DBConnectionManager.getInstance().getConnection();

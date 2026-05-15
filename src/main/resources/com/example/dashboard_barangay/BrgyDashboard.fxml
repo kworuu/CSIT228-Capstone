@@ -78,6 +78,11 @@
                                 mnemonicParsing="false"
                                 styleClass="brgy-nav-btn"
                                 onAction="#handleNavActivity"/>
+                        <Button text="📦 Request Supply"
+                                onAction="#handleOpenSupplyRequests"
+                                styleClass="brgy-btn-ghost"
+                                maxWidth="1.7976931348623157E308"
+                        />
                     </children>
                 </VBox>
 
@@ -133,6 +138,11 @@
                         mnemonicParsing="false"
                         styleClass="brgy-btn-ghost"
                         onAction="#handleRefresh"/>
+                <Button fx:id="buttonLogout"
+                        text="⎋  Log Out"
+                        mnemonicParsing="false"
+                        styleClass="brgy-btn-ghost"
+                        onAction="#handleLogout"/>
             </children>
         </HBox>
 
