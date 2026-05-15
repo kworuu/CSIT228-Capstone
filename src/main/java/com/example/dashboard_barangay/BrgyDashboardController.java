@@ -75,7 +75,7 @@ public class BrgyDashboardController {
     @FXML private Label  labelOverlayEvent;
     @FXML private Label  labelOverlayTimestamp;
     @FXML private Button buttonUpdateCenter;
-    @FXML private Button buttonOverlayClose;
+
 
     // Center cards strip
     @FXML private HBox   hboxCenterCardsRow;
@@ -93,6 +93,7 @@ public class BrgyDashboardController {
     @FXML private Button buttonExportCsv;
     @FXML private TextField textFieldSearchEvacuees;
     @FXML private Button buttonLogout;
+    @FXML private Button btnReturnHome;
 
     // ── FXML — Activity panel ─────────────────────────────────────
     @FXML private TableView<ActivityTimelineItem> tableViewActivity;
@@ -261,6 +262,17 @@ public class BrgyDashboardController {
     private void handleLogout() {
         new com.example.auth.AuthService().logout();
         com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
+    }
+    
+    @FXML
+    private void handleReturnHome() {
+        btnReturnHome.setVisible(false); // Hide immediately on click
+        try {
+            // Tell the Leaflet map to fly back to the center
+            webViewMap.getEngine().executeScript("if(window.flyHome) window.flyHome();");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showPanel(VBox target) {
@@ -847,6 +859,18 @@ public class BrgyDashboardController {
         /** Called from JavaScript when a marker is clicked. */
         public void onMarkerClick(String centerId) {
             Platform.runLater(() -> ctrl.onMarkerClicked(centerId));
+        }
+        
+        // NEW: Called by JavaScript when the map moves too far
+        public void toggleHomeButton(boolean show) {
+            Platform.runLater(() -> {
+                if (ctrl.btnReturnHome != null) {
+                    // Only update if the visibility actually changes to prevent UI flickering
+                    if (ctrl.btnReturnHome.isVisible() != show) {
+                        ctrl.btnReturnHome.setVisible(show);
+                    }
+                }
+            });
         }
     }
     /**

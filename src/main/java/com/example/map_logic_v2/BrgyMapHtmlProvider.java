@@ -100,27 +100,37 @@ public class BrgyMapHtmlProvider {
                 var markerMap = {};   
 
                 setTimeout(function () {
-                   // Compute a bounding box around the barangay center — this is the
-                               // area the user is allowed to pan within. ~0.012 degrees ≈ 1.3 km radius.
-                               var brgyLat = __BRGY_LAT__;
-                               var brgyLng = __BRGY_LNG__;
-                               var brgyZoom = __BRGY_ZOOM__;
-                               var panRadius = 0.012;
-                
-                               var southWest = L.latLng(brgyLat - panRadius, brgyLng - panRadius);
-                               var northEast = L.latLng(brgyLat + panRadius, brgyLng + panRadius);
-                               var bounds = L.latLngBounds(southWest, northEast);
-                
-                               var map = L.map('map', {
-                                   center: [brgyLat, brgyLng],
-                                   zoom: brgyZoom,
-                                   minZoom: brgyZoom,       // can never zoom out past the default
-                                   maxZoom: 17,             // can zoom in for detail
-                                   maxBounds: bounds,       // rigid pan border
-                                   maxBoundsViscosity: 0.5  // 1.0 = completely rigid; 0.5 = elastic
-                               });
+                    var brgyLat = __BRGY_LAT__;
+                    var brgyLng = __BRGY_LNG__;
+                    var brgyZoom = __BRGY_ZOOM__;
+                    var homeLatLng = L.latLng(brgyLat, brgyLng); // Save origin point
+    
+                    // Notice: maxBounds is completely REMOVED so they can scroll anywhere!
+                    var map = L.map('map', {
+                        center: [brgyLat, brgyLng],
+                        zoom: brgyZoom,
+                        minZoom: 10, // Allow zooming out further now
+                        maxZoom: 17
+                    });
 
                     L.tileLayer('http://localhost:__TILE_PORT__/{z}/{x}/{y}.png').addTo(map);
+
+                    // --- NEW: DISTANCE TRACKER ---
+                    var thresholdMeters = 1500; // 1.5 Kilometers
+                    map.on('move', function() {
+                        var currentCenter = map.getCenter();
+                        var dist = map.distance(homeLatLng, currentCenter);
+                        
+                        // Tell Java to show button if distance > 1500m, hide if closer
+                        if (window.javaBridge) {
+                            window.javaBridge.toggleHomeButton(dist > thresholdMeters);
+                        }
+                    });
+
+                    // --- NEW: FLY HOME COMMAND ---
+                    window.flyHome = function() {
+                        map.flyTo(homeLatLng, brgyZoom, { duration: 1.5 }); // Smooth flight animation
+                    };
 
                     centers.forEach(function (c) {
                         var shortName = c.name.length > 22 ? c.name.substring(0, 20) + '…' : c.name;

@@ -158,7 +158,22 @@
                 <StackPane fx:id="stackPaneMapContainer" VBox.vgrow="ALWAYS">
                     <children>
 
-                        <WebView fx:id="webViewMap" />
+                        <StackPane VBox.vgrow="ALWAYS">
+                            <children>
+                                <WebView fx:id="webViewMap" />
+
+                                <Button fx:id="btnReturnHome"
+                                        text="📍 Return to Barangay"
+                                        onAction="#handleReturnHome"
+                                        styleClass="brgy-btn-primary"
+                                        visible="false"
+                                        StackPane.alignment="BOTTOM_CENTER">
+                                    <StackPane.margin>
+                                        <Insets bottom="30.0" />
+                                    </StackPane.margin>
+                                </Button>
+                            </children>
+                        </StackPane>
 
                         <!-- CHANGED VBox to AnchorPane for Absolute close button positioning -->
                         <AnchorPane fx:id="vboxMapOverlay"
