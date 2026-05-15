@@ -298,22 +298,6 @@
                                            promptText="Search by name, barangay, or center…"
                                            styleClass="brgy-search"/>
                                 <Region HBox.hgrow="ALWAYS"/>
-                                <HBox styleClass="brgy-seg-control">
-                                    <children>
-                                        <Button fx:id="buttonFilterRegAll"
-                                                text="All"
-                                                mnemonicParsing="false"
-                                                styleClass="brgy-seg-btn, brgy-seg-active"/>
-                                        <Button fx:id="buttonFilterRegVerified"
-                                                text="Verified"
-                                                mnemonicParsing="false"
-                                                styleClass="brgy-seg-btn"/>
-                                        <Button fx:id="buttonFilterRegPending"
-                                                text="Pending"
-                                                mnemonicParsing="false"
-                                                styleClass="brgy-seg-btn"/>
-                                    </children>
-                                </HBox>
                             </children>
                         </HBox>
 
@@ -324,8 +308,6 @@
                                 <TableColumn fx:id="tableColumnEvacCenter"  prefWidth="200.0" text="CENTER"/>
                                 <TableColumn fx:id="tableColumnEvacBrgy"    prefWidth="140.0" text="BARANGAY"/>
                                 <TableColumn fx:id="tableColumnEvacFamily"  prefWidth="100.0" text="FAMILY SIZE"/>
-                                <TableColumn fx:id="tableColumnEvacStatus"  prefWidth="110.0" text="STATUS"/>
-                                <TableColumn fx:id="tableColumnEvacAction"  prefWidth="90.0"  text="ACTION"/>
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

@@ -5,6 +5,7 @@ import com.example.util.Route;
 import com.example.util.Router;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 /**
@@ -58,6 +59,12 @@ public class AppLauncher extends Application {
         Router.getInstance().setPrimaryStage(stage);
         stage.setTitle("CivicGuard — Disaster Response");
         stage.setMaximized(true);
+        
+        // Ensure the application stops running when the primary stage is closed
+        stage.setOnCloseRequest(event -> {
+            Platform.exit();
+            System.exit(0);
+        });
 
         Router.getInstance().navigate(Route.KIOSK);
     }

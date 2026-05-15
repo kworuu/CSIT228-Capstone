@@ -109,8 +109,6 @@ public class AddBrgyController {
             center.setName(name);
             center.setBarangay(brgy);
             center.setAddress(brgy);
-            center.setCapacity(500);
-            center.setCurrentOccupancy(0);
             center.setActive(true);
             center.setCreatedAt(LocalDateTime.now());
             center.setLatitude(selectedLat != null ? selectedLat : new BigDecimal("14.5995"));

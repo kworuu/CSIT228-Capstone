@@ -89,14 +89,9 @@ public class BrgyDashboardController {
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacCenter;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacBrgy;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacFamily;
-    @FXML private TableColumn<EvacueeRow,String> tableColumnEvacStatus;
-    @FXML private TableColumn<EvacueeRow,String> tableColumnEvacAction;
     @FXML private Button buttonRegisterEvacuee;
     @FXML private Button buttonExportCsv;
     @FXML private TextField textFieldSearchEvacuees;
-    @FXML private Button buttonFilterRegAll;
-    @FXML private Button buttonFilterRegVerified;
-    @FXML private Button buttonFilterRegPending;
     @FXML private Button buttonLogout;
 
     // ── FXML — Activity panel ─────────────────────────────────────
@@ -157,7 +152,7 @@ public class BrgyDashboardController {
 
     public record EvacueeRow(
             String id, String name, String center,
-            String barangay, String familySize, String status) {}
+            String barangay, String familySize) {}
 
     public record ActivityRow(
             String time, String action, String target,
@@ -165,7 +160,7 @@ public class BrgyDashboardController {
 
     public record CenterData(
             long id, String name, String address, String barangay,
-            int capacity, int occupancy, double lat, double lng,
+            double lat, double lng,
             String eventLabel, List<String> availableItems,
             String updatedAt, String photoPath,
             // Phase 5b additions:
@@ -292,7 +287,6 @@ public class BrgyDashboardController {
             String sql = """
         SELECT
             ec.id, ec.name, ec.address, ec.barangay, ec.photo_path,
-            ec.capacity, ec.current_occupancy,
             ec.latitude, ec.longitude,
             ec.structural_status, ec.structural_notes, ec.structural_updated_at,
             csu.event_label, csu.available_item_ids, csu.updated_at
@@ -323,8 +317,6 @@ public class BrgyDashboardController {
                     // It is perfectly fine if this is empty/null in the DB right now!
                     String photoPath = rs.getString("photo_path");
 
-                    int capacity     = rs.getInt("capacity");
-                    int occupancy    = rs.getInt("current_occupancy");
                     double lat       = rs.getDouble("latitude");
                     double lng       = rs.getDouble("longitude");
 
@@ -347,7 +339,7 @@ public class BrgyDashboardController {
 
                     centers.add(new CenterData(
                             id, name, address, barangay,
-                            capacity, occupancy, lat, lng,
+                            lat, lng,
                             eventLabel, items, updatedAt, photoPath,
                             structStatus, structNotes, structUpdated));
                 }
@@ -709,30 +701,6 @@ public class BrgyDashboardController {
                 new javafx.beans.property.SimpleStringProperty(d.getValue().barangay()));
         tableColumnEvacFamily.setCellValueFactory(d ->
                 new javafx.beans.property.SimpleStringProperty(d.getValue().familySize()));
-        tableColumnEvacStatus.setCellValueFactory(d ->
-                new javafx.beans.property.SimpleStringProperty(d.getValue().status()));
-        tableColumnEvacStatus.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(String s, boolean empty) {
-                super.updateItem(s, empty);
-                if (empty || s == null) { setGraphic(null); return; }
-                Label lbl = new Label(s);
-                lbl.getStyleClass().add(switch (s.toLowerCase()) {
-                    case "verified" -> "brgy-status-verified";
-                    case "rejected" -> "brgy-status-rejected";
-                    default         -> "brgy-status-pending";
-                });
-                setGraphic(lbl); setText(null);
-            }
-        });
-        tableColumnEvacAction.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("View");
-            { btn.getStyleClass().add("brgy-tbl-action"); }
-            @Override protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : btn);
-                setText(null);
-            }
-        });
     }
 
     private void loadEvacueesFromDB() {
@@ -741,11 +709,9 @@ public class BrgyDashboardController {
                    e.full_name_enc,
                    ec.name AS center_name,
                    e.barangay,
-                   COALESCE(fg.member_count, 1) AS family_size,
-                   e.verification_status
+                   1 AS family_size
             FROM evacuees e
             LEFT JOIN evacuation_centers ec ON ec.id = e.evacuation_center_id
-            LEFT JOIN family_groups fg ON fg.id = e.family_group_id
             ORDER BY e.created_at DESC
             LIMIT 200
             """;
@@ -762,8 +728,7 @@ public class BrgyDashboardController {
                         rs.getString("full_name_enc"),
                         rs.getString("center_name"),
                         rs.getString("barangay"),
-                        String.valueOf(rs.getInt("family_size")),
-                        rs.getString("verification_status")));
+                        String.valueOf(rs.getInt("family_size"))));
             }
         } catch (SQLException e) {
             System.err.println("[BrgyDashboard] DB error loading evacuees: " + e.getMessage());

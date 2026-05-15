@@ -1,8 +1,10 @@
 package com.example.dashboard_barangay;
 
 import com.example.auth.SessionContext;
+import com.example.dao.EvacuationCenterDao;
 import com.example.dao.InventoryItemDao;
 import com.example.dao.SupplyRequestDao;
+import com.example.model.EvacuationCenter;
 import com.example.model.InventoryItem;
 import com.example.model.SupplyRequest;
 import com.example.model.SupplyRequestItem;
@@ -23,6 +25,7 @@ public class ManageSupplyRequestsController {
     @FXML private StackPane modalRoot;
 
     // Draft Request Fields
+    @FXML private ComboBox<EvacuationCenter> comboBoxCenter;
     @FXML private ComboBox<InventoryItem> comboItems;
     @FXML private TextField fieldQuantity;
     @FXML private TextField fieldNotes;
@@ -40,6 +43,7 @@ public class ManageSupplyRequestsController {
     @FXML private TableColumn<SupplyRequest, String> colHistoryStatus;
     @FXML private TableColumn<SupplyRequest, String> colHistoryNotes;
 
+    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
     private final SupplyRequestDao requestDao = new SupplyRequestDao();
 
@@ -50,6 +54,7 @@ public class ManageSupplyRequestsController {
     @FXML
     public void initialize() {
         setupTables();
+        loadEvacuationCenters();
         loadInventoryItems();
         loadRequestHistory();
     }
@@ -76,6 +81,23 @@ public class ManageSupplyRequestsController {
                 new SimpleStringProperty(cellData.getValue().getStatus().displayLabel()));
 
         colHistoryNotes.setCellValueFactory(new PropertyValueFactory<>("notes"));
+    }
+    
+    private void loadEvacuationCenters() {
+         try {
+            if (SessionContext.current() == null || SessionContext.current().getBarangay() == null) return;
+            String brgyName = SessionContext.current().getBarangay().getName();
+            
+            comboBoxCenter.setItems(FXCollections.observableArrayList(centerDao.findByBarangay(brgyName)));
+            comboBoxCenter.setConverter(new StringConverter<>() {
+                @Override public String toString(EvacuationCenter center) {
+                    return center == null ? "" : center.getName();
+                }
+                @Override public EvacuationCenter fromString(String string) { return null; } // Not needed
+            });
+        } catch (SQLException e) {
+            System.err.println("Failed to load evacuation centers: " + e.getMessage());
+        }
     }
 
     private void loadInventoryItems() {
@@ -137,12 +159,19 @@ public class ManageSupplyRequestsController {
     private void handleSubmitRequest() {
         if (stagingItems.isEmpty()) return;
         if (SessionContext.current() == null) return;
+        
+        EvacuationCenter selectedCenter = comboBoxCenter.getValue();
+        if (selectedCenter == null) {
+            // Show alert or handle error visually
+             System.err.println("Error: Evacuation center is not selected.");
+             return;
+        }
 
         try {
             SupplyRequest request = new SupplyRequest(
                     SessionContext.current().getBarangay().getName(),
                     SessionContext.current().getUser().getId(),
-                    null, // Can be linked to a specific center later if you expand the UI
+                    selectedCenter.getId(),
                     fieldNotes.getText()
             );
 
@@ -155,6 +184,7 @@ public class ManageSupplyRequestsController {
             // Clean up UI and refresh history
             stagingItems.clear();
             fieldNotes.clear();
+            comboBoxCenter.getSelectionModel().clearSelection();
             loadRequestHistory();
 
         } catch (SQLException e) {

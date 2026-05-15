@@ -35,6 +35,11 @@
         <VBox spacing="10.0">
             <Label text="DRAFT NEW REQUEST" styleClass="brgy-slate-section-label"/>
 
+            <VBox spacing="6.0">
+                <Label text="TARGET EVACUATION CENTER" styleClass="brgy-slate-section-label" style="-fx-font-size: 10px;"/>
+                <ComboBox fx:id="comboBoxCenter" promptText="Select destination center..." prefWidth="400.0" styleClass="brgy-slate-input"/>
+            </VBox>
+
             <HBox spacing="8.0" alignment="CENTER_LEFT">
                 <ComboBox fx:id="comboItems" promptText="Select item..." prefWidth="220" styleClass="brgy-slate-input"/>
                 <TextField fx:id="fieldQuantity" promptText="Qty" prefWidth="80" styleClass="brgy-slate-input"/>

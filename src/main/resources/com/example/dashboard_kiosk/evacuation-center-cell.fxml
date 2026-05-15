@@ -20,7 +20,7 @@
       styleClass="center-card"
       xmlns="http://javafx.com/javafx/25"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.dashboard_barangay_v2.EvacuationCenterCellController">
+      fx:controller="com.example.dashboard_kiosk.EvacuationCenterCellController">
     <padding>
         <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
     </padding>
