@@ -10,7 +10,8 @@ module com.example.capstone {
     requires jbcrypt;
     requires jdk.jsobject;
     requires jdk.httpserver;
-    requires java.net.http;                   // password hashing
+    requires java.net.http;
+    requires java.desktop;                   // password hashing
 
     // Main package
     opens com.example to javafx.graphics, javafx.fxml;
