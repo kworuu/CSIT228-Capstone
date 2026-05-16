@@ -164,10 +164,11 @@
                                 </HBox>
                                 <TableView fx:id="mainTable" VBox.vgrow="ALWAYS">
                                     <columns>
-                                        <TableColumn fx:id="colBrgy" prefWidth="160.0" text="BARANGAY" />
-                                        <TableColumn fx:id="colDate" prefWidth="160.0" text="DATE" />
-                                        <TableColumn fx:id="colNotes" prefWidth="240.0" text="NOTES" />
-                                        <TableColumn fx:id="colStatus" prefWidth="120.0" text="STATUS" />
+                                        <TableColumn fx:id="colBrgy" prefWidth="185.0" text="BARANGAY" />
+                                        <TableColumn fx:id="colDate" prefWidth="134.0" text="ITEM" />
+                                        <TableColumn fx:id="colNotes" prefWidth="94.0" text="QUANTITY" />
+                                        <TableColumn fx:id="colStatus" prefWidth="114.0" text="STATUS" />
+                              <TableColumn fx:id="colStatus1" prefWidth="115.0" text="ACTION" />
                                     </columns>
                                     <columnResizePolicy>
                                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

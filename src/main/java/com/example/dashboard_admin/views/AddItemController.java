@@ -8,12 +8,14 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 public class AddItemController {
 
     @FXML private TextField nameField;
     @FXML private ComboBox<String> categoryCombo;
     @FXML private TextField unitField;
+    @FXML private TextField quantityField; // Added field connection
     @FXML private TextField lowThresholdField;
     @FXML private TextField criticalThresholdField;
     @FXML private Button btnSave;
@@ -24,6 +26,9 @@ public class AddItemController {
     @FXML
     public void initialize() {
         categoryCombo.getItems().addAll("food", "water", "non-food", "medical");
+
+        // Apply numeric validation to the new quantity field along with thresholds
+        setupNumericValidation(quantityField);
         setupNumericValidation(lowThresholdField);
         setupNumericValidation(criticalThresholdField);
 
@@ -32,32 +37,31 @@ public class AddItemController {
     }
 
     private void handleSave() {
-        if (!isInputValid()) {
-            return;
-        }
+        if (!isInputValid()) return;
 
         try {
             SessionContext session = SessionContext.current();
             Long userId = (session != null && session.getUser() != null) ? session.getUser().id() : null;
 
-            // NEW: Using the 8-parameter InventoryItem record constructor
+            // Instantiating item with user-defined initial quantity
             InventoryItem newItem = new InventoryItem(
                     0,
                     nameField.getText().trim(),
                     categoryCombo.getValue(),
                     unitField.getText().trim(),
+                    Integer.parseInt(criticalThresholdField.getText()),
                     Integer.parseInt(lowThresholdField.getText()),
-                    0,
-                    null,
+                    Integer.parseInt(quantityField.getText()), // Changed from hardcoded 0
+                    LocalDateTime.now(),
                     userId
             );
 
             inventoryDao.save(newItem);
             closeStage();
 
-        } catch (Exception e) { // Updated to catch broader exceptions due to DAO variations
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save the item to the database.");
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save.");
         }
     }
 
@@ -66,6 +70,9 @@ public class AddItemController {
         if (nameField.getText() == null || nameField.getText().isEmpty()) errorMessage += "Item Name is required.\n";
         if (categoryCombo.getValue() == null) errorMessage += "Category must be selected.\n";
         if (unitField.getText() == null || unitField.getText().isEmpty()) errorMessage += "Unit is required.\n";
+
+        // Added validation check for initial stock input
+        if (quantityField.getText() == null || quantityField.getText().isEmpty()) errorMessage += "Initial Stock Quantity is required.\n";
         if (lowThresholdField.getText().isEmpty() || criticalThresholdField.getText().isEmpty()) errorMessage += "Threshold values are required.\n";
 
         if (errorMessage.isEmpty()) return true;

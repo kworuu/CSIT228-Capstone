@@ -31,7 +31,7 @@ public class CardAlertHelper {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label qtyLabel = new Label(item.totalQuantity() + " left");
+        Label qtyLabel = new Label(item.stockQuantity() + " left");
         qtyLabel.getStyleClass().add("alert-qty");
 
         header.getChildren().addAll(nameLabel, spacer, qtyLabel);

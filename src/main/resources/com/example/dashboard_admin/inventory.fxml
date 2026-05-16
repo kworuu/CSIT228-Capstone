@@ -131,8 +131,8 @@
                                         <HBox styleClass="segmented-control">
                                             <children>
                                                 <Button fx:id="filterAll" mnemonicParsing="false" styleClass="segment, segment-first, segment-active" text="All" />
-                                                <Button fx:id="filterVerified" mnemonicParsing="false" styleClass="segment" text="Critical" />
-                                                <Button fx:id="filterPending" mnemonicParsing="false" styleClass="segment, segment-last" text="Low" />
+                                                <Button fx:id="filterCrit" mnemonicParsing="false" styleClass="segment" text="Critical" />
+                                                <Button fx:id="filterLow" mnemonicParsing="false" styleClass="segment, segment-last" text="Low" />
                                             </children>
                                         </HBox>
                                     </children>
@@ -146,8 +146,9 @@
                                         <TableColumn fx:id="colItemName" prefWidth="100.0" text="NAME" />
                                         <TableColumn fx:id="colCategory" prefWidth="200.0" text="CATEGORY" />
                                         <TableColumn fx:id="colUnit" prefWidth="220.0" text="UNIT" />
-                                        <TableColumn fx:id="colStatus" prefWidth="160.0" text="STATUS" />
-                              <TableColumn fx:id="colAction" prefWidth="160.0" text="ACTION" />
+                                        <TableColumn fx:id="colQty" prefWidth="160.0" text="QUANTITY" />
+                              <TableColumn fx:id="colStatus" prefWidth="160.0" text="STATUS" />
+                              <TableColumn fx:id="colAction" prefWidth="220.0" text="ACTION" />
                                     </columns>
                                     <columnResizePolicy>
                                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
