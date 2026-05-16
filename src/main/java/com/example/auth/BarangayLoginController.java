@@ -16,17 +16,6 @@ import javafx.scene.control.PasswordField;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Controller for {@code BarangayLogin.fxml}.
- *
- * <p>On initialization, loads the list of registered barangays into
- * the dropdown so users can only pick a real one (prevents typos and
- * gives discoverability). Login itself goes through
- * {@link AuthService#loginAsBarangay(String, String)}.</p>
- *
- * <p>The dropdown loads asynchronously — if the DB is briefly slow,
- * the user sees an empty combo for ~100ms instead of a frozen UI.</p>
- */
 public class BarangayLoginController {
 
     @FXML private ComboBox<String> barangayCombo;
@@ -56,16 +45,9 @@ public class BarangayLoginController {
         setBusy(true);
 
         Thread worker = new Thread(() -> {
-            try {
-                LoginResult result = authService.loginAsBarangay(barangayName, password);
-                Platform.runLater(() -> handleResult(result));
-            } catch (SQLException e) {
-                Platform.runLater(() -> {
-                    showError("Could not reach database. Please try again.");
-                    setBusy(false);
-                    System.err.println("[BarangayLogin] DB error: " + e.getMessage());
-                });
-            }
+            // No SQLException needs to be caught here because AuthService handles it
+            LoginResult result = authService.loginBarangay(barangayName, password);
+            Platform.runLater(() -> handleResult(result));
         }, "barangay-login-worker");
         worker.setDaemon(true);
         worker.start();
@@ -76,12 +58,6 @@ public class BarangayLoginController {
         Router.getInstance().navigate(Route.KIOSK);
     }
 
-    // ── Helpers ─────────────────────────────────────────────────
-
-    /**
-     * Loads all barangay names from the DB on a background thread,
-     * then populates the combo box on the FX thread.
-     */
     private void loadBarangaysAsync() {
         Thread loader = new Thread(() -> {
             try {
@@ -100,7 +76,7 @@ public class BarangayLoginController {
     }
 
     private void handleResult(LoginResult result) {
-        if (result.success().isSuccess()) {
+        if (result.isSuccess()) {
             Router.getInstance().navigate(Route.BARANGAY_DASHBOARD);
         } else {
             showError(result.errorMessage());

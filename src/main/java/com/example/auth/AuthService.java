@@ -17,15 +17,15 @@ public class AuthService {
         try {
             User user = userDao.findByUsername(username);
             if (user == null || !user.passwordHash().equals(hashPassword(password))) {
-                return new LoginResult(false, "Invalid username or password", null);
+                return LoginResult.failure("Invalid username or password");
             }
             if (user.role() != UserRole.ADMIN) {
-                return new LoginResult(false, "Access denied: Admin only", null);
+                return LoginResult.failure("Access denied: Admin only");
             }
             SessionContext.create(user, null);
-            return new LoginResult(true, "Success", user);
+            return LoginResult.success();
         } catch (SQLException e) {
-            return new LoginResult(false, "Database error: " + e.getMessage(), null);
+            return LoginResult.failure("Database error: " + e.getMessage());
         }
     }
 
@@ -33,21 +33,21 @@ public class AuthService {
         try {
             User user = userDao.findByUsername(username);
             if (user == null || !user.passwordHash().equals(hashPassword(password))) {
-                return new LoginResult(false, "Invalid username or password", null);
+                return LoginResult.failure("Invalid username or password");
             }
             if (user.role() != UserRole.BARANGAY && user.role() != UserRole.STAFF) {
-                return new LoginResult(false, "Access denied: Barangay accounts only", null);
+                return LoginResult.failure("Access denied: Barangay accounts only");
             }
 
-            Barangay brgy = barangayDao.findByName(user.assignedBarangay());
+            Barangay brgy = barangayDao.findByName(user.assignedBarangay()).orElse(null);
             if (brgy == null) {
-                return new LoginResult(false, "Configuration error: Assigned barangay not found", null);
+                return LoginResult.failure("Configuration error: Assigned barangay not found");
             }
 
             SessionContext.create(user, brgy);
-            return new LoginResult(true, "Success", user);
+            return LoginResult.success();
         } catch (SQLException e) {
-            return new LoginResult(false, "Database error: " + e.getMessage(), null);
+            return LoginResult.failure("Database error: " + e.getMessage());
         }
     }
 
@@ -56,6 +56,8 @@ public class AuthService {
     }
 
     private String hashPassword(String plainText) {
-        return plainText; // Placeholder for actual hash check if implemented
+        // In a real application, you would use a strong hashing algorithm like BCrypt.
+        // For this project, we are assuming no hashing for simplicity.
+        return plainText;
     }
 }

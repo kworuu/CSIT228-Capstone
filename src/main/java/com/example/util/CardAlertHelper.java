@@ -25,13 +25,13 @@ public class CardAlertHelper {
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
 
-        Label nameLabel = new Label(item.getName());
+        Label nameLabel = new Label(item.name());
         nameLabel.getStyleClass().add("alert-title");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label qtyLabel = new Label(item.getStockQuantity() + " left");
+        Label qtyLabel = new Label(item.totalQuantity() + " left");
         qtyLabel.getStyleClass().add("alert-qty");
 
         header.getChildren().addAll(nameLabel, spacer, qtyLabel);

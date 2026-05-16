@@ -33,6 +33,20 @@ public class SupplyRequestDao {
         }
     }
 
+    public List<SupplyRequest> findAll() throws SQLException {
+        List<SupplyRequest> requests = new ArrayList<>();
+        String sql = "SELECT * FROM supply_requests ORDER BY created_at DESC";
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                requests.add(mapRow(rs));
+            }
+        }
+        return requests;
+    }
+
     public List<SupplyRequest> getRequestsByBarangay(String barangay) throws SQLException {
         List<SupplyRequest> requests = new ArrayList<>();
         String sql = "SELECT * FROM supply_requests WHERE requesting_barangay = ? ORDER BY created_at DESC";

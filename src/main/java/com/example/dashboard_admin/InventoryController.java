@@ -29,40 +29,32 @@ public class InventoryController {
     @FXML private Button navActivity;
     @FXML private TextField searchItemField;
 
-    // 1. Rename to masterData to match your utility pattern
     private final ObservableList<InventoryItem> masterData = FXCollections.observableArrayList();
-
-    // 2. Instantiate your DAO to fetch the data
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
 
     @FXML
     public void initialize() {
         setupTableColumns();
-        loadData(); // Load the data from the database
+        loadData();
 
-        // Navigation & Actions
         btnNewItem.setOnAction(event -> {
             SceneHelper.showModal("/com/example/dashboard_admin/modals/add-item.fxml", "Insert New Item", btnNewItem);
-            // Optional: Call loadData() here again if you want the table to refresh after the modal closes
             loadData();
         });
 
-        // 3. Implement Search using your SearchTableUtility
         SearchTableUtility.setupSearch(
                 searchItemField,
                 mainTable,
                 masterData,
                 (item, query) ->
-                        (item.getName() != null && item.getName().toLowerCase().contains(query)) ||
-                                (item.getCategory() != null && item.getCategory().toLowerCase().contains(query))
+                        (item.name() != null && item.name().toLowerCase().contains(query)) ||
+                                (item.category() != null && item.category().toLowerCase().contains(query))
         );
 
-        // Scene Switching
         navEvacuations.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/evacuation.fxml", navEvacuations));
         navMap.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", navMap));
     }
 
-    // 4. Method to pull data from your database into the table
     private void loadData() {
         try {
             List<InventoryItem> items = inventoryDao.findAll();
@@ -79,7 +71,7 @@ public class InventoryController {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
 
         colStatus.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getStatus()));
+                new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getStockStatus()));
 
         colStatus.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -90,11 +82,11 @@ public class InventoryController {
                     setGraphic(null);
                 } else {
                     setText(status.toString());
-                    getStyleClass().removeAll("status-ok", "status-low", "status-critical");
+                    getStyleClass().removeAll("status-ok", "status-low", "status-out-of-stock");
                     switch (status) {
                         case OK -> getStyleClass().add("status-ok");
-                        case LOW -> getStyleClass().add("status-low");
-                        case CRITICAL -> getStyleClass().add("status-critical");
+                        case LOW_STOCK -> getStyleClass().add("status-low");
+                        case OUT_OF_STOCK -> getStyleClass().add("status-out-of-stock");
                     }
                 }
             }
@@ -116,9 +108,7 @@ public class InventoryController {
                 setGraphic(empty ? null : container);
             }
         });
-
-        // The SearchTableUtility handles setting the items to the table automatically,
-        // so we just initialize it with our masterData here just in case.
+        
         mainTable.setItems(masterData);
     }
 }
