@@ -8,7 +8,6 @@ import com.example.util.DBConnectionManager;
 import com.example.util.Route;
 import com.example.util.Router;
 import javafx.application.Platform;
-import com.example.model.EvacueeRecord;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -44,7 +43,6 @@ public class KioskDashboardController implements CenterEventObserver {
     @FXML private TableColumn<SimpleCenter, String> colStatus1;
     @FXML private TableColumn<SimpleCenter, String> colAction1;
 
-    // Tab 2 — already added:
     @FXML private TableView<EvacueeRecord>           kioskEvacueeTable;
     @FXML private TableColumn<EvacueeRecord, String> colEvacId;
     @FXML private TableColumn<EvacueeRecord, String> colEvacName;
@@ -52,59 +50,61 @@ public class KioskDashboardController implements CenterEventObserver {
     @FXML private TableColumn<EvacueeRecord, String> colEvacBrgy;
     @FXML private TableColumn<EvacueeRecord, String> colEvacRegisteredAt;
     @FXML private TextField searchField1;
-    @FXML private Label lblEvacueeCount;  // "2 registered" badge in detail modal
-    @FXML private VBox  vboxEvacueeList;  // name list inside detail modal
+    @FXML private Label lblEvacueeCount;
+    @FXML private VBox  vboxEvacueeList;
 
-    // Tracks which center the detail modal is currently showing.
     private String selectedCenterId = null;
 
     private final List<SimpleCenter> allCenters = new ArrayList<>();
-    private final List<SimpleCenter> filteredCenters = new ArrayList<>();
     private final ObservableList<EvacueeRecord> evacueeData = FXCollections.observableArrayList();
     private MapBridge mapBridge;
 
-    // Current Map Location Default
     private double currentBrgyLat = 10.3157;
     private double currentBrgyLng = 123.8854;
     private int currentBrgyZoom = 13;
 
-    // ── State ──────────────────────────────────────────────────────────────
     private final ObservableList<SimpleCenter> masterTableData = FXCollections.observableArrayList();
+
+    public record EvacueeRecord(String id, String fullName, String assignedCenter, String barangay, String registeredAt) {}
+    public record SimpleCenter(String id, String title, String address, String barangay, String status, String createdAt, double lat, double lng) {}
+
 
     @FXML
     public void initialize() {
-        setupInventoryTable();   // wires both Tab 1 and Tab 2 columns
+        setupInventoryTable();
         setupSearch();
         loadCentersFromDB();
-        loadEvacueesFromDB();    // ← new
+        loadEvacueesFromDB();
         loadEventsFromDB();
         setupMap();
         CenterEventManager.getInstance().addObserver(this);
     }
 
     private void setupInventoryTable() {
-        // ── Tab 1: Centers ───────────────────────────────────────────────────────
-        if (colId1       != null) colId1.setCellValueFactory(c       -> new SimpleStringProperty(c.getValue().getId()));
-        if (colName1     != null) colName1.setCellValueFactory(c     -> new SimpleStringProperty(c.getValue().getTitle()));
-        if (colCenter1   != null) colCenter1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().getAddress()));
-        if (colBarangay1 != null) colBarangay1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getBarangay()));
-        if (colStatus1   != null) colStatus1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().getStatus()));
-        if (colAction1   != null) colAction1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().getCreatedAt()));
+        if (colId1       != null) colId1.setCellValueFactory(c       -> new SimpleStringProperty(c.getValue().id()));
+        if (colName1     != null) colName1.setCellValueFactory(c     -> new SimpleStringProperty(c.getValue().title()));
+        if (colCenter1   != null) colCenter1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().address()));
+        if (colBarangay1 != null) colBarangay1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().barangay()));
+        if (colStatus1   != null) colStatus1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().status()));
+        if (colAction1   != null) colAction1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().createdAt()));
 
-        // ── Tab 2: Evacuees ───────────────────────────────────────────────────────
-        if (colEvacId          != null) colEvacId.setCellValueFactory(c          -> new SimpleStringProperty(c.getValue().getId()));
-        if (colEvacName        != null) colEvacName.setCellValueFactory(c        -> new SimpleStringProperty(c.getValue().getFullName()));
-        if (colEvacCenter      != null) colEvacCenter.setCellValueFactory(c      -> new SimpleStringProperty(c.getValue().getAssignedCenter()));
-        if (colEvacBrgy        != null) colEvacBrgy.setCellValueFactory(c        -> new SimpleStringProperty(c.getValue().getBarangay()));
-        if (colEvacRegisteredAt != null) colEvacRegisteredAt.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getRegisteredAt()));
+        if (colEvacId          != null) colEvacId.setCellValueFactory(c          -> new SimpleStringProperty(c.getValue().id()));
+        if (colEvacName        != null) colEvacName.setCellValueFactory(c        -> new SimpleStringProperty(c.getValue().fullName()));
+        if (colEvacCenter      != null) colEvacCenter.setCellValueFactory(c      -> new SimpleStringProperty(c.getValue().assignedCenter()));
+        if (colEvacBrgy        != null) colEvacBrgy.setCellValueFactory(c        -> new SimpleStringProperty(c.getValue().barangay()));
+        if (colEvacRegisteredAt != null) colEvacRegisteredAt.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().registeredAt()));
 
         if (kioskEvacueeTable != null) kioskEvacueeTable.setItems(evacueeData);
     }
 
-    // DB Query to load centers for Table and Map
     private void loadCentersFromDB() {
         allCenters.clear();
-        String sql = "SELECT id, name, address, barangay, is_active, created_at, latitude, longitude FROM evacuation_centers ORDER BY name ASC";
+        String sql = """
+            SELECT ec.id, ec.name, ec.address, u.display_name as barangay, ec.created_at, ec.latitude, ec.longitude 
+            FROM evacuation_centers ec
+            JOIN users u ON ec.user_id = u.id
+            ORDER BY ec.name ASC
+        """;
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -115,7 +115,7 @@ public class KioskDashboardController implements CenterEventObserver {
                         rs.getString("name"),
                         rs.getString("address"),
                         rs.getString("barangay"),
-                        rs.getBoolean("is_active") ? "ACTIVE" : "INACTIVE",
+                        "ACTIVE",
                         formatTimestamp(rs.getString("created_at")),
                         rs.getDouble("latitude"),
                         rs.getDouble("longitude")
@@ -130,7 +130,6 @@ public class KioskDashboardController implements CenterEventObserver {
         });
     }
 
-    // DB Query to prepopulate events drawer
     private void loadEventsFromDB() {
         List<CenterEvent> events = new ArrayList<>();
         String sql = "SELECT csu.event_label, csu.updated_at, ec.name, ec.id " +
@@ -160,17 +159,14 @@ public class KioskDashboardController implements CenterEventObserver {
 
     private void loadEvacueesFromDB() {
         List<EvacueeRecord> rows = new ArrayList<>();
-
-        // Exact column names from civicguard schema:
-        //   evacuees.full_name_enc, evacuees.evacuation_center_id,
-        //   evacuees.barangay, evacuees.created_at
-        String sql =
-                "SELECT e.id, e.full_name_enc, ec.name AS center_name, " +
-                        "       e.barangay, e.created_at " +
-                        "FROM evacuees e " +
-                        "JOIN evacuation_centers ec ON e.evacuation_center_id = ec.id " +
-                        "ORDER BY e.created_at DESC " +
-                        "LIMIT 200";
+        String sql = """
+            SELECT e.id, e.full_name_enc, ec.name AS center_name, u.display_name as barangay, e.created_at 
+            FROM evacuees e 
+            JOIN evacuation_centers ec ON e.evacuation_center_id = ec.id
+            JOIN users u ON ec.user_id = u.id
+            ORDER BY e.created_at DESC 
+            LIMIT 200
+        """;
 
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -179,9 +175,9 @@ public class KioskDashboardController implements CenterEventObserver {
             while (rs.next()) {
                 rows.add(new EvacueeRecord(
                         String.valueOf(rs.getLong("id")),
-                        rs.getString("full_name_enc"),   // encrypted field — plain text for now
-                        rs.getString("center_name"),      // ec.name alias
-                        rs.getString("barangay"),         // e.barangay (on evacuees row itself)
+                        rs.getString("full_name_enc"),
+                        rs.getString("center_name"),
+                        rs.getString("barangay"),
                         formatTimestamp(rs.getString("created_at"))
                 ));
             }
@@ -192,15 +188,12 @@ public class KioskDashboardController implements CenterEventObserver {
         Platform.runLater(() -> evacueeData.setAll(rows));
     }
 
-    // Observer Callback - Triggered by UpdateCenterController
     @Override
     public void onCenterUpdated(CenterEvent event) {
         Platform.runLater(() -> {
-            loadCentersFromDB();   // Tab 1
-            loadEvacueesFromDB();  // Tab 2
+            loadCentersFromDB();
+            loadEvacueesFromDB();
 
-            // If the detail modal is open in the center that just changed,
-            // refresh its list immediately without any user interaction
             if (detailModal != null
                     && detailModal.isVisible()
                     && selectedCenterId != null
@@ -216,12 +209,9 @@ public class KioskDashboardController implements CenterEventObserver {
         });
     }
 
-    // Paste this right below setupInventoryTable()
     private void setupSearch() {
-        // Safety check to ensure UI elements are loaded
         if (searchField1 == null || mainTable1 == null) return;
 
-        // Call your existing utility class
         SearchTableUtility.setupSearch(
                 searchField1,
                 mainTable1,
@@ -231,10 +221,9 @@ public class KioskDashboardController implements CenterEventObserver {
 
                     String searchLower = searchText.toLowerCase();
 
-                    // Safe checks to prevent NullPointerExceptions if a field is null
-                    boolean matchTitle = center.getTitle() != null && center.getTitle().toLowerCase().contains(searchLower);
-                    boolean matchAddress = center.getAddress() != null && center.getAddress().toLowerCase().contains(searchLower);
-                    boolean matchBarangay = center.getBarangay() != null && center.getBarangay().toLowerCase().contains(searchLower);
+                    boolean matchTitle = center.title() != null && center.title().toLowerCase().contains(searchLower);
+                    boolean matchAddress = center.address() != null && center.address().toLowerCase().contains(searchLower);
+                    boolean matchBarangay = center.barangay() != null && center.barangay().toLowerCase().contains(searchLower);
 
                     return matchTitle || matchAddress || matchBarangay;
                 }
@@ -261,12 +250,12 @@ public class KioskDashboardController implements CenterEventObserver {
     private void showDetailModal(SimpleCenter c) {
         if (c == null) return;
 
-        selectedCenterId = c.getId();
+        selectedCenterId = c.id();
 
-        if (lblModalTitle != null) lblModalTitle.setText(c.getTitle());
-        if (lblModalDesc  != null) lblModalDesc.setText(c.getAddress() + " · " + c.getBarangay());
+        if (lblModalTitle != null) lblModalTitle.setText(c.title());
+        if (lblModalDesc  != null) lblModalDesc.setText(c.address() + " · " + c.barangay());
 
-        loadEvacueesForCenter(c.getId());
+        loadEvacueesForCenter(c.id());
 
         if (detailModal != null) {
             detailModal.setVisible(true);
@@ -281,8 +270,6 @@ public class KioskDashboardController implements CenterEventObserver {
         }
     }
 
-    // ── Map initialisation ─────────────────────────────────────────────────
-
     private void setupMap() {
         if (webViewMiniMap == null) return;
 
@@ -290,8 +277,6 @@ public class KioskDashboardController implements CenterEventObserver {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         webViewMiniMap.getEngine().setUserAgent("CivicGuard/1.0");
 
-        // Critical: without explicit max sizes the WebView hit-test surface
-        // may not fill the StackPane, causing drag events to fall through
         webViewMiniMap.setMaxWidth(Double.MAX_VALUE);
         webViewMiniMap.setMaxHeight(Double.MAX_VALUE);
 
@@ -302,13 +287,12 @@ public class KioskDashboardController implements CenterEventObserver {
 
                         this.mapBridge = centerId -> Platform.runLater(() ->
                                 allCenters.stream()
-                                        .filter(c -> c.getId().equals(centerId))
+                                        .filter(c -> c.id().equals(centerId))
                                         .findFirst()
                                         .ifPresent(this::showDetailModal));
 
                         win.setMember("javaBridge", this.mapBridge);
 
-                        // Re-enable Leaflet drag after page load
                         webViewMiniMap.getEngine().executeScript(
                                 "try {" +
                                         "  if (window._leafletMap) {" +
@@ -344,9 +328,8 @@ public class KioskDashboardController implements CenterEventObserver {
             SimpleCenter c = allCenters.get(i);
             if (i > 0) sb.append(",");
             sb.append(String.format(
-                    KioskConstants.JSON_CENTER_TEMPLATE,
-                    esc(c.getId()), esc(c.getTitle()), c.getLat(), c.getLng(),
-                    KioskConstants.FOCAL_CENTER_ID.equals(c.getId())
+                    "{\"id\":\"%s\",\"name\":\"%s\",\"lat\":%s,\"lng\":%s,\"focal\":%b}",
+                    esc(c.id()), esc(c.title()), c.lat(), c.lng(), false
             ));
         }
         return sb.append("]").toString();
@@ -357,37 +340,7 @@ public class KioskDashboardController implements CenterEventObserver {
         return s.replace("\"", "\\\"").replace("\n", " ");
     }
 
-
-
-
     public interface MapBridge { void onMarkerClick(String centerId); }
-
-    // Updated SimpleCenter to match Real DB Schema for the TableView
-    public static class SimpleCenter {
-        private final String id;
-        private final String title;
-        private final String address;
-        private final String barangay;
-        private final String status;
-        private final String createdAt;
-        private final double lat;
-        private final double lng;
-
-        public SimpleCenter(String id, String title, String address, String barangay, String status, String createdAt, double lat, double lng) {
-            this.id = id; this.title = title; this.address = address;
-            this.barangay = barangay; this.status = status; this.createdAt = createdAt;
-            this.lat = lat; this.lng = lng;
-        }
-
-        public String getId() { return id; }
-        public String getTitle() { return title; }
-        public String getAddress() { return address; }
-        public String getBarangay() { return barangay; }
-        public String getStatus() { return status; }
-        public String getCreatedAt() { return createdAt; }
-        public double getLat() { return lat; }
-        public double getLng() { return lng; }
-    }
 
     private void loadEvacueesForCenter(String centerId) {
         if (vboxEvacueeList == null || lblEvacueeCount == null) return;

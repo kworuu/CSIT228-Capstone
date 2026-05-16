@@ -7,9 +7,8 @@ public record SupplyRequest(
         long itemId,
         int quantity,
         SupplyRequestStatus status,
-        String requestingBarangay,
+        String requestingBarangay, // Populated dynamically via JOIN
         Long requestingUserId,
         String notes,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime createdAt
 ) {}

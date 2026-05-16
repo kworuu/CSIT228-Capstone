@@ -95,12 +95,11 @@ public class RegisterEvacueeController {
             Long userId = SessionContext.current() != null && SessionContext.current().getUser() != null
                     ? SessionContext.current().getUser().id() : null;
 
-            // NEW: Using the 9-parameter Evacuee record constructor
+            // FIXED: Removed the 'currentBarangay' ghost! Uses 8 parameters now.
             Evacuee newEvacuee = new Evacuee(
                     0,
                     name,
                     contact.isEmpty() ? null : contact,
-                    currentBarangay,
                     null,
                     selectedCenter.id(),
                     userId,
@@ -111,8 +110,6 @@ public class RegisterEvacueeController {
             evacueeDao.saveEvacuee(newEvacuee);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Registration Successful");
-            alert.setHeaderText(null);
             alert.setContentText(name + " has been successfully assigned to " + selectedCenter.name() + ".");
             alert.showAndWait();
 

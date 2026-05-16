@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
 public class ManageSupplyRequestsController {
 
     @FXML private StackPane modalRoot;
-
     @FXML private ComboBox<EvacuationCenter> comboBoxCenter;
     @FXML private ComboBox<InventoryItem> comboItems;
     @FXML private TextField fieldQuantity;
@@ -70,22 +69,22 @@ public class ManageSupplyRequestsController {
         tableHistory.setItems(historyItems);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
 
-        // NEW: Uses record accessors to prevent crashes
         colHistoryDate.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().createdAt() != null ? cellData.getValue().createdAt().format(dtf) : ""));
 
         colHistoryStatus.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().status().displayLabel()));
 
-        colHistoryNotes.setCellValueFactory(cellData ->
+        colHistoryNotes.setCellValueFactory(cellData -> 
                 new SimpleStringProperty(cellData.getValue().notes()));
     }
-
+    
     private void loadEvacuationCenters() {
-        try {
-            if (SessionContext.current() == null || SessionContext.current().getBarangay() == null) return;
-            String brgyName = SessionContext.current().getBarangay().getName();
-
+         try {
+            if (SessionContext.current() == null || SessionContext.current().getUser() == null) return;
+            // FIXED: Using displayName instead of the old Barangay object
+            String brgyName = SessionContext.current().getUser().displayName(); 
+            
             comboBoxCenter.setItems(FXCollections.observableArrayList(centerDao.findByBarangay(brgyName)));
             comboBoxCenter.setConverter(new StringConverter<>() {
                 @Override public String toString(EvacuationCenter center) {
@@ -113,9 +112,10 @@ public class ManageSupplyRequestsController {
     }
 
     private void loadRequestHistory() {
-        if (SessionContext.current() == null || SessionContext.current().getBarangay() == null) return;
+        if (SessionContext.current() == null || SessionContext.current().getUser() == null) return;
         try {
-            String brgyName = SessionContext.current().getBarangay().getName();
+            // FIXED: Using displayName
+            String brgyName = SessionContext.current().getUser().displayName();
             historyItems.setAll(requestDao.getRequestsByBarangay(brgyName));
         } catch (SQLException e) {
             System.err.println("Failed to load history: " + e.getMessage());
@@ -153,15 +153,15 @@ public class ManageSupplyRequestsController {
 
     @FXML
     private void handleSubmitRequest() {
-        if (stagingItems.isEmpty()) return;
-        if (SessionContext.current() == null) return;
+        if (stagingItems.isEmpty() || SessionContext.current() == null) return;
 
         try {
             Long userId = SessionContext.current().getUser().id();
-            String brgyName = SessionContext.current().getBarangay().getName();
+            // FIXED: Using displayName
+            String brgyName = SessionContext.current().getUser().displayName();
 
-            // NEW: Save each staged item as an individual supply request natively
             for (SupplyRequestItem stagedItem : stagingItems) {
+                // FIXED: Uses the new 8-parameter constructor
                 SupplyRequest newRequest = new SupplyRequest(
                         0,
                         stagedItem.getItemId(),
@@ -170,7 +170,6 @@ public class ManageSupplyRequestsController {
                         brgyName,
                         userId,
                         fieldNotes.getText(),
-                        null,
                         null
                 );
                 requestDao.saveRequest(newRequest);

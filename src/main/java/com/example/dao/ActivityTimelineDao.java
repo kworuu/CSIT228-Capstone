@@ -17,26 +17,26 @@ public class ActivityTimelineDao {
         List<ActivityTimelineItem> timeline = new ArrayList<>();
 
         String sql = """
-            SELECT t.created_at AS event_date, 
-                   UPPER(t.direction) AS action_type, 
+            SELECT t.created_at AS event_date,
+                   UPPER(t.direction) AS action_type,
                    CONCAT('Recorded ', t.quantity, ' items') AS target_desc,
                    ec.name AS center_name,
                    u.display_name AS user_name
             FROM transactions t
-            JOIN evacuation_centers ec ON t.destination_id = ec.id AND t.destination_type = 'EVACUATION_CENTER'
-            JOIN users u ON t.user_id = u.id
-            WHERE ec.barangay = ?
+            JOIN evacuation_centers ec ON t.destination_id = ec.id
+            JOIN users u ON ec.user_id = u.id
+            WHERE u.display_name = ?
             
             UNION ALL
             
-            SELECT sr.created_at AS event_date, 
-                   'REQUEST' AS action_type, 
+            SELECT sr.created_at AS event_date,
+                   'REQUEST' AS action_type,
                    CONCAT('Submitted supply request (Status: ', UPPER(sr.status), ')') AS target_desc,
                    'Barangay LGU' AS center_name,
-                   u.display_name AS user_name
+                   u_req.display_name AS user_name
             FROM supply_requests sr
-            JOIN users u ON sr.requesting_user_id = u.id
-            WHERE sr.requesting_barangay = ?
+            JOIN users u_req ON sr.requesting_user_id = u_req.id
+            WHERE u_req.display_name = ?
             
             ORDER BY event_date DESC
             LIMIT 50

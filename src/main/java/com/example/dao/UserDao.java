@@ -5,14 +5,13 @@ import com.example.model.UserRole;
 import com.example.util.DBConnectionManager;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDao {
 
     public User findByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM users WHERE display_name = ?";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
@@ -37,20 +36,21 @@ public class UserDao {
     private User mapRowToUser(ResultSet rs) throws SQLException {
         Double lat = rs.getObject("latitude") != null ? rs.getDouble("latitude") : null;
         Double lng = rs.getObject("longitude") != null ? rs.getDouble("longitude") : null;
+        Integer zoom = rs.getObject("zoom") != null ? rs.getInt("zoom") : null;
 
-        Timestamp createdTs = rs.getTimestamp("created_at");
-        Timestamp loginTs = rs.getTimestamp("last_login");
+        // Fixed column name to match the DB
+        Timestamp loginTs = rs.getTimestamp("last_login_at");
 
+        // Uses the newly updated User record structure
         return new User(
                 rs.getLong("id"),
                 rs.getString("username"),
                 rs.getString("password_hash"),
                 rs.getString("display_name"),
                 UserRole.valueOf(rs.getString("role").toUpperCase()),
-                rs.getString("assigned_barangay"),
                 lat,
                 lng,
-                createdTs != null ? createdTs.toLocalDateTime() : null,
+                zoom,
                 loginTs != null ? loginTs.toLocalDateTime() : null
         );
     }
