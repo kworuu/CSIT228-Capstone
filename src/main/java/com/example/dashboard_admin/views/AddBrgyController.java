@@ -2,6 +2,7 @@ package com.example.dashboard_admin.views;
 
 import com.example.dao.EvacuationCenterDao;
 import com.example.model.EvacuationCenter;
+import com.example.model.StructuralStatus;
 import com.example.util.SceneHelper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,7 +19,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class AddBrgyController {
 
@@ -28,7 +28,7 @@ public class AddBrgyController {
     @FXML private TextField addressPathField;
     @FXML private Button btnOpenMap_extension;
     @FXML private ImageView photoPreview;
-    @FXML private Label placeholderLabel; // Optional: to hide/show "No Image" text
+    @FXML private Label placeholderLabel;
     @FXML private Button btnCancel;
     @FXML private Button btnSaveLoc;
 
@@ -37,7 +37,7 @@ public class AddBrgyController {
     private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
 
     public void initialize() {
-        btnCancel.setOnAction(SceneHelper::closeWindow);
+        btnCancel.setOnAction(e -> closeWindow());
     }
 
     public void setLocationData(String address, double lat, double lon) {
@@ -72,14 +72,10 @@ public class AddBrgyController {
         File selectedFile = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
 
         if (selectedFile != null) {
-            // Update the text field with the absolute path
             photoPathField.setText(selectedFile.getAbsolutePath());
-
-            // Update the preview image
             Image image = new Image(selectedFile.toURI().toString());
             photoPreview.setImage(image);
 
-            // Hide placeholder text if you added one
             if (placeholderLabel != null) {
                 placeholderLabel.setVisible(false);
             }
@@ -97,20 +93,34 @@ public class AddBrgyController {
         }
 
         try {
-            EvacuationCenter center = new EvacuationCenter();
-            center.setName(name);
-            center.setBarangay(brgy);
-            center.setAddress(brgy);
-            center.setActive(true);
-            center.setCreatedAt(LocalDateTime.now());
-            center.setLatitude(selectedLat != null ? selectedLat : new BigDecimal("14.5995"));
-            center.setLongitude(selectedLon != null ? selectedLon : new BigDecimal("120.9842"));
+            Double lat = selectedLat != null ? selectedLat.doubleValue() : 14.5995;
+            Double lon = selectedLon != null ? selectedLon.doubleValue() : 120.9842;
 
-            centerDao.save(center);
+            // NEW: Using the 16-parameter EvacuationCenter record constructor
+            EvacuationCenter center = new EvacuationCenter(
+                    0,
+                    name,
+                    brgy,
+                    brgy,
+                    photoPathField.getText(),
+                    0,
+                    0,
+                    lat,
+                    lon,
+                    StructuralStatus.SAFE,
+                    null,
+                    null,
+                    null,
+                    true,
+                    null,
+                    null
+            );
+
+            centerDao.save(center); // Adjusted to standard save method
 
             showAlert(Alert.AlertType.INFORMATION, "Success", "Center '" + name + "' registered!");
             closeWindow();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Database Error", e.getMessage());
         }
     }
@@ -129,6 +139,4 @@ public class AddBrgyController {
         alert.setContentText(content);
         alert.showAndWait();
     }
-
-
 }

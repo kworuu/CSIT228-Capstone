@@ -13,7 +13,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import com.example.util.SceneHelper;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 
@@ -24,7 +23,7 @@ import java.util.List;
 public class DashboardController {
 
     @FXML private Button btnNewEvacCenter;
-    @FXML private TextField searchEvacCenter; // You can rename this to searchRequest in your FXML
+    @FXML private TextField searchEvacCenter;
     @FXML private Button navInventory;
     @FXML private Button navMap;
     @FXML private Button btnExpandMap;
@@ -32,7 +31,7 @@ public class DashboardController {
     @FXML private Button navActivity;
 
     // Cards & Alerts
-    @FXML private Label lblTotalEvacValue; // Can be repurposed to show "Total Requests"
+    @FXML private Label lblTotalEvacValue;
     @FXML private Label lblCriticalItem;
     @FXML private VBox alertsContainer;
 
@@ -80,19 +79,19 @@ public class DashboardController {
     }
 
     private void setupTable() {
-        // Map columns to SupplyRequest properties
-        colBrgy.setCellValueFactory(new PropertyValueFactory<>("requestingBarangay"));
+        // NEW: Replaced PropertyValueFactory with safe lambda accessors for records
+        colBrgy.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().requestingBarangay()));
 
-        // Format the date so it looks clean (e.g., "May 16, 2026 14:30")
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
         colDate.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCreatedAt().format(dtf)));
+                new SimpleStringProperty(cellData.getValue().createdAt() != null ? cellData.getValue().createdAt().format(dtf) : ""));
 
-        colNotes.setCellValueFactory(new PropertyValueFactory<>("notes"));
+        colNotes.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().notes()));
 
-        // Use the displayLabel from your SupplyRequestStatus enum
         colStatus.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getStatus().displayLabel()));
+                new SimpleStringProperty(cellData.getValue().status().displayLabel()));
 
         mainTable.setItems(masterData);
     }
@@ -111,7 +110,6 @@ public class DashboardController {
 
     private void refreshStats() {
         try {
-            // Repurpose the total card to show the number of requests
             int totalRequests = masterData.size();
             if (lblTotalEvacValue != null) {
                 lblTotalEvacValue.setText(String.valueOf(totalRequests));
@@ -129,15 +127,15 @@ public class DashboardController {
     private void setupSearch() {
         if (searchEvacCenter == null || mainTable == null) return;
 
-        // Search through the Requests by Barangay Name, Notes, or Status
+        // NEW: Used record accessor methods without "get"
         SearchTableUtility.setupSearch(
                 searchEvacCenter,
                 mainTable,
                 masterData,
                 (request, query) ->
-                        (request.getRequestingBarangay() != null && request.getRequestingBarangay().toLowerCase().contains(query)) ||
-                                (request.getNotes() != null && request.getNotes().toLowerCase().contains(query)) ||
-                                (request.getStatus() != null && request.getStatus().name().toLowerCase().contains(query))
+                        (request.requestingBarangay() != null && request.requestingBarangay().toLowerCase().contains(query)) ||
+                                (request.notes() != null && request.notes().toLowerCase().contains(query)) ||
+                                (request.status() != null && request.status().name().toLowerCase().contains(query))
         );
     }
 

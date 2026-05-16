@@ -7,6 +7,7 @@ import com.example.dao.SupplyRequestDao;
 import com.example.model.EvacuationCenter;
 import com.example.model.InventoryItem;
 import com.example.model.SupplyRequest;
+import com.example.model.SupplyRequestStatus;
 import com.example.model.SupplyRequestItem;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -24,20 +25,17 @@ public class ManageSupplyRequestsController {
 
     @FXML private StackPane modalRoot;
 
-    // Draft Request Fields
     @FXML private ComboBox<EvacuationCenter> comboBoxCenter;
     @FXML private ComboBox<InventoryItem> comboItems;
     @FXML private TextField fieldQuantity;
     @FXML private TextField fieldNotes;
     @FXML private Button btnSubmit;
 
-    // Staging Table
     @FXML private TableView<SupplyRequestItem> tableStaging;
     @FXML private TableColumn<SupplyRequestItem, String> colStagingItem;
     @FXML private TableColumn<SupplyRequestItem, Integer> colStagingQty;
     @FXML private TableColumn<SupplyRequestItem, String> colStagingUnit;
 
-    // History Table
     @FXML private TableView<SupplyRequest> tableHistory;
     @FXML private TableColumn<SupplyRequest, String> colHistoryDate;
     @FXML private TableColumn<SupplyRequest, String> colHistoryStatus;
@@ -64,36 +62,36 @@ public class ManageSupplyRequestsController {
     }
 
     private void setupTables() {
-        // Staging Table
         tableStaging.setItems(stagingItems);
         colStagingItem.setCellValueFactory(new PropertyValueFactory<>("itemName"));
         colStagingQty.setCellValueFactory(new PropertyValueFactory<>("quantityRequested"));
         colStagingUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
 
-        // History Table
         tableHistory.setItems(historyItems);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
 
+        // NEW: Uses record accessors to prevent crashes
         colHistoryDate.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCreatedAt().format(dtf)));
+                new SimpleStringProperty(cellData.getValue().createdAt() != null ? cellData.getValue().createdAt().format(dtf) : ""));
 
         colHistoryStatus.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getStatus().displayLabel()));
+                new SimpleStringProperty(cellData.getValue().status().displayLabel()));
 
-        colHistoryNotes.setCellValueFactory(new PropertyValueFactory<>("notes"));
+        colHistoryNotes.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().notes()));
     }
-    
+
     private void loadEvacuationCenters() {
-         try {
+        try {
             if (SessionContext.current() == null || SessionContext.current().getBarangay() == null) return;
             String brgyName = SessionContext.current().getBarangay().getName();
-            
+
             comboBoxCenter.setItems(FXCollections.observableArrayList(centerDao.findByBarangay(brgyName)));
             comboBoxCenter.setConverter(new StringConverter<>() {
                 @Override public String toString(EvacuationCenter center) {
-                    return center == null ? "" : center.getName();
+                    return center == null ? "" : center.name();
                 }
-                @Override public EvacuationCenter fromString(String string) { return null; } // Not needed
+                @Override public EvacuationCenter fromString(String string) { return null; }
             });
         } catch (SQLException e) {
             System.err.println("Failed to load evacuation centers: " + e.getMessage());
@@ -105,9 +103,9 @@ public class ManageSupplyRequestsController {
             comboItems.setItems(FXCollections.observableArrayList(inventoryDao.findAll()));
             comboItems.setConverter(new StringConverter<>() {
                 @Override public String toString(InventoryItem item) {
-                    return item == null ? "" : item.getName() + " (" + item.getUnit() + ")";
+                    return item == null ? "" : item.name() + " (" + item.unit() + ")";
                 }
-                @Override public InventoryItem fromString(String string) { return null; } // Not needed
+                @Override public InventoryItem fromString(String string) { return null; }
             });
         } catch (SQLException e) {
             System.err.println("Failed to load inventory items: " + e.getMessage());
@@ -118,7 +116,7 @@ public class ManageSupplyRequestsController {
         if (SessionContext.current() == null || SessionContext.current().getBarangay() == null) return;
         try {
             String brgyName = SessionContext.current().getBarangay().getName();
-            historyItems.setAll(requestDao.findByBarangay(brgyName));
+            historyItems.setAll(requestDao.getRequestsByBarangay(brgyName));
         } catch (SQLException e) {
             System.err.println("Failed to load history: " + e.getMessage());
         }
@@ -135,18 +133,16 @@ public class ManageSupplyRequestsController {
             int qty = Integer.parseInt(qtyText.trim());
             if (qty <= 0) return;
 
-            // Check if item is already in staging; if so, add to existing qty
             for (SupplyRequestItem item : stagingItems) {
-                if (item.getItemId().equals(selected.getId())) {
-                    // Quick replace to update table
+                if (item.getItemId().equals(selected.id())) {
                     stagingItems.remove(item);
-                    stagingItems.add(new SupplyRequestItem(selected.getId(), item.getQuantityRequested() + qty, selected.getName(), selected.getUnit()));
+                    stagingItems.add(new SupplyRequestItem(selected.id(), item.getQuantityRequested() + qty, selected.name(), selected.unit()));
                     fieldQuantity.clear();
                     return;
                 }
             }
 
-            stagingItems.add(new SupplyRequestItem(selected.getId(), qty, selected.getName(), selected.getUnit()));
+            stagingItems.add(new SupplyRequestItem(selected.id(), qty, selected.name(), selected.unit()));
             fieldQuantity.clear();
             comboItems.getSelectionModel().clearSelection();
 
@@ -159,29 +155,27 @@ public class ManageSupplyRequestsController {
     private void handleSubmitRequest() {
         if (stagingItems.isEmpty()) return;
         if (SessionContext.current() == null) return;
-        
-        EvacuationCenter selectedCenter = comboBoxCenter.getValue();
-        if (selectedCenter == null) {
-            // Show alert or handle error visually
-             System.err.println("Error: Evacuation center is not selected.");
-             return;
-        }
 
         try {
-            SupplyRequest request = new SupplyRequest(
-                    SessionContext.current().getBarangay().getName(),
-                    SessionContext.current().getUser().getId(),
-                    selectedCenter.getId(),
-                    fieldNotes.getText()
-            );
+            Long userId = SessionContext.current().getUser().id();
+            String brgyName = SessionContext.current().getBarangay().getName();
 
-            // Move items from staging to request
-            request.getItems().addAll(stagingItems);
+            // NEW: Save each staged item as an individual supply request natively
+            for (SupplyRequestItem stagedItem : stagingItems) {
+                SupplyRequest newRequest = new SupplyRequest(
+                        0,
+                        stagedItem.getItemId(),
+                        stagedItem.getQuantityRequested(),
+                        SupplyRequestStatus.PENDING,
+                        brgyName,
+                        userId,
+                        fieldNotes.getText(),
+                        null,
+                        null
+                );
+                requestDao.saveRequest(newRequest);
+            }
 
-            // Transact to DB
-            requestDao.saveRequestWithItems(request);
-
-            // Clean up UI and refresh history
             stagingItems.clear();
             fieldNotes.clear();
             comboBoxCenter.getSelectionModel().clearSelection();

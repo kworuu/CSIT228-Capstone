@@ -2,7 +2,7 @@ package com.example.dashboard_admin.views;
 
 import com.example.dao.InventoryItemDao;
 import com.example.model.InventoryItem;
-import com.example.auth.SessionContext;     // Import your global session manager
+import com.example.auth.SessionContext;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -37,31 +37,27 @@ public class AddItemController {
         }
 
         try {
-            InventoryItem newItem = new InventoryItem();
-            newItem.setName(nameField.getText().trim());
-            newItem.setCategory(categoryCombo.getValue());
-            newItem.setUnit(unitField.getText().trim());
-            newItem.setLowThreshold(Integer.parseInt(lowThresholdField.getText()));
-            newItem.setCriticalThreshold(Integer.parseInt(criticalThresholdField.getText()));
-            newItem.setStockQuantity(0);
-
-            // FETCH GLOBAL USER ID using your specific SessionContext methods
             SessionContext session = SessionContext.current();
+            Long userId = (session != null && session.getUser() != null) ? session.getUser().id() : null;
 
-            if (session != null && session.getUser() != null) {
-                newItem.setCreatedByUserId(session.getUser().getId());
-            } else {
-                newItem.setCreatedByUserId(null); // Fallback if no one is logged in
-            }
+            // NEW: Using the 8-parameter InventoryItem record constructor
+            InventoryItem newItem = new InventoryItem(
+                    0,
+                    nameField.getText().trim(),
+                    categoryCombo.getValue(),
+                    unitField.getText().trim(),
+                    Integer.parseInt(lowThresholdField.getText()),
+                    0,
+                    null,
+                    userId
+            );
 
             inventoryDao.save(newItem);
             closeStage();
 
-        } catch (SQLException e) {
+        } catch (Exception e) { // Updated to catch broader exceptions due to DAO variations
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save the item to the database.");
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Input Error", "Please ensure thresholds are valid numbers.");
         }
     }
 

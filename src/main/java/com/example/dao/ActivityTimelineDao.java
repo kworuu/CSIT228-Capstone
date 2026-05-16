@@ -16,7 +16,6 @@ public class ActivityTimelineDao {
     public List<ActivityTimelineItem> getBarangayTimeline(String barangayName) throws SQLException {
         List<ActivityTimelineItem> timeline = new ArrayList<>();
 
-        // This query UNIONS your transactions (inflow/outflow) with your supply_requests
         String sql = """
             SELECT t.created_at AS event_date, 
                    UPPER(t.direction) AS action_type, 
@@ -24,8 +23,8 @@ public class ActivityTimelineDao {
                    ec.name AS center_name,
                    u.display_name AS user_name
             FROM transactions t
-            JOIN evacuation_centers ec ON t.destination_center_id = ec.id
-            JOIN users u ON t.created_by = u.id
+            JOIN evacuation_centers ec ON t.destination_id = ec.id AND t.destination_type = 'EVACUATION_CENTER'
+            JOIN users u ON t.user_id = u.id
             WHERE ec.barangay = ?
             
             UNION ALL
@@ -33,10 +32,9 @@ public class ActivityTimelineDao {
             SELECT sr.created_at AS event_date, 
                    'REQUEST' AS action_type, 
                    CONCAT('Submitted supply request (Status: ', UPPER(sr.status), ')') AS target_desc,
-                   COALESCE(ec.name, 'Barangay LGU') AS center_name,
+                   'Barangay LGU' AS center_name,
                    u.display_name AS user_name
             FROM supply_requests sr
-            LEFT JOIN evacuation_centers ec ON sr.evacuation_center_id = ec.id
             JOIN users u ON sr.requesting_user_id = u.id
             WHERE sr.requesting_barangay = ?
             
