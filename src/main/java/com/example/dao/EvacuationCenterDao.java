@@ -32,29 +32,29 @@ public class EvacuationCenterDao implements GenericDao<EvacuationCenter, Long> {
                     "WHERE id = ?";
 
     private static final String SQL_FIND_BY_ID =
-            "SELECT id, name, address, barangay, " +
+            "SELECT id, name, address, barangay, photo_path, " +
                     "       latitude, longitude, managed_by, is_active, created_at " +
                     "FROM evacuation_centers WHERE id = ?";
 
     private static final String SQL_FIND_ALL =
-            "SELECT id, name, address, barangay, " +
+            "SELECT id, name, address, barangay, photo_path, " +
                     "       latitude, longitude, managed_by, is_active, created_at " +
                     "FROM evacuation_centers ORDER BY id";
 
     private static final String SQL_FIND_ACTIVE =
-            "SELECT id, name, address, barangay, " +
+            "SELECT id, name, address, barangay, photo_path, " +
                     "       latitude, longitude, managed_by, is_active, created_at " +
                     "FROM evacuation_centers WHERE is_active = TRUE ORDER BY name";
 
     private static final String SQL_INSERT =
             "INSERT INTO evacuation_centers " +
-                    "(name, address, barangay, " +
+                    "(name, address, barangay, photo_path, " +
                     " latitude, longitude, managed_by, is_active) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_UPDATE =
             "UPDATE evacuation_centers SET " +
-                    "name = ?, address = ?, barangay = ?, " +
+                    "name = ?, address = ?, barangay = ?, photo_path = ?, " +
                     "latitude = ?, longitude = ?, " +
                     "managed_by = ?, is_active = ? " +
                     "WHERE id = ?";
@@ -65,7 +65,7 @@ public class EvacuationCenterDao implements GenericDao<EvacuationCenter, Long> {
     private static final String SQL_COUNT_EVAC = "SELECT COUNT(*) FROM evacuation_centers";
     
     private static final String SQL_FIND_BY_BARANGAY =
-            "SELECT id, name, address, barangay, " +
+            "SELECT id, name, address, barangay, photo_path, " +
             "       latitude, longitude, managed_by, is_active, created_at " +
             "FROM evacuation_centers WHERE barangay = ? ORDER BY name";
 
@@ -145,10 +145,11 @@ public class EvacuationCenterDao implements GenericDao<EvacuationCenter, Long> {
             stmt.setString(1, center.getName());
             stmt.setString(2, center.getAddress());
             stmt.setString(3, center.getBarangay());
-            setBigDecimalOrNull(stmt, 4, center.getLatitude());
-            setBigDecimalOrNull(stmt, 5, center.getLongitude());
-            setLongOrNull(stmt, 6, center.getManagedBy());
-            stmt.setBoolean(7, center.isActive());
+            stmt.setString(4, center.getPhotoPath());
+            setBigDecimalOrNull(stmt, 5, center.getLatitude());
+            setBigDecimalOrNull(stmt, 6, center.getLongitude());
+            setLongOrNull(stmt, 7, center.getManagedBy());
+            stmt.setBoolean(8, center.isActive());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -176,11 +177,12 @@ public class EvacuationCenterDao implements GenericDao<EvacuationCenter, Long> {
             stmt.setString(1, center.getName());
             stmt.setString(2, center.getAddress());
             stmt.setString(3, center.getBarangay());
-            setBigDecimalOrNull(stmt, 4, center.getLatitude());
-            setBigDecimalOrNull(stmt, 5, center.getLongitude());
-            setLongOrNull(stmt, 6, center.getManagedBy());
-            stmt.setBoolean(7, center.isActive());
-            stmt.setLong(8, center.getId());
+            stmt.setString(4, center.getPhotoPath());
+            setBigDecimalOrNull(stmt, 5, center.getLatitude());
+            setBigDecimalOrNull(stmt, 6, center.getLongitude());
+            setLongOrNull(stmt, 7, center.getManagedBy());
+            stmt.setBoolean(8, center.isActive());
+            stmt.setLong(9, center.getId());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -260,6 +262,7 @@ public class EvacuationCenterDao implements GenericDao<EvacuationCenter, Long> {
                 rs.getString("name"),
                 rs.getString("address"),
                 rs.getString("barangay"),
+                rs.getString("photo_path"),
                 rs.getBigDecimal("latitude"),
                 rs.getBigDecimal("longitude"),
                 managedBy,

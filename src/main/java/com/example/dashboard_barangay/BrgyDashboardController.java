@@ -55,6 +55,7 @@ public class BrgyDashboardController {
     @FXML private Label  labelHeaderTitle;
     @FXML private Label  labelHeaderSubtitle;
     @FXML private Button buttonRefresh;
+    @FXML private Button buttonAddCenter;
 
     // ── FXML — Content panels ──────────────────────────────────────
     @FXML private VBox   vboxPanelMap;
@@ -110,6 +111,8 @@ public class BrgyDashboardController {
     @FXML private ComboBox<StructuralStatus> comboStructuralStatus;
     @FXML private Label                      labelStructuralCurrent;
     @FXML private TextField                  textFieldStructuralNotes;
+    @FXML private Button buttonOverlayClose;
+    @FXML private Button buttonViewRoster; // Make sure this is declared!
 
     private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
 
@@ -178,7 +181,7 @@ public class BrgyDashboardController {
         labelBrgyName.setText("Brgy. " + CURRENT_BARANGAY);
         populateSidebarFromSession();
 
-        loadBarangayCoordinates(); // <--- NEW!
+        loadBarangayCoordinates();
         loadCentersFromDB();
         setupMap();
         setupCenterCards();
@@ -271,6 +274,32 @@ public class BrgyDashboardController {
             // Tell the Leaflet map to fly back to the center
             webViewMap.getEngine().executeScript("if(window.flyHome) window.flyHome();");
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleAddCenter() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/example/dashboard_barangay/modals/add-brgyReg.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            AddBrgyController controller = loader.getController();
+            controller.setOnRegistrationSuccess(() -> {
+                handleRefresh();
+            });
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Register Evacuation Center");
+            stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            stage.initOwner(buttonAddCenter.getScene().getWindow());
+            stage.setScene(new javafx.scene.Scene(root));
+
+            stage.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Failed to open Register Center modal: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -551,6 +580,28 @@ public class BrgyDashboardController {
 
         // Wire update button to carry the selected center
         buttonUpdateCenter.setOnAction(e -> handleUpdateCenter());
+
+        // NEW: Wire the View Roster button to pop open our custom modal!
+        buttonViewRoster.setOnAction(e -> {
+            try {
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                        getClass().getResource("/com/example/dashboard_barangay/modals/roster-modal.fxml")
+                );
+                javafx.scene.Parent modal = loader.load();
+
+                RosterModalController controller = loader.getController();
+                controller.initData(c.id(), c.name()); // Pass the specific center ID
+
+                // Close behavior
+                controller.setOnClose(() -> anchorPaneMainRoot.getChildren().remove(modal));
+
+                // Add the modal overlay to the main screen
+                anchorPaneMainRoot.getChildren().add(modal);
+            } catch (Exception ex) {
+                System.err.println("Failed to open Roster Modal: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
     }
 
     /** Rough category detection from item name for pill colour */
