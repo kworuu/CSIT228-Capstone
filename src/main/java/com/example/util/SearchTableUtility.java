@@ -5,6 +5,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
+
 import java.util.function.BiPredicate;
 
 public class SearchTableUtility {

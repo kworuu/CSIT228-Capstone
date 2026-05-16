@@ -180,6 +180,13 @@ public class UpdateCenterController {
             }
         }
 
+        // ── 3. Notify all Kiosk screens (Observers) that a center update happened ──
+        String eventLabel = textFieldEvent.getText().isEmpty() ? "No active event" : textFieldEvent.getText();
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a"));
+
+        com.example.util.CenterEvent event = new com.example.util.CenterEvent(currentCenterId, labelTitle.getText(), eventLabel, timestamp);
+        com.example.util.CenterEventManager.getInstance().notifyObservers(event);
+
         closeModal();
     }
 
