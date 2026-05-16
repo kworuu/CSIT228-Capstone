@@ -133,6 +133,7 @@
                     </children>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="buttonAddCenter" text="+ Add New Center" onAction="#handleAddCenter" styleClass="brgy-btn-ghost"/>
                 <Button fx:id="buttonRefresh"
                         text="↻  Refresh"
                         mnemonicParsing="false"
@@ -175,14 +176,13 @@
                             </children>
                         </StackPane>
 
-                        <!-- CHANGED VBox to AnchorPane for Absolute close button positioning -->
                         <AnchorPane fx:id="vboxMapOverlay"
-                              maxWidth="340.0"
-                              prefWidth="320.0"
-                              styleClass="brgy-map-overlay"
-                              visible="false"
-                              managed="false"
-                              StackPane.alignment="BOTTOM_LEFT">
+                                    maxWidth="340.0"
+                                    prefWidth="320.0"
+                                    styleClass="brgy-map-overlay"
+                                    visible="false"
+                                    managed="false"
+                                    StackPane.alignment="BOTTOM_LEFT">
                             <StackPane.margin><Insets bottom="16.0" left="16.0"/></StackPane.margin>
                             <children>
                                 <VBox spacing="10.0"
@@ -190,46 +190,51 @@
                                       AnchorPane.bottomAnchor="0.0"
                                       AnchorPane.leftAnchor="0.0"
                                       AnchorPane.rightAnchor="0.0">
-                                      <padding><Insets bottom="16.0" left="18.0" right="18.0" top="16.0"/></padding>
-                                      <children>
-                                          <ImageView fx:id="imgOverlayCenter"
-                                                     fitHeight="140.0" fitWidth="284.0"
-                                                     preserveRatio="false"
-                                                     styleClass="brgy-overlay-img"/>
+                                    <padding><Insets bottom="16.0" left="18.0" right="18.0" top="16.0"/></padding>
+                                    <children>
+                                        <ImageView fx:id="imgOverlayCenter"
+                                                   fitHeight="140.0" fitWidth="284.0"
+                                                   preserveRatio="false"
+                                                   styleClass="brgy-overlay-img"/>
 
-                                          <VBox spacing="2.0">
-                                              <children>
-                                                  <Label fx:id="labelOverlayName" text="Center Name" styleClass="brgy-overlay-title" wrapText="true"/>
-                                                  <Label fx:id="labelOverlayAddress" text="Address" styleClass="brgy-overlay-address" wrapText="true"/>
-                                              </children>
-                                              <padding><Insets right="20.0"/></padding>
-                                          </VBox>
+                                        <VBox spacing="2.0">
+                                            <children>
+                                                <Label fx:id="labelOverlayName" text="Center Name" styleClass="brgy-overlay-title" wrapText="true"/>
+                                                <Label fx:id="labelOverlayAddress" text="Address" styleClass="brgy-overlay-address" wrapText="true"/>
+                                            </children>
+                                            <padding><Insets right="20.0"/></padding>
+                                        </VBox>
 
-                                          <VBox fx:id="vboxOverlayItemsBox" spacing="6.0">
-                                              <children>
-                                                  <Label text="AVAILABLE SUPPLIES" styleClass="brgy-overlay-section-label"/>
-                                                  <FlowPane fx:id="flowPaneOverlayPillsRow" hgap="6.0" vgap="6.0" prefWrapLength="290.0"/>
-                                              </children>
-                                          </VBox>
+                                        <VBox fx:id="vboxOverlayItemsBox" spacing="6.0">
+                                            <children>
+                                                <Label text="AVAILABLE SUPPLIES" styleClass="brgy-overlay-section-label"/>
+                                                <FlowPane fx:id="flowPaneOverlayPillsRow" hgap="6.0" vgap="6.0" prefWrapLength="290.0"/>
+                                            </children>
+                                        </VBox>
 
-                                          <VBox spacing="4.0">
-                                              <children>
-                                                  <Label text="CURRENT EVENT" styleClass="brgy-overlay-section-label"/>
-                                                  <Label fx:id="labelOverlayEvent" text="No active event" styleClass="brgy-overlay-event" wrapText="true"/>
-                                              </children>
-                                          </VBox>
+                                        <VBox spacing="4.0">
+                                            <children>
+                                                <Label text="CURRENT EVENT" styleClass="brgy-overlay-section-label"/>
+                                                <Label fx:id="labelOverlayEvent" text="No active event" styleClass="brgy-overlay-event" wrapText="true"/>
+                                            </children>
+                                        </VBox>
 
-                                          <Label fx:id="labelOverlayTimestamp" text="Updated: —" styleClass="brgy-overlay-ts"/>
+                                        <Label fx:id="labelOverlayTimestamp" text="Updated: —" styleClass="brgy-overlay-ts"/>
 
-                                          <Button fx:id="buttonUpdateCenter"
-                                                  text="✏  Update Center Info"
-                                                  maxWidth="1.7976931348623157E308"
-                                                  mnemonicParsing="false"
-                                                  styleClass="brgy-btn-primary"
-                                                  onAction="#handleUpdateCenter"/>
-                                      </children>
+                                        <Button fx:id="buttonViewRoster"
+                                                text="📋  View Center Roster"
+                                                maxWidth="1.7976931348623157E308"
+                                                mnemonicParsing="false"
+                                                styleClass="brgy-btn-ghost"/>
+
+                                        <Button fx:id="buttonUpdateCenter"
+                                                text="✏  Update Center Info"
+                                                maxWidth="1.7976931348623157E308"
+                                                mnemonicParsing="false"
+                                                styleClass="brgy-btn-primary"
+                                                onAction="#handleUpdateCenter"/>
+                                    </children>
                                 </VBox>
-                                <!-- The floating close button! -->
                                 <Button fx:id="buttonOverlayClose"
                                         text="✕"
                                         mnemonicParsing="false"
@@ -246,12 +251,12 @@
                 <VBox styleClass="brgy-cards-strip" prefHeight="220.0" VBox.vgrow="NEVER">
                     <padding><Insets top="12.0" bottom="12.0" left="20.0" right="20.0"/></padding>
                     <children>
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <HBox alignment="CENTER_LEFT" spacing="16.0">
                             <padding><Insets bottom="10.0"/></padding>
                             <children>
                                 <Label text="EVACUATION CENTERS" styleClass="brgy-strip-header"/>
-                                <Region HBox.hgrow="ALWAYS"/>
                                 <Label fx:id="labelCenterCount" text="0 centers" styleClass="brgy-strip-count"/>
+                                <Region HBox.hgrow="ALWAYS"/>
                             </children>
                         </HBox>
                         <ScrollPane

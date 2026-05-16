@@ -15,6 +15,7 @@ public class User {
     private String email;
     private String displayName;
     private UserRole role;
+    private String assignedBarangay;
     private Long assignedCenterId;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
@@ -22,7 +23,7 @@ public class User {
     public User() {}
 
     public User(Long id, String username, String passwordHash, String email,
-                String displayName, UserRole role, Long assignedCenterId,
+                String displayName, UserRole role, String assignedBarangay, Long assignedCenterId,
                 LocalDateTime createdAt, LocalDateTime lastLoginAt) {
         this.id = id;
         this.username = username;
@@ -30,6 +31,7 @@ public class User {
         this.email = email;
         this.displayName = displayName;
         this.role = role;
+        this.assignedBarangay = assignedBarangay;
         this.assignedCenterId = assignedCenterId;
         this.createdAt = createdAt;
         this.lastLoginAt = lastLoginAt;
@@ -47,6 +49,8 @@ public class User {
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     public UserRole getRole() { return role; }
     public void setRole(UserRole role) { this.role = role; }
+    public String getAssignedBarangay() { return assignedBarangay; }
+    public void setAssignedBarangay(String assignedBarangay) { this.assignedBarangay = assignedBarangay; }
     public Long getAssignedCenterId() { return assignedCenterId; }
     public void setAssignedCenterId(Long assignedCenterId) { this.assignedCenterId = assignedCenterId; }
     public LocalDateTime getCreatedAt() { return createdAt; }

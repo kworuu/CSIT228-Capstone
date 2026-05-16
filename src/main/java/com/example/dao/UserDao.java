@@ -32,7 +32,7 @@ public class UserDao implements GenericDao<User, Long> {
 
     private static final String COLS =
             "id, username, password_hash, email, display_name, role, " +
-            "assigned_center_id, created_at, last_login_at";
+            "assigned_barangay, assigned_center_id, created_at, last_login_at";
 
     private static final String SQL_FIND_BY_ID =
             "SELECT " + COLS + " FROM users WHERE id = ?";
@@ -45,13 +45,13 @@ public class UserDao implements GenericDao<User, Long> {
 
     private static final String SQL_INSERT =
             "INSERT INTO users " +
-            "(username, password_hash, email, display_name, role, assigned_center_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "(username, password_hash, email, display_name, role, assigned_barangay, assigned_center_id) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_UPDATE =
             "UPDATE users SET " +
             "username = ?, password_hash = ?, email = ?, display_name = ?, " +
-            "role = ?, assigned_center_id = ? " +
+            "role = ?, assigned_barangay = ?, assigned_center_id = ? " +
             "WHERE id = ?";
 
     private static final String SQL_UPDATE_LAST_LOGIN =
@@ -124,7 +124,8 @@ public class UserDao implements GenericDao<User, Long> {
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getDisplayName());
             stmt.setString(5, user.getRole().toDb());
-            setLongOrNull(stmt, 6, user.getAssignedCenterId());
+            stmt.setString(6, user.getAssignedBarangay());
+            setLongOrNull(stmt, 7, user.getAssignedCenterId());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -154,8 +155,9 @@ public class UserDao implements GenericDao<User, Long> {
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getDisplayName());
             stmt.setString(5, user.getRole().toDb());
-            setLongOrNull(stmt, 6, user.getAssignedCenterId());
-            stmt.setLong(7, user.getId());
+            stmt.setString(6, user.getAssignedBarangay());
+            setLongOrNull(stmt, 7, user.getAssignedCenterId());
+            stmt.setLong(8, user.getId());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -209,6 +211,7 @@ public class UserDao implements GenericDao<User, Long> {
                 rs.getString("email"),
                 rs.getString("display_name"),
                 UserRole.fromDb(rs.getString("role")),
+                rs.getString("assigned_barangay"),
                 assignedCenterId,
                 created,
                 lastLogin

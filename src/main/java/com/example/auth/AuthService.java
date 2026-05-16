@@ -139,7 +139,7 @@ public class AuthService {
      */
     private Optional<User> findBarangayUser(String barangayName) throws SQLException {
         String sql =
-                "SELECT id, username, password_hash, email, display_name, role, " +
+                "SELECT id, username, password_hash, email, display_name, role, assigned_barangay, " + // Added assigned_barangay
                         "       assigned_center_id, created_at, last_login_at " +
                         "FROM users " +
                         "WHERE assigned_barangay = ? AND role IN ('barangay','staff') " +
@@ -154,6 +154,8 @@ public class AuthService {
 
                 Long assignedCenterId = rs.getLong("assigned_center_id");
                 if (rs.wasNull()) assignedCenterId = null;
+                
+                String assignedBarangay = rs.getString("assigned_barangay"); // Retrieved assigned_barangay
 
                 var createdTs = rs.getTimestamp("created_at");
                 var lastLoginTs = rs.getTimestamp("last_login_at");
@@ -165,7 +167,8 @@ public class AuthService {
                         rs.getString("email"),
                         rs.getString("display_name"),
                         UserRole.fromDb(rs.getString("role")),
-                        assignedCenterId,
+                        assignedBarangay, // Correct order: String
+                        assignedCenterId, // Correct order: Long
                         createdTs == null ? null : createdTs.toLocalDateTime(),
                         lastLoginTs == null ? null : lastLoginTs.toLocalDateTime()
                 );
