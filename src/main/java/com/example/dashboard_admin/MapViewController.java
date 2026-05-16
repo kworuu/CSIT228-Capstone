@@ -125,8 +125,6 @@ public class MapViewController implements Initializable {
                 "/com/example/dashboard_admin/evacuation.fxml", navEvacuations));
         navInventory.setOnAction(e -> SceneHelper.switchScene(
                 "/com/example/dashboard_admin/inventory.fxml", navInventory));
-        navActivity.setOnAction(e -> SceneHelper.switchScene(
-                "/com/example/dashboard_admin/activity-log.fxml", navActivity));
 
         // 2. Render the map shell synchronously with an empty marker list.
         //    The Cebu City frame is visible within milliseconds — the user

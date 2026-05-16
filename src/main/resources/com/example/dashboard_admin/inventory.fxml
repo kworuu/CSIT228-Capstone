@@ -38,11 +38,6 @@
                         <Button fx:id="navEvacuations" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item" text="Evacuations" />
                         <Button fx:id="navInventory" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item, nav-active" text="Inventory" />
                         <Button fx:id="navMap" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item" text="Map View" />
-
-                        <Label styleClass="nav-header" text="REPORTING">
-                            <padding><Insets top="24.0" /></padding>
-                        </Label>
-                        <Button fx:id="navActivity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item" text="Activity Log" />
                     </children>
                     <padding>
                         <Insets left="12.0" right="12.0" />
