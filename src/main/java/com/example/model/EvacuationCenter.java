@@ -13,6 +13,7 @@ public class EvacuationCenter {
     private String name;
     private String address;
     private String barangay;
+    private String photoPath;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private Long managedBy;
@@ -22,13 +23,14 @@ public class EvacuationCenter {
 
     public EvacuationCenter() {}
 
-    public EvacuationCenter(Long id, String name, String address, String barangay,
+    public EvacuationCenter(Long id, String name, String address, String barangay, String photoPath,
                             BigDecimal latitude, BigDecimal longitude,
                             Long managedBy, boolean active, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.barangay = barangay;
+        this.photoPath = photoPath;
         this.latitude = latitude;
         this.longitude = longitude;
         this.managedBy = managedBy;
@@ -44,6 +46,8 @@ public class EvacuationCenter {
     public void setAddress(String address) { this.address = address; }
     public String getBarangay() { return barangay; }
     public void setBarangay(String barangay) { this.barangay = barangay; }
+    public String getPhotoPath() { return photoPath; }
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
     public BigDecimal getLatitude() { return latitude; }
     public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
     public BigDecimal getLongitude() { return longitude; }

@@ -201,4 +201,37 @@ public class EvacueeDao implements GenericDao<Evacuee, Long> {
         }
     }
 
+    /**
+     * Fetches the Roster List for a specific Evacuation Center.
+     */
+    public java.util.List<com.example.dashboard_barangay.RosterModalController.RosterItem> getRosterByCenter(long centerId) throws java.sql.SQLException {
+        java.util.List<com.example.dashboard_barangay.RosterModalController.RosterItem> roster = new java.util.ArrayList<>();
+
+        String sql = """
+            SELECT full_name_enc, verification_status, created_at 
+            FROM evacuees 
+            WHERE evacuation_center_id = ? 
+            ORDER BY full_name_enc ASC
+            """;
+
+        try (java.sql.Connection conn = com.example.util.DBConnectionManager.getInstance().getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, centerId);
+
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy");
+
+                while (rs.next()) {
+                    String name = rs.getString("full_name_enc");
+                    String status = rs.getString("verification_status");
+                    String date = rs.getTimestamp("created_at").toLocalDateTime().format(dtf);
+
+                    roster.add(new com.example.dashboard_barangay.RosterModalController.RosterItem(name, status, date));
+                }
+            }
+        }
+        return roster;
+    }
+
 }
