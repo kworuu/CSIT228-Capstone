@@ -48,8 +48,9 @@ public class AddItemController {
                     unitField.getText().trim(),
                     Integer.parseInt(lowThresholdField.getText()),
                     0,
-                    null,
+                    0,
                     userId
+
             );
 
             inventoryDao.save(newItem);

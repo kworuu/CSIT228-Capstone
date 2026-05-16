@@ -13,8 +13,8 @@ public class EvacueeDao {
     public void saveEvacuee(Evacuee evacuee) throws SQLException {
         String sql = """
             INSERT INTO evacuees 
-            (full_name_enc, contact_enc, barangay, photo_path, evacuation_center_id, user_id, notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (full_name_enc, contact_enc, photo_path, evacuation_center_id, user_id, notes) 
+            VALUES (?, ?, ?, ?, ?, ?)
             """;
 
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
@@ -22,14 +22,13 @@ public class EvacueeDao {
 
             ps.setString(1, evacuee.fullNameEnc());
             ps.setString(2, evacuee.contactEnc());
-            ps.setString(3, evacuee.barangay());
-            ps.setString(4, evacuee.photoPath());
-            ps.setLong(5, evacuee.evacuationCenterId());
+            ps.setString(3, evacuee.photoPath());
+            ps.setLong(4, evacuee.evacuationCenterId());
 
-            if (evacuee.userId() != null) ps.setLong(6, evacuee.userId());
-            else ps.setNull(6, Types.BIGINT);
+            if (evacuee.userId() != null) ps.setLong(5, evacuee.userId());
+            else ps.setNull(5, Types.BIGINT);
 
-            ps.setString(7, evacuee.notes());
+            ps.setString(6, evacuee.notes());
             ps.executeUpdate();
         }
     }
