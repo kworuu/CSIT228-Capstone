@@ -1,58 +1,59 @@
 package com.example.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
+@Entity
+@Table(name = "supply_requests")
 public class SupplyRequest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String requestingBarangay;
-    private Long requestingUserId;
-    private Long evacuationCenterId;
-    private SupplyRequestStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "requesting_user_id", nullable = false)
+    private User requestingUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private InventoryItem item;
+
+    @Column(nullable = false)
+    private Integer quantity = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SupplyRequestStatus status = SupplyRequestStatus.pending;
+
+    @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
-    private Long reviewedBy;
-    private LocalDateTime reviewedAt;
-    private String adminNotes;
 
-    private List<SupplyRequestItem> items = new ArrayList<>();
-
-    // Constructor for creating a new request
-    public SupplyRequest(String requestingBarangay, Long requestingUserId, Long evacuationCenterId, String notes) {
-        this.requestingBarangay = requestingBarangay;
-        this.requestingUserId = requestingUserId;
-        this.evacuationCenterId = evacuationCenterId;
-        this.notes = notes;
-        this.status = SupplyRequestStatus.PENDING;
-    }
-
-    // Constructor for loading from DB
-    public SupplyRequest(Long id, String requestingBarangay, Long requestingUserId, Long evacuationCenterId,
-                         SupplyRequestStatus status, String notes, LocalDateTime createdAt,
-                         Long reviewedBy, LocalDateTime reviewedAt, String adminNotes) {
-        this.id = id;
-        this.requestingBarangay = requestingBarangay;
-        this.requestingUserId = requestingUserId;
-        this.evacuationCenterId = evacuationCenterId;
-        this.status = status;
-        this.notes = notes;
-        this.createdAt = createdAt;
-        this.reviewedBy = reviewedBy;
-        this.reviewedAt = reviewedAt;
-        this.adminNotes = adminNotes;
-    }
+    // Constructors
+    public SupplyRequest() {}
 
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getRequestingBarangay() { return requestingBarangay; }
-    public Long getRequestingUserId() { return requestingUserId; }
-    public Long getEvacuationCenterId() { return evacuationCenterId; }
+
+    public User getRequestingUser() { return requestingUser; }
+    public void setRequestingUser(User requestingUser) { this.requestingUser = requestingUser; }
+
+    public InventoryItem getItem() { return item; }
+    public void setItem(InventoryItem item) { this.item = item; }
+
+    public Integer getQuantity() { return quantity; }
+    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+
     public SupplyRequestStatus getStatus() { return status; }
+    public void setStatus(SupplyRequestStatus status) { this.status = status; }
+
     public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public List<SupplyRequestItem> getItems() { return items; }
-    public void setItems(List<SupplyRequestItem> items) { this.items = items; }
-    public void addItem(SupplyRequestItem item) { this.items.add(item); }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

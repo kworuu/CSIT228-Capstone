@@ -11,7 +11,8 @@ module com.example.capstone {
     requires jdk.jsobject;
     requires jdk.httpserver;
     requires java.net.http;
-    requires java.desktop;                   // password hashing
+    requires java.desktop;
+    requires jakarta.persistence;                   // password hashing
 
     // Main package
     opens com.example to javafx.graphics, javafx.fxml;

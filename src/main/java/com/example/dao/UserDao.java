@@ -17,22 +17,22 @@ import java.util.Optional;
 
 /**
  * Data Access Object for {@link User} entities.
- * Implements all CRUD operations against the {@code users} table.
+ * Implements all CRUD operations against the refactored {@code users} table.
  *
  * <p>Important: this DAO never compares passwords. It only stores and
  * retrieves {@code password_hash} values. Password comparison and hashing
  * happen in the service layer (AuthService) using bcrypt.</p>
  *
  * <p>All SQL is parameterized via {@link PreparedStatement} to prevent
- * SQL injection (rubric criterion 5).</p>
+ * SQL injection.</p>
  */
 public class UserDao implements GenericDao<User, Long> {
 
     // ── SQL constants ───────────────────────────────────────────
 
     private static final String COLS =
-            "id, username, password_hash, email, display_name, role, " +
-            "assigned_barangay, assigned_center_id, created_at, last_login_at";
+            "id, username, password_hash, display_name, role, " +
+                    "latitude, longitude, zoom, last_login_at";
 
     private static final String SQL_FIND_BY_ID =
             "SELECT " + COLS + " FROM users WHERE id = ?";
@@ -45,14 +45,14 @@ public class UserDao implements GenericDao<User, Long> {
 
     private static final String SQL_INSERT =
             "INSERT INTO users " +
-            "(username, password_hash, email, display_name, role, assigned_barangay, assigned_center_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    "(username, password_hash, display_name, role, latitude, longitude, zoom) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_UPDATE =
             "UPDATE users SET " +
-            "username = ?, password_hash = ?, email = ?, display_name = ?, " +
-            "role = ?, assigned_barangay = ?, assigned_center_id = ? " +
-            "WHERE id = ?";
+                    "username = ?, password_hash = ?, display_name = ?, " +
+                    "role = ?, latitude = ?, longitude = ?, zoom = ? " +
+                    "WHERE id = ?";
 
     private static final String SQL_UPDATE_LAST_LOGIN =
             "UPDATE users SET last_login_at = ? WHERE id = ?";
@@ -121,11 +121,14 @@ public class UserDao implements GenericDao<User, Long> {
 
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPasswordHash());
-            stmt.setString(3, user.getEmail());
-            stmt.setString(4, user.getDisplayName());
-            stmt.setString(5, user.getRole().toDb());
-            stmt.setString(6, user.getAssignedBarangay());
-            setLongOrNull(stmt, 7, user.getAssignedCenterId());
+            stmt.setString(3, user.getDisplayName());
+
+            // Handle UserRole correctly (depends on if you use .toDb() or .name())
+            stmt.setString(4, user.getRole() != null ? user.getRole().name().toLowerCase() : "barangay");
+
+            setDoubleOrNull(stmt, 5, user.getLatitude());
+            setDoubleOrNull(stmt, 6, user.getLongitude());
+            setIntOrNull(stmt, 7, user.getZoom());
 
             int rows = stmt.executeUpdate();
             if (rows == 0) {
@@ -152,11 +155,12 @@ public class UserDao implements GenericDao<User, Long> {
 
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPasswordHash());
-            stmt.setString(3, user.getEmail());
-            stmt.setString(4, user.getDisplayName());
-            stmt.setString(5, user.getRole().toDb());
-            stmt.setString(6, user.getAssignedBarangay());
-            setLongOrNull(stmt, 7, user.getAssignedCenterId());
+            stmt.setString(3, user.getDisplayName());
+            stmt.setString(4, user.getRole() != null ? user.getRole().name().toLowerCase() : "barangay");
+
+            setDoubleOrNull(stmt, 5, user.getLatitude());
+            setDoubleOrNull(stmt, 6, user.getLongitude());
+            setIntOrNull(stmt, 7, user.getZoom());
             stmt.setLong(8, user.getId());
 
             int rows = stmt.executeUpdate();
@@ -195,35 +199,50 @@ public class UserDao implements GenericDao<User, Long> {
     // ── Helpers ─────────────────────────────────────────────────
 
     private User mapRow(ResultSet rs) throws SQLException {
-        Long assignedCenterId = rs.getLong("assigned_center_id");
-        if (rs.wasNull()) assignedCenterId = null;
+        User user = new User();
+        user.setId(rs.getLong("id"));
+        user.setUsername(rs.getString("username"));
+        user.setPasswordHash(rs.getString("password_hash"));
+        user.setDisplayName(rs.getString("display_name"));
 
-        Timestamp createdAt = rs.getTimestamp("created_at");
-        LocalDateTime created = createdAt == null ? null : createdAt.toLocalDateTime();
+        // Match the role enum mapping (adjust if you have a custom fromDb() method)
+        String roleStr = rs.getString("role");
+        if (roleStr != null) {
+            user.setRole(UserRole.valueOf(roleStr.toUpperCase()));
+        }
 
+        // Handle safe null checking for coordinates and zoom
+        double lat = rs.getDouble("latitude");
+        if (!rs.wasNull()) user.setLatitude(lat);
+
+        double lng = rs.getDouble("longitude");
+        if (!rs.wasNull()) user.setLongitude(lng);
+
+        int zoom = rs.getInt("zoom");
+        if (!rs.wasNull()) user.setZoom(zoom);
+
+        // Map timestamp
         Timestamp lastLoginAt = rs.getTimestamp("last_login_at");
-        LocalDateTime lastLogin = lastLoginAt == null ? null : lastLoginAt.toLocalDateTime();
+        if (lastLoginAt != null) {
+            user.setLastLoginAt(lastLoginAt.toLocalDateTime());
+        }
 
-        return new User(
-                rs.getLong("id"),
-                rs.getString("username"),
-                rs.getString("password_hash"),
-                rs.getString("email"),
-                rs.getString("display_name"),
-                UserRole.fromDb(rs.getString("role")),
-                rs.getString("assigned_barangay"),
-                assignedCenterId,
-                created,
-                lastLogin
-        );
+        return user;
     }
 
-    private void setLongOrNull(PreparedStatement stmt, int index, Long value)
-            throws SQLException {
+    private void setDoubleOrNull(PreparedStatement stmt, int index, Double value) throws SQLException {
         if (value == null) {
-            stmt.setNull(index, java.sql.Types.BIGINT);
+            stmt.setNull(index, java.sql.Types.DECIMAL);
         } else {
-            stmt.setLong(index, value);
+            stmt.setDouble(index, value);
+        }
+    }
+
+    private void setIntOrNull(PreparedStatement stmt, int index, Integer value) throws SQLException {
+        if (value == null) {
+            stmt.setNull(index, java.sql.Types.INTEGER);
+        } else {
+            stmt.setInt(index, value);
         }
     }
 }

@@ -1,53 +1,46 @@
 package com.example.model;
 
+import com.example.model.User;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Represents a type of supply item tracked in inventory.
- * Maps to the {@code inventory_items} table.
- */
+@Entity
+@Table(name = "inventory_items")
 public class InventoryItem {
 
-    /** Status levels for an item's current stock. */
-    public enum StockStatus {
-        OK, LOW, CRITICAL
-    }
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 255)
     private String name;
+
+    @Column(nullable = false, length = 64)
     private String category;
+
+    @Column(nullable = false, length = 32)
     private String unit;
-    private int criticalThreshold;
-    private int lowThreshold;
+
+    @Column(name = "critical_threshold", nullable = false)
+    private Integer criticalThreshold;
+
+    @Column(name = "low_threshold", nullable = false)
+    private Integer lowThreshold;
+
+    @Column(name = "stock_quantity", nullable = false)
+    private Integer stockQuantity = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdByUser;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
-    // Integrated Stock Column
-    private int stockQuantity;
-
-    // Tracks which user created/owns this record
-    private Long createdByUserId;
-
-    // Default Constructor
+    // Constructors
     public InventoryItem() {}
 
-    // Full Constructor for DAO mapping
-    public InventoryItem(Long id, String name, String category,
-                         String unit, int criticalThreshold,
-                         int lowThreshold, LocalDateTime createdAt,
-                         int stockQuantity, Long createdByUserId) {
-        this.id = id;
-        this.name = name;
-        this.category = category;
-        this.unit = unit;
-        this.criticalThreshold = criticalThreshold;
-        this.lowThreshold = lowThreshold;
-        this.createdAt = createdAt;
-        this.stockQuantity = stockQuantity;
-        this.createdByUserId = createdByUserId;
-    }
-
-    // --- Getters and Setters ---
-
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -60,33 +53,18 @@ public class InventoryItem {
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }
 
-    public int getCriticalThreshold() { return criticalThreshold; }
-    public void setCriticalThreshold(int criticalThreshold) { this.criticalThreshold = criticalThreshold; }
+    public Integer getCriticalThreshold() { return criticalThreshold; }
+    public void setCriticalThreshold(Integer criticalThreshold) { this.criticalThreshold = criticalThreshold; }
 
-    public int getLowThreshold() { return lowThreshold; }
-    public void setLowThreshold(int lowThreshold) { this.lowThreshold = lowThreshold; }
+    public Integer getLowThreshold() { return lowThreshold; }
+    public void setLowThreshold(Integer lowThreshold) { this.lowThreshold = lowThreshold; }
+
+    public Integer getStockQuantity() { return stockQuantity; }
+    public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
+
+    public User getCreatedByUser() { return createdByUser; }
+    public void setCreatedByUser(User createdByUser) { this.createdByUser = createdByUser; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public int getStockQuantity() { return stockQuantity; }
-    public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
-
-    public Long getCreatedByUserId() { return createdByUserId; }
-    public void setCreatedByUserId(Long createdByUserId) { this.createdByUserId = createdByUserId; }
-
-    /**
-     * Business Logic: Returns the status based on internal thresholds.
-     * Useful for UI coloring (e.g., Red for Critical).
-     */
-    public StockStatus getStatus() {
-        if (stockQuantity <= criticalThreshold) return StockStatus.CRITICAL;
-        if (stockQuantity <= lowThreshold) return StockStatus.LOW;
-        return StockStatus.OK;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s [%s] - Stock: %d %s", name, category, stockQuantity, unit);
-    }
 }

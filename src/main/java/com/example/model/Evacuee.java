@@ -1,51 +1,70 @@
-package com.example.model;
 
+
+// Replaced jakarta with javax if you downgraded, or keep jakarta if dependencies are resolved.
+import com.example.model.EvacuationCenter;
+import com.example.model.User;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Represents a person sheltered at an evacuation center.
- * Maps to the {@code evacuees} table.
- */
+@Entity
+@Table(name = "evacuees")
 public class Evacuee {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "full_name_enc", nullable = false, length = 500)
     private String fullNameEnc;
+
+    @Column(name = "contact_enc", length = 500)
     private String contactEnc;
-    private String barangay;
+
+    // No imports needed for User if it is in com.civicguard.model
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "photo_path", length = 500)
     private String photoPath;
-    private Long evacuationCenterId;
+
+    // No imports needed for EvacuationCenter if it is in com.civicguard.model
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "evacuation_center_id", nullable = false)
+    private EvacuationCenter evacuationCenter;
+
+    @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
+    // Constructors
     public Evacuee() {}
 
-    public Evacuee(Long id, String fullNameEnc, String contactEnc, String barangay,
-                   String photoPath, Long evacuationCenterId,
-                   String notes, LocalDateTime createdAt) {
-        this.id = id;
-        this.fullNameEnc = fullNameEnc;
-        this.contactEnc = contactEnc;
-        this.barangay = barangay;
-        this.photoPath = photoPath;
-        this.evacuationCenterId = evacuationCenterId;
-        this.notes = notes;
-        this.createdAt = createdAt;
-    }
-
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getFullNameEnc() { return fullNameEnc; }
     public void setFullNameEnc(String fullNameEnc) { this.fullNameEnc = fullNameEnc; }
+
     public String getContactEnc() { return contactEnc; }
+    // FIXED: Corrected syntax parenthesis below
     public void setContactEnc(String contactEnc) { this.contactEnc = contactEnc; }
-    public String getBarangay() { return barangay; }
-    public void setBarangay(String barangay) { this.barangay = barangay; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
     public String getPhotoPath() { return photoPath; }
     public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
-    public Long getEvacuationCenterId() { return evacuationCenterId; }
-    public void setEvacuationCenterId(Long evacuationCenterId) { this.evacuationCenterId = evacuationCenterId; }
+
+    public EvacuationCenter getEvacuationCenter() { return evacuationCenter; }
+    public void setEvacuationCenter(EvacuationCenter evacuationCenter) { this.evacuationCenter = evacuationCenter; }
+
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

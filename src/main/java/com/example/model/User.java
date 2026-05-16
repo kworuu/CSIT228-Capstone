@@ -1,63 +1,75 @@
 package com.example.model;
 
-import java.time.LocalDateTime;
 
-/**
- * Represents an admin or staff user of the CivicGuard system.
- * Maps to the {@code users} table. The {@code passwordHash} field
- * stores a bcrypt hash, never plaintext.
- */
+import com.example.model.Role;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+
+
+@Entity
+@Table(name = "users")
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, length = 64)
     private String username;
+
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
-    private String email;
+
+    @Column(name = "display_name", nullable = false, length = 128)
     private String displayName;
-    private UserRole role;
-    private String assignedBarangay;
-    private Long assignedCenterId;
-    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.barangay;
+
+    @Column(precision = 10, scale = 6)
+    private BigDecimal latitude;
+
+    @Column(precision = 10, scale = 6)
+    private BigDecimal longitude;
+
+    private Integer zoom;
+
+    @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    // Constructors
     public User() {}
 
-    public User(Long id, String username, String passwordHash, String email,
-                String displayName, UserRole role, String assignedBarangay, Long assignedCenterId,
-                LocalDateTime createdAt, LocalDateTime lastLoginAt) {
-        this.id = id;
-        this.username = username;
-        this.passwordHash = passwordHash;
-        this.email = email;
-        this.displayName = displayName;
-        this.role = role;
-        this.assignedBarangay = assignedBarangay;
-        this.assignedCenterId = assignedCenterId;
-        this.createdAt = createdAt;
-        this.lastLoginAt = lastLoginAt;
-    }
-
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
-    public UserRole getRole() { return role; }
-    public void setRole(UserRole role) { this.role = role; }
-    public String getAssignedBarangay() { return assignedBarangay; }
-    public void setAssignedBarangay(String assignedBarangay) { this.assignedBarangay = assignedBarangay; }
-    public Long getAssignedCenterId() { return assignedCenterId; }
-    public void setAssignedCenterId(Long assignedCenterId) { this.assignedCenterId = assignedCenterId; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public BigDecimal getLatitude() { return latitude; }
+    public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
+
+    public BigDecimal getLongitude() { return longitude; }
+    public void setLongitude(BigDecimal longitude) { this.longitude = longitude; }
+
+    public Integer getZoom() { return zoom; }
+    public void setZoom(Integer zoom) { this.zoom = zoom; }
+
     public LocalDateTime getLastLoginAt() { return lastLoginAt; }
     public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
-
-    @Override
-    public String toString() { return displayName + " (@" + username + ")"; }
 }
