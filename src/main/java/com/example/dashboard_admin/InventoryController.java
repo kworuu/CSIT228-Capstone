@@ -97,4 +97,9 @@ public class InventoryController {
 
         mainTable.setItems(inventoryData);
     }
+
+
+    private void addItem(){
+
+    }
 }

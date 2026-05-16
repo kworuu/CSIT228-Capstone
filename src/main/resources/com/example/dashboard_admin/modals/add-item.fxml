@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="450" spacing="20" style="-fx-padding: 30;" styleClass="card-container" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.modals.AddItemController"> <children>
+<VBox prefWidth="450" spacing="20" style="-fx-padding: 30;" styleClass="card-container" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.modals.AddItemController"> <children>
     <VBox spacing="5">
         <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" styleClass="modal-title" text="Insert New Inventory Item" />
         <Label styleClass="modal-description" text="Add supplies to the LGU Central Warehouse tracking system." />

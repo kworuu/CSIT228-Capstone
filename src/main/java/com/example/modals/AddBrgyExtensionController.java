@@ -1,4 +1,4 @@
-package com.example.dashboard_admin.views;
+package com.example.modals;
 
 import com.example.util.SceneHelper;
 import javafx.event.ActionEvent;

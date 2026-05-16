@@ -1,8 +1,9 @@
-package com.example.dashboard_admin.views;
-
+package com.example.modals;
 
 import com.example.dao.InventoryItemDao;
 import com.example.model.InventoryItem;
+import com.example.model.User;             // Import User model
+import com.example.auth.SessionContext;     // Import your global session manager
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -23,45 +24,38 @@ public class AddItemController {
 
     @FXML
     public void initialize() {
-        // Initialize Categories to match the inventory_items schema categories
         categoryCombo.getItems().addAll("food", "water", "non-food", "medical");
-
-        // Use your utility to ensure thresholds only accept digits
         setupNumericValidation(lowThresholdField);
         setupNumericValidation(criticalThresholdField);
 
-        // Action Handlers
         btnCancel.setOnAction(e -> closeStage());
         btnSave.setOnAction(e -> handleSave());
     }
 
-    /**
-     * Collects data from the UI and saves it using the InventoryItemDao.
-     */
     private void handleSave() {
         if (!isInputValid()) {
             return;
         }
 
         try {
-            // 1. Create a new model instance
             InventoryItem newItem = new InventoryItem();
             newItem.setName(nameField.getText().trim());
             newItem.setCategory(categoryCombo.getValue());
             newItem.setUnit(unitField.getText().trim());
             newItem.setLowThreshold(Integer.parseInt(lowThresholdField.getText()));
             newItem.setCriticalThreshold(Integer.parseInt(criticalThresholdField.getText()));
-
-            // Initial stock is 0 for new items as per your schema
             newItem.setStockQuantity(0);
 
-            // TODO: In a real scenario, get the current logged-in user's ID
-            // newItem.setCreatedByUserId(currentUserId);
+            // FETCH GLOBAL USER ID using your specific SessionContext methods
+            SessionContext session = SessionContext.current();
 
-            // 2. Persist to database via DAO
+            if (session != null && session.getUser() != null) {
+                newItem.setCreatedByUserId(session.getUser().getId());
+            } else {
+                newItem.setCreatedByUserId(null); // Fallback if no one is logged in
+            }
+
             inventoryDao.save(newItem);
-
-            // 3. Close modal on success
             closeStage();
 
         } catch (SQLException e) {
@@ -72,28 +66,15 @@ public class AddItemController {
         }
     }
 
-    /**
-     * Validates that required fields are not empty.
-     */
     private boolean isInputValid() {
         String errorMessage = "";
+        if (nameField.getText() == null || nameField.getText().isEmpty()) errorMessage += "Item Name is required.\n";
+        if (categoryCombo.getValue() == null) errorMessage += "Category must be selected.\n";
+        if (unitField.getText() == null || unitField.getText().isEmpty()) errorMessage += "Unit is required.\n";
+        if (lowThresholdField.getText().isEmpty() || criticalThresholdField.getText().isEmpty()) errorMessage += "Threshold values are required.\n";
 
-        if (nameField.getText() == null || nameField.getText().isEmpty()) {
-            errorMessage += "Item Name is required.\n";
-        }
-        if (categoryCombo.getValue() == null) {
-            errorMessage += "Category must be selected.\n";
-        }
-        if (unitField.getText() == null || unitField.getText().isEmpty()) {
-            errorMessage += "Unit is required.\n";
-        }
-        if (lowThresholdField.getText().isEmpty() || criticalThresholdField.getText().isEmpty()) {
-            errorMessage += "Threshold values are required.\n";
-        }
-
-        if (errorMessage.isEmpty()) {
-            return true;
-        } else {
+        if (errorMessage.isEmpty()) return true;
+        else {
             showAlert(Alert.AlertType.WARNING, "Invalid Fields", errorMessage);
             return false;
         }

@@ -82,25 +82,6 @@ public class DashboardController {
         colEvacCenter.setCellValueFactory(new PropertyValueFactory<>("name"));
         colBrgy.setCellValueFactory(new PropertyValueFactory<>("barangay"));
         colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        colStatus.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    switch (item.toUpperCase()) {
-                        case "FULL" -> setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
-                        case "ALMOST FULL" -> setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
-                        default -> setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
-                    }
-                }
-            }
-        });
     }
 
     private void loadData() {
