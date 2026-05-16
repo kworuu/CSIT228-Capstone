@@ -8,6 +8,7 @@ import com.example.util.DBConnectionManager;
 import com.example.util.Route;
 import com.example.util.Router;
 import javafx.application.Platform;
+import com.example.model.EvacueeRecord;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -42,10 +43,24 @@ public class KioskDashboardController implements CenterEventObserver {
     @FXML private TableColumn<SimpleCenter, String> colBarangay1;
     @FXML private TableColumn<SimpleCenter, String> colStatus1;
     @FXML private TableColumn<SimpleCenter, String> colAction1;
+
+    // Tab 2 — already added:
+    @FXML private TableView<EvacueeRecord>           kioskEvacueeTable;
+    @FXML private TableColumn<EvacueeRecord, String> colEvacId;
+    @FXML private TableColumn<EvacueeRecord, String> colEvacName;
+    @FXML private TableColumn<EvacueeRecord, String> colEvacCenter;
+    @FXML private TableColumn<EvacueeRecord, String> colEvacBrgy;
+    @FXML private TableColumn<EvacueeRecord, String> colEvacRegisteredAt;
     @FXML private TextField searchField1;
+    @FXML private Label lblEvacueeCount;  // "2 registered" badge in detail modal
+    @FXML private VBox  vboxEvacueeList;  // name list inside detail modal
+
+    // Tracks which center the detail modal is currently showing.
+    private String selectedCenterId = null;
 
     private final List<SimpleCenter> allCenters = new ArrayList<>();
     private final List<SimpleCenter> filteredCenters = new ArrayList<>();
+    private final ObservableList<EvacueeRecord> evacueeData = FXCollections.observableArrayList();
     private MapBridge mapBridge;
 
     // Current Map Location Default
@@ -58,17 +73,32 @@ public class KioskDashboardController implements CenterEventObserver {
 
     @FXML
     public void initialize() {
-        setupInventoryTable();
-
-        // ADD THIS LINE HERE:
+        setupInventoryTable();   // wires both Tab 1 and Tab 2 columns
         setupSearch();
-
         loadCentersFromDB();
-        loadEventsFromDB(); // Populates drawer at startup
+        loadEvacueesFromDB();    // ← new
+        loadEventsFromDB();
         setupMap();
-
-        // Subscribe to real-time events
         CenterEventManager.getInstance().addObserver(this);
+    }
+
+    private void setupInventoryTable() {
+        // ── Tab 1: Centers ───────────────────────────────────────────────────────
+        if (colId1       != null) colId1.setCellValueFactory(c       -> new SimpleStringProperty(c.getValue().getId()));
+        if (colName1     != null) colName1.setCellValueFactory(c     -> new SimpleStringProperty(c.getValue().getTitle()));
+        if (colCenter1   != null) colCenter1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().getAddress()));
+        if (colBarangay1 != null) colBarangay1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getBarangay()));
+        if (colStatus1   != null) colStatus1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().getStatus()));
+        if (colAction1   != null) colAction1.setCellValueFactory(c   -> new SimpleStringProperty(c.getValue().getCreatedAt()));
+
+        // ── Tab 2: Evacuees ───────────────────────────────────────────────────────
+        if (colEvacId          != null) colEvacId.setCellValueFactory(c          -> new SimpleStringProperty(c.getValue().getId()));
+        if (colEvacName        != null) colEvacName.setCellValueFactory(c        -> new SimpleStringProperty(c.getValue().getFullName()));
+        if (colEvacCenter      != null) colEvacCenter.setCellValueFactory(c      -> new SimpleStringProperty(c.getValue().getAssignedCenter()));
+        if (colEvacBrgy        != null) colEvacBrgy.setCellValueFactory(c        -> new SimpleStringProperty(c.getValue().getBarangay()));
+        if (colEvacRegisteredAt != null) colEvacRegisteredAt.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getRegisteredAt()));
+
+        if (kioskEvacueeTable != null) kioskEvacueeTable.setItems(evacueeData);
     }
 
     // DB Query to load centers for Table and Map
@@ -128,26 +158,62 @@ public class KioskDashboardController implements CenterEventObserver {
         }
     }
 
+    private void loadEvacueesFromDB() {
+        List<EvacueeRecord> rows = new ArrayList<>();
+
+        // Exact column names from civicguard schema:
+        //   evacuees.full_name_enc, evacuees.evacuation_center_id,
+        //   evacuees.barangay, evacuees.created_at
+        String sql =
+                "SELECT e.id, e.full_name_enc, ec.name AS center_name, " +
+                        "       e.barangay, e.created_at " +
+                        "FROM evacuees e " +
+                        "JOIN evacuation_centers ec ON e.evacuation_center_id = ec.id " +
+                        "ORDER BY e.created_at DESC " +
+                        "LIMIT 200";
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                rows.add(new EvacueeRecord(
+                        String.valueOf(rs.getLong("id")),
+                        rs.getString("full_name_enc"),   // encrypted field — plain text for now
+                        rs.getString("center_name"),      // ec.name alias
+                        rs.getString("barangay"),         // e.barangay (on evacuees row itself)
+                        formatTimestamp(rs.getString("created_at"))
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("[KioskDashboard] DB Error loading evacuees: " + e.getMessage());
+        }
+
+        Platform.runLater(() -> evacueeData.setAll(rows));
+    }
+
     // Observer Callback - Triggered by UpdateCenterController
     @Override
     public void onCenterUpdated(CenterEvent event) {
-        // Must execute on JavaFX Thread
         Platform.runLater(() -> {
-            loadCentersFromDB(); // Refresh Table
-            if (eventCellController != null) {
-                eventCellController.addEventToTop(event); // Push new event to drawer
+            loadCentersFromDB();   // Tab 1
+            loadEvacueesFromDB();  // Tab 2
+
+            // If the detail modal is open in the center that just changed,
+            // refresh its list immediately without any user interaction
+            if (detailModal != null
+                    && detailModal.isVisible()
+                    && selectedCenterId != null
+                    && String.valueOf(event.centerId()).equals(selectedCenterId)) {
+                loadEvacueesForCenter(selectedCenterId);
             }
+
+            if (eventCellController != null) {
+                eventCellController.addEventToTop(event);
+            }
+
             setupMap();
         });
-    }
-
-    private void setupInventoryTable() {
-        if (colId1 != null) colId1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getId()));
-        if (colName1 != null) colName1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
-        if (colCenter1 != null) colCenter1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAddress()));
-        if (colBarangay1 != null) colBarangay1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getBarangay()));
-        if (colStatus1 != null) colStatus1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatus()));
-        if (colAction1 != null) colAction1.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCreatedAt()));
     }
 
     // Paste this right below setupInventoryTable()
@@ -193,8 +259,15 @@ public class KioskDashboardController implements CenterEventObserver {
     @FXML private void handleBarangayLogin() { Router.getInstance().navigate(Route.BARANGAY_LOGIN); }
 
     private void showDetailModal(SimpleCenter c) {
+        if (c == null) return;
+
+        selectedCenterId = c.getId();
+
         if (lblModalTitle != null) lblModalTitle.setText(c.getTitle());
-        if (lblModalDesc != null) lblModalDesc.setText(c.getAddress());
+        if (lblModalDesc  != null) lblModalDesc.setText(c.getAddress() + " · " + c.getBarangay());
+
+        loadEvacueesForCenter(c.getId());
+
         if (detailModal != null) {
             detailModal.setVisible(true);
             detailModal.setManaged(true);
@@ -217,37 +290,43 @@ public class KioskDashboardController implements CenterEventObserver {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         webViewMiniMap.getEngine().setUserAgent("CivicGuard/1.0");
 
+        // Critical: without explicit max sizes the WebView hit-test surface
+        // may not fill the StackPane, causing drag events to fall through
+        webViewMiniMap.setMaxWidth(Double.MAX_VALUE);
+        webViewMiniMap.setMaxHeight(Double.MAX_VALUE);
+
         webViewMiniMap.getEngine().getLoadWorker().stateProperty()
                 .addListener((obs, old, state) -> {
                     if (state == Worker.State.SUCCEEDED) {
                         JSObject win = (JSObject) webViewMiniMap.getEngine().executeScript("window");
 
-                        // 1. Assign to class variable
-                        this.mapBridge = new MapBridge() {
-                            @Override
-                            public void onMarkerClick(String centerId) {
-                                Platform.runLater(() ->
-                                        allCenters.stream()
-                                                .filter(c -> c.getId().equals(centerId))
-                                                .findFirst()
-                                                .ifPresent(KioskDashboardController.this::showDetailModal));
-                            }
-                        };
+                        this.mapBridge = centerId -> Platform.runLater(() ->
+                                allCenters.stream()
+                                        .filter(c -> c.getId().equals(centerId))
+                                        .findFirst()
+                                        .ifPresent(this::showDetailModal));
 
-                        // 2. Pass to JS window
                         win.setMember("javaBridge", this.mapBridge);
+
+                        // Re-enable Leaflet drag after page load
+                        webViewMiniMap.getEngine().executeScript(
+                                "try {" +
+                                        "  if (window._leafletMap) {" +
+                                        "    window._leafletMap.dragging.enable();" +
+                                        "    window._leafletMap.scrollWheelZoom.enable();" +
+                                        "  }" +
+                                        "} catch(e) {}"
+                        );
                     }
                 });
 
-        // Ensure the local tile server is started
         int tilePort = -1;
         try {
             tilePort = TilePrefetchService.getInstance().startServer();
         } catch (Exception e) {
-            System.err.println("Could not start local tile server for Kiosk: " + e.getMessage());
+            System.err.println("[KioskDashboard] Tile server error: " + e.getMessage());
         }
 
-        // Load the map
         webViewMiniMap.getEngine().loadContent(
                 com.example.map_logic_v2.BrgyMapHtmlProvider.getMapHTML(
                         buildCentersJson(),
@@ -308,5 +387,55 @@ public class KioskDashboardController implements CenterEventObserver {
         public String getCreatedAt() { return createdAt; }
         public double getLat() { return lat; }
         public double getLng() { return lng; }
+    }
+
+    private void loadEvacueesForCenter(String centerId) {
+        if (vboxEvacueeList == null || lblEvacueeCount == null) return;
+
+        List<String> names = new ArrayList<>();
+
+        String sql =
+                "SELECT full_name_enc " +
+                        "FROM evacuees " +
+                        "WHERE evacuation_center_id = ? " +
+                        "ORDER BY created_at DESC " +
+                        "LIMIT 50";
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, Long.parseLong(centerId));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    names.add(rs.getString("full_name_enc"));
+                }
+            }
+        } catch (SQLException | NumberFormatException e) {
+            System.err.println("[KioskDashboard] loadEvacueesForCenter: " + e.getMessage());
+        }
+
+        final List<String> finalNames = names;
+        Platform.runLater(() -> {
+            vboxEvacueeList.getChildren().clear();
+
+            if (finalNames.isEmpty()) {
+                Label empty = new Label("No evacuees registered at this center.");
+                empty.getStyleClass().add("detail-meta");
+                vboxEvacueeList.getChildren().add(empty);
+            } else {
+                for (String name : finalNames) {
+                    Label row = new Label("👤  " + name);
+                    row.getStyleClass().add("evacuee-list-row");
+                    row.setMaxWidth(Double.MAX_VALUE);
+                    vboxEvacueeList.getChildren().add(row);
+                }
+            }
+
+            int count = finalNames.size();
+            lblEvacueeCount.setText(count + " registered");
+            lblEvacueeCount.getStyleClass().removeAll("status-tag-open", "status-tag-pending");
+            lblEvacueeCount.getStyleClass().add(count > 0 ? "status-tag-open" : "status-tag-pending");
+        });
     }
 }
