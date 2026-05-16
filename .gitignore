@@ -12,6 +12,7 @@ target/
 *.iws
 *.iml
 *.ipr
+.civicguard/tiles
 
 ### Eclipse ###
 .apt_generated
