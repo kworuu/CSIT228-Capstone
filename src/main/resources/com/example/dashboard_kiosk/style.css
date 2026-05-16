@@ -747,3 +747,100 @@
        animation is applied from the controller or via Timeline if needed.
        The fill colour is set inline in FXML as #5A6E4F. */
 }
+
+/*
+ * ═══════════════════════════════════════════════════════════════
+ *  EVENTS DRAWER  —  Add these rules to your existing style.css
+ * ═══════════════════════════════════════════════════════════════
+ *
+ *  The drawer (.kiosk-event-cell) is a full-height VBox anchored to
+ *  the right edge of the root AnchorPane. It slides in/out via
+ *  translateX animation in EventCellController.
+ *
+ *  Colour tokens reuse the existing CivicGuard palette:
+ *    Surface  #FFFFFF   Border  #E0D4BE   Text-1  #1C1917
+ *    Accent   #5A6E4F   Text-3  #A8A29E
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/* ── Outer shell ─────────────────────────────────────────────── */
+
+.kiosk-event-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0D4BE;
+    -fx-border-width: 0 0 0 1;          /* left border only — right is the window edge */
+
+    /*
+     * Drop-shadow pulled LEFT so it appears to cast a shadow onto
+     * the content behind the drawer (map / table).
+     * Gaussian blur 20, spread 0, offset x=-6 y=0.
+     */
+    -fx-effect: dropshadow(gaussian, rgba(28,25,23,0.18), 20, 0, -6, 0);
+}
+
+/* ── Drawer header row ───────────────────────────────────────── */
+
+.kiosk-event-header {
+    -fx-background-color: #FDFCF9;
+    -fx-border-color: #F0EBE0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.kiosk-event-title {
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1C1917;
+}
+
+/* ── Scroll pane that holds the alert list ───────────────────── */
+
+.kiosk-event-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.kiosk-event-scroll > .viewport {
+    -fx-background-color: #FFFFFF;
+}
+
+.kiosk-event-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 5;
+}
+
+.kiosk-event-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #D0C9BE;
+    -fx-background-radius: 3;
+}
+
+.evacuee-list-box {
+    -fx-background-color: #F7F5EE;
+    -fx-background-radius: 6;
+    -fx-border-color: #E0D4BE;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 8 10;
+}
+
+.evacuee-list-row {
+    -fx-font-size: 12;
+    -fx-text-fill: #1C1917;
+    -fx-padding: 3 0;
+    -fx-border-color: #F0EBE0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.evacuee-list-row:last-child {
+    -fx-border-width: 0;
+}
+
+/*
+ * ── NOTE on the old .kiosk-event-tab ──────────────────────────
+ *
+ *  The "Drawer tab" HBox from EventCell v1 has been REMOVED.
+ *  The toggle is now the "⚡ Events" button in the header bar
+ *  (styleClass="btn-outline"), so no separate tab stub is needed.
+ *  You can safely delete the old .kiosk-event-tab rule if present.
+ */
