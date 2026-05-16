@@ -6,12 +6,9 @@ public record EvacuationCenter(
         long id,
         String name,
         String address,
-        String barangay,
-        int capacity,
-        int currentOccupancy,
+        Long userId,
+        String photoPath,
         Double latitude,
         Double longitude,
-        Long userId,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime createdAt
 ) {}

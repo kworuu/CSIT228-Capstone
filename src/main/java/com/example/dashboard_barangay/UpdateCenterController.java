@@ -5,14 +5,12 @@ import com.example.model.EvacuationCenter;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
 import java.sql.SQLException;
 
 public class UpdateCenterController {
 
     @FXML private Label labelCenterName;
     @FXML private TextField fieldAddress;
-    @FXML private TextField fieldCapacity;
     @FXML private Button btnSave;
     @FXML private Button btnCancel;
 
@@ -27,21 +25,19 @@ public class UpdateCenterController {
 
     public void initData(long id, String name, String address) {
         this.centerId = id;
-        labelCenterName.setText("Update " + name);
+        labelCenterName.setText(name);
         fieldAddress.setText(address);
     }
 
     private void handleSave() {
         try {
-            // Update basic details
+            // Uses exact 8-parameter record
             EvacuationCenter updatedCenter = new EvacuationCenter(
-                    centerId, labelCenterName.getText(), fieldAddress.getText(), "",
-                    Integer.parseInt(fieldCapacity.getText()), 0, 0.0, 0.0, null, null, null
+                    centerId, labelCenterName.getText(), fieldAddress.getText(), null, null, null, null, null
             );
-
             centerDao.updateCenterStatus(updatedCenter);
             closeWindow();
-        } catch (SQLException | NumberFormatException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
