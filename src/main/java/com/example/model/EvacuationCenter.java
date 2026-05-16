@@ -19,6 +19,7 @@ public class EvacuationCenter {
     private Long managedBy;
     private boolean active;
     private LocalDateTime createdAt;
+    private String structuralStatus;
 
     public EvacuationCenter() {}
 
@@ -57,7 +58,6 @@ public class EvacuationCenter {
     public void setActive(boolean active) { this.active = active; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
 
     @Override
     public String toString() {
