@@ -93,4 +93,33 @@ public class SupplyRequestDao {
         }
         return requests;
     }
+
+    /**
+     * Retrieves all supply requests across the entire system (for the Admin dashboard).
+     */
+    public List<SupplyRequest> findAll() throws SQLException {
+        List<SupplyRequest> requests = new ArrayList<>();
+        String sql = "SELECT * FROM supply_requests ORDER BY created_at DESC";
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                requests.add(new SupplyRequest(
+                        rs.getLong("id"),
+                        rs.getString("requesting_barangay"),
+                        rs.getLong("requesting_user_id"),
+                        rs.getLong("evacuation_center_id") == 0 ? null : rs.getLong("evacuation_center_id"),
+                        SupplyRequestStatus.fromDb(rs.getString("status")),
+                        rs.getString("notes"),
+                        rs.getTimestamp("created_at").toLocalDateTime(),
+                        rs.getLong("reviewed_by") == 0 ? null : rs.getLong("reviewed_by"),
+                        rs.getTimestamp("reviewed_at") != null ? rs.getTimestamp("reviewed_at").toLocalDateTime() : null,
+                        rs.getString("admin_notes")
+                ));
+            }
+        }
+        return requests;
+    }
 }

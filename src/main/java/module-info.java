@@ -47,6 +47,7 @@ module com.example.capstone {
     exports com.example.service;
     exports com.example.util;
     opens com.example.util to javafx.fxml;
-    exports com.example.modals;
-    opens com.example.modals to javafx.fxml;
+
+    exports com.example.dashboard_admin.views;
+    opens com.example.dashboard_admin.views to javafx.fxml;
 }

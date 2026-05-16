@@ -325,3 +325,29 @@
     -fx-padding: 6 12;
     -fx-background-radius: 6;
 }
+
+/* Table Action Buttons */
+.btn-action-edit {
+    -fx-background-color: #059669;
+    -fx-border-radius: 6;
+    -fx-text-fill: white;
+    -fx-padding: 5 12;
+    -fx-font-size: 11;
+    -fx-cursor: hand;
+}
+
+.btn-action-delete {
+    -fx-background-color: transparent;
+    -fx-border-color: #fca5a5;
+    -fx-border-radius: 6;
+    -fx-text-fill: #ef4444;
+    -fx-padding: 5 12;
+    -fx-font-size: 11;
+    -fx-cursor: hand;
+}
+
+.btn-action-delete:hover {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #dc2626;
+}

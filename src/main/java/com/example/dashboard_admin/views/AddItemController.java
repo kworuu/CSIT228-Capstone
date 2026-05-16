@@ -1,8 +1,7 @@
-package com.example.modals;
+package com.example.dashboard_admin.views;
 
 import com.example.dao.InventoryItemDao;
 import com.example.model.InventoryItem;
-import com.example.model.User;             // Import User model
 import com.example.auth.SessionContext;     // Import your global session manager
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

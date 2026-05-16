@@ -1,4 +1,4 @@
-package com.example.modals;
+package com.example.dashboard_admin.views;
 
 import com.example.dao.EvacuationCenterDao;
 import com.example.model.EvacuationCenter;

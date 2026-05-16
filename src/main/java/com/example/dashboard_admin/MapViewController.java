@@ -40,10 +40,6 @@ public class MapViewController implements Initializable {
         mapWebView.getEngine().setJavaScriptEnabled(true);
         mapWebView.getEngine().loadContent(loadMap());
 
-        navActivity.setOnAction(event->{
-            SceneHelper.switchScene("/com/example/dashboard_admin/activity-log.fxml", navActivity);
-        });
-
         navInventory.setOnAction(event->{
             SceneHelper.switchScene("/com/example/dashboard_admin/inventory.fxml", navInventory);
         });
