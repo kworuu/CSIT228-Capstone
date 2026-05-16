@@ -1,12 +1,13 @@
 package com.example.dashboard_admin;
 
-import com.example.dao.EvacuationCenterDao;
 import com.example.dao.InventoryItemDao;
+import com.example.dao.SupplyRequestDao;
 import com.example.map_logic.MapHtmlProvider;
-import com.example.model.EvacuationCenter;
 import com.example.model.InventoryItem;
+import com.example.model.SupplyRequest;
 import com.example.util.CardAlertHelper;
 import com.example.util.SearchTableUtility;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,12 +18,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class DashboardController {
 
     @FXML private Button btnNewEvacCenter;
-    @FXML private TextField searchEvacCenter;
+    @FXML private TextField searchEvacCenter; // You can rename this to searchRequest in your FXML
     @FXML private Button navInventory;
     @FXML private Button navMap;
     @FXML private Button btnExpandMap;
@@ -30,21 +32,21 @@ public class DashboardController {
     @FXML private Button navActivity;
 
     // Cards & Alerts
-    @FXML private Label lblTotalEvacValue;
+    @FXML private Label lblTotalEvacValue; // Can be repurposed to show "Total Requests"
     @FXML private Label lblCriticalItem;
     @FXML private VBox alertsContainer;
 
-    // Table components - Changed colAddress to String to match standard addresses
-    @FXML private TableView<EvacuationCenter> mainTable;
-    @FXML private TableColumn<EvacuationCenter, String> colEvacCenter;
-    @FXML private TableColumn<EvacuationCenter, String> colBrgy;
-    @FXML private TableColumn<EvacuationCenter, String> colAddress;
-    @FXML private TableColumn<EvacuationCenter, String> colStatus;
+    // --- UPDATED TABLE COMPONENTS ---
+    @FXML private TableView<SupplyRequest> mainTable;
+    @FXML private TableColumn<SupplyRequest, String> colBrgy;
+    @FXML private TableColumn<SupplyRequest, String> colDate;
+    @FXML private TableColumn<SupplyRequest, String> colNotes;
+    @FXML private TableColumn<SupplyRequest, String> colStatus;
 
-    private final ObservableList<EvacuationCenter> masterData = FXCollections.observableArrayList();
+    private final ObservableList<SupplyRequest> masterData = FXCollections.observableArrayList();
 
-    // Dependencies
-    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
+    // --- UPDATED DEPENDENCIES ---
+    private final SupplyRequestDao requestDao = new SupplyRequestDao();
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
 
     @FXML
@@ -52,7 +54,6 @@ public class DashboardController {
         // Navigation Logic
         navInventory.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/inventory.fxml", navInventory));
         navMap.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", navMap));
-        navActivity.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/activity-log.fxml", navActivity));
 
         // Minimap Logic
         if (webviewMiniMap != null) {
@@ -64,7 +65,7 @@ public class DashboardController {
             btnExpandMap.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", btnExpandMap));
         }
 
-        // Safe registration for the Modal Button to handle multi-view loading gracefully
+        // Safe registration for Modals
         if (btnNewEvacCenter != null) {
             btnNewEvacCenter.setOnAction(event -> {
                 SceneHelper.showModal("/com/example/dashboard_admin/modals/add-brgyReg.fxml", "Register Evacuation Center", btnNewEvacCenter);
@@ -79,49 +80,43 @@ public class DashboardController {
     }
 
     private void setupTable() {
-        colEvacCenter.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colBrgy.setCellValueFactory(new PropertyValueFactory<>("barangay"));
-        colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        // Map columns to SupplyRequest properties
+        colBrgy.setCellValueFactory(new PropertyValueFactory<>("requestingBarangay"));
 
-        colStatus.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    switch (item.toUpperCase()) {
-                        case "FULL" -> setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
-                        case "ALMOST FULL" -> setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
-                        default -> setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
-                    }
-                }
-            }
-        });
+        // Format the date so it looks clean (e.g., "May 16, 2026 14:30")
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
+        colDate.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getCreatedAt().format(dtf)));
+
+        colNotes.setCellValueFactory(new PropertyValueFactory<>("notes"));
+
+        // Use the displayLabel from your SupplyRequestStatus enum
+        colStatus.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStatus().displayLabel()));
+
+        mainTable.setItems(masterData);
     }
 
     private void loadData() {
         try {
-            List<EvacuationCenter> evacCenterList = centerDao.findAll();
-            masterData.setAll(evacCenterList);
-            searchEvac();
+            // Fetch all requests across the system for the Admin
+            List<SupplyRequest> requestsList = requestDao.findAll();
+            masterData.setAll(requestsList);
+            setupSearch();
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("Database connection error: Could not fetch evacuation centers.");
+            System.err.println("Database connection error: Could not fetch supply requests.");
         }
     }
 
     private void refreshStats() {
         try {
-            int totEvacCenter = centerDao.getTotalCount();
+            // Repurpose the total card to show the number of requests
+            int totalRequests = masterData.size();
             if (lblTotalEvacValue != null) {
-                lblTotalEvacValue.setText(String.valueOf(totEvacCenter));
+                lblTotalEvacValue.setText(String.valueOf(totalRequests));
             }
 
-            // Corrected static reference to match how your architecture access counts
             int crit = InventoryItemDao.getAdminCriticalCount();
             if (lblCriticalItem != null) {
                 lblCriticalItem.setText(String.valueOf(crit));
@@ -131,15 +126,18 @@ public class DashboardController {
         }
     }
 
-    private void searchEvac() {
+    private void setupSearch() {
         if (searchEvacCenter == null || mainTable == null) return;
 
+        // Search through the Requests by Barangay Name, Notes, or Status
         SearchTableUtility.setupSearch(
                 searchEvacCenter,
                 mainTable,
                 masterData,
-                (center, query) -> center.getName().toLowerCase().contains(query) ||
-                        center.getBarangay().toLowerCase().contains(query)
+                (request, query) ->
+                        (request.getRequestingBarangay() != null && request.getRequestingBarangay().toLowerCase().contains(query)) ||
+                                (request.getNotes() != null && request.getNotes().toLowerCase().contains(query)) ||
+                                (request.getStatus() != null && request.getStatus().name().toLowerCase().contains(query))
         );
     }
 
