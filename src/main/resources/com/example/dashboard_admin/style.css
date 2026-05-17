@@ -863,3 +863,30 @@
     -fx-alignment: center;
 }
 
+.deploy-log {
+    -fx-background-color: #1e293b; /* Dark slate matching dark panel layouts */
+    -fx-background-radius: 8px;
+    -fx-border-color: #334155;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.deploy-logText{
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+
+.deploy-logText-details{
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6ee7b7;
+}
+.deploy-logText-CreatedBy{
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6ee7b7;
+}
