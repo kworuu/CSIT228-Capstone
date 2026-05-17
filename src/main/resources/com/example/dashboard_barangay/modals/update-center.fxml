@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.ComboBox?>
 <AnchorPane fx:id="anchorPaneRoot" prefWidth="450.0" prefHeight="550.0"
             stylesheets="@../../dashboard_barangay/style.css" styleClass="brgy-card"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -21,7 +20,6 @@
         <VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <children>
-
                 <ImageView fx:id="imgModalCenter"
                            fitHeight="160.0" fitWidth="450.0"
                            preserveRatio="false"
@@ -32,36 +30,11 @@
                         <Insets top="20.0" right="28.0" bottom="24.0" left="28.0"/>
                     </padding>
                     <children>
-
                         <VBox fx:id="vboxHeader" spacing="4.0">
                             <padding><Insets right="40.0"/></padding>
                             <children>
                                 <Label fx:id="labelTitle" text="Update Center" styleClass="brgy-card-title" wrapText="true"/>
                                 <Label fx:id="labelOverlayAddress" text="Center Address" styleClass="brgy-overlay-address" wrapText="true"/>
-                            </children>
-                        </VBox>
-
-                        <!-- ─── Phase 5b: Structural Integrity ─────────────────────── -->
-                        <VBox fx:id="vboxStructural" spacing="8.0">
-                            <children>
-                                <Label text="Structural Integrity" styleClass="brgy-nav-section-label"/>
-
-                                <HBox spacing="8.0" alignment="CENTER_LEFT">
-                                    <children>
-                                        <ComboBox fx:id="comboStructuralStatus"
-                                                  prefWidth="160.0"
-                                                  prefHeight="36.0"
-                                                  styleClass="brgy-search"/>
-                                        <Label fx:id="labelStructuralCurrent"
-                                               text="Currently: —"
-                                               styleClass="brgy-card-center-ts"/>
-                                    </children>
-                                </HBox>
-
-                                <TextField fx:id="textFieldStructuralNotes"
-                                           promptText="Inspector notes (optional) — e.g. 'cracks in east wall, minor flooding'"
-                                           styleClass="brgy-search"
-                                           prefHeight="36.0"/>
                             </children>
                         </VBox>
 
@@ -85,6 +58,7 @@
 
                         <HBox spacing="12.0" alignment="CENTER_RIGHT">
                             <children>
+                                <Button fx:id="buttonDelete" text="Delete Center" styleClass="brgy-btn-danger" style="-fx-background-color: #ef4444; -fx-text-fill: white;" onAction="#handleDelete"/>
                                 <Button fx:id="buttonSave" text="Save Update" styleClass="brgy-btn-primary" onAction="#handleSave"/>
                             </children>
                         </HBox>
