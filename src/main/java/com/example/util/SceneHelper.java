@@ -122,4 +122,36 @@ public class SceneHelper {
         stage.close();
     }
 
+
+    public static FXMLLoader showModalWithController(String fxmlPath, String title, Node ownerNode) {
+        java.net.URL location = SceneHelper.class.getResource(fxmlPath);
+        if (location == null) {
+            System.err.println("CRITICAL: FXML file not found at: " + fxmlPath);
+            return null;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(SceneHelper.class.getResource(fxmlPath));
+            Parent root = loader.load(); // The controller is created here
+
+            Stage stage = new Stage();
+            dragWindow(root, stage, 1);
+
+            stage.setTitle(title);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(ownerNode.getScene().getWindow());
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            // We return the loader so the caller can use loader.getController()
+            return loader;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

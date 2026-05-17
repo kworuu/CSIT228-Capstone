@@ -3,6 +3,7 @@ package com.example.dashboard_admin;
 import com.example.auth.AuthService;
 import com.example.dao.InventoryItemDao;
 import com.example.dao.SupplyRequestDao;
+import com.example.dashboard_admin.views.DeployItemController;
 import com.example.map_logic.MapHtmlProvider;
 import com.example.model.InventoryItem;
 import com.example.model.SupplyRequest;
@@ -13,16 +14,19 @@ import com.example.util.Router;
 import com.example.util.SceneHelper;
 import com.example.util.SearchTableUtility;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -37,12 +41,17 @@ public class DashboardController {
     @FXML private WebView webviewMiniMap;
     @FXML private Button navActivity;
 
+    // Toggle Tab Filters
+    @FXML private Button filterAll;
+    @FXML private Button filterPending;
+    @FXML private Button filterApproved;
+
     // Cards & Alerts
     @FXML private Label lblTotalEvacValue;
     @FXML private Label lblCriticalItem;
     @FXML private VBox alertsContainer;
 
-    // --- UPDATED TABLE COMPONENTS ---
+    // --- TABLE COMPONENTS ---
     @FXML private TableView<SupplyRequest> mainTable;
     @FXML private TableColumn<SupplyRequest, String> colBrgy;
     @FXML private TableColumn<SupplyRequest, String> colItem;
@@ -55,9 +64,12 @@ public class DashboardController {
     private final ObservableList<SupplyRequest> masterData =
             FXCollections.observableArrayList();
 
-    // --- UPDATED DEPENDENCIES ---
+    // State tracking variables
     private final SupplyRequestDao requestDao = new SupplyRequestDao();
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
+
+    // FIX: Changed to an Observable Property so listeners update items automatically
+    private final StringProperty selectedStatusFilter = new SimpleStringProperty("ALL");
 
 
     @FXML
@@ -88,15 +100,21 @@ public class DashboardController {
                             btnNewEvacCenter));
         }
 
+        // Action listeners for tab switches
+        if (filterAll != null && filterPending != null && filterApproved != null) {
+            filterAll.setOnAction(e -> handleFilterChange("ALL", filterAll));
+            filterPending.setOnAction(e -> handleFilterChange("PENDING", filterPending));
+            filterApproved.setOnAction(e -> handleFilterChange("APPROVED", filterApproved));
+        }
+
         // Data Initialization
         setupTable();
         loadData();
         refreshStats();
-        refreshAlerts(1L); // Adjust hardcoded ID as necessary for session management
+        refreshAlerts(1L);
     }
 
     private void setupTable() {
-        // NEW: Replaced PropertyValueFactory with safe lambda accessors for records
         colBrgy.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().barangay()));
 
@@ -116,16 +134,11 @@ public class DashboardController {
                 new SimpleStringProperty(cellData.getValue().notes()));
 
         colStatus.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().status().displayLabel()));
+                new SimpleStringProperty(cellData.getValue().status().name())); // Using .name() is safer for debugging case matches
 
         setupActionColumn();
-        mainTable.setItems(masterData);
     }
 
-    /**
-     * Installs a custom TableCell rendering a Deploy button on pending rows.
-     * Already-processed rows show no button.
-     */
     private void setupActionColumn() {
         if (colAction == null) return;
 
@@ -163,13 +176,14 @@ public class DashboardController {
 
     private void loadData() {
         try {
-            // Fetch all requests across the system for the Admin
             List<SupplyRequest> requestsList = requestDao.findAllForAdmin();
             masterData.setAll(requestsList);
+
+            // Only mount the layout filters if they aren't bound yet
             setupSearch();
+            mainTable.refresh();
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("Database connection error: Could not fetch supply requests.");
         }
     }
 
@@ -192,16 +206,51 @@ public class DashboardController {
     private void setupSearch() {
         if (searchEvacCenter == null || mainTable == null) return;
 
-        // NEW: Used record accessor methods without "get"
+        // Use the newly upgraded utility overload method
         SearchTableUtility.setupSearch(
                 searchEvacCenter,
                 mainTable,
                 masterData,
-                (request, query) ->
-                        (request.barangay() != null && request.barangay().toLowerCase().contains(query)) ||
-                                (request.notes() != null && request.notes().toLowerCase().contains(query)) ||
-                                (request.status() != null && request.status().name().toLowerCase().contains(query))
+                (request, query) -> {
+                    // --- STAGE 1: Tab Filter Logic ---
+                    String activeFilter = selectedStatusFilter.get();
+                    if (!activeFilter.equals("ALL")) {
+                        SupplyRequestStatus currentStatus = request.status();
+
+                        if (activeFilter.equals("PENDING") && currentStatus != SupplyRequestStatus.PENDING) {
+                            return false;
+                        }
+
+                        if (activeFilter.equals("APPROVED") && currentStatus == SupplyRequestStatus.PENDING) {
+                            return false;
+                        }
+                    }
+
+                    // --- STAGE 2: Text Box Query Logic ---
+                    if (query == null || query.trim().isEmpty()) {
+                        return true; // Pass item if text query is empty (Stage 1 controls visibility)
+                    }
+
+                    return (request.barangay() != null && request.barangay().toLowerCase().contains(query)) ||
+                            (request.notes() != null && request.notes().toLowerCase().contains(query)) ||
+                            (request.itemName() != null && request.itemName().toLowerCase().contains(query));
+                },
+                selectedStatusFilter // <-- Pass the status tracking property here!
         );
+    }
+
+    private void handleFilterChange(String status, Button selectedButton) {
+        this.selectedStatusFilter.set(status);
+
+        if (filterAll != null && filterPending != null && filterApproved != null) {
+            filterAll.getStyleClass().remove("segment-active");
+            filterPending.getStyleClass().remove("segment-active");
+            filterApproved.getStyleClass().remove("segment-active");
+        }
+
+        if (selectedButton != null) {
+            selectedButton.getStyleClass().add("segment-active");
+        }
     }
 
     public void refreshAlerts(Long userId) {
@@ -225,33 +274,36 @@ public class DashboardController {
         }
     }
 
-    /**
-     * Called when admin clicks Deploy on a pending request.
-     * Shows confirmation, updates DB status to FULFILLED, refreshes table.
-     */
     private void handleDeployClick(SupplyRequest request) {
-        Alert confirm = new Alert(AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Deployment");
-        confirm.setHeaderText("Deploy supplies to " + request.barangay() + "?");
+        FXMLLoader loader = SceneHelper.showModalWithController(
+                "/com/example/dashboard_admin/modals/deploy-items.fxml",
+                "Deploy Supplies",
+                mainTable
+        );
 
-        String detail = "This will mark the request as fulfilled.";
-        if (request.notes() != null && !request.notes().isBlank()) {
-            detail += "\n\nNotes: " + request.notes();
-        }
-        confirm.setContentText(detail);
+        if (loader != null) {
+            DeployItemController controller = loader.getController();
+            controller.setData(
+                    request.id(),
+                    request.itemId(),
+                    request.itemName(),
+                    request.userId(),
+                    request.barangay(),
+                    request.quantity()
+            );
 
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-                    requestDao.updateStatus(request.id(), SupplyRequestStatus.FULFILLED);
+            Parent root = loader.getRoot();
+            Stage stage = (Stage) root.getScene().getWindow();
+
+            stage.setOnHiding(event -> {
+                javafx.application.Platform.runLater(() -> {
                     loadData();
                     refreshStats();
-                } catch (SQLException e) {
-                    showError("Failed to update request status", e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        });
+                });
+            });
+
+            stage.show();
+        }
     }
 
     @FXML
