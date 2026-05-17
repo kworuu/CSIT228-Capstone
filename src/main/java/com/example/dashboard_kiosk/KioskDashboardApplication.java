@@ -8,24 +8,41 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class KioskDashboardApplication extends Application {
+/**
+ * JavaFX entry point for the public kiosk dashboard.
+ *
+ * <p>The scene is loaded from {@link KioskConstants#FXML_ROOT} and made
+ * draggable so the kiosk window can be repositioned during setup.</p>
+ */
+public final class KioskDashboardApplication extends Application {
 
-    private double xOffset, yOffset;
+    private static final String WINDOW_TITLE = "CivicGuard — Disaster Response";
+
+    private double dragOffsetX;
+    private double dragOffsetY;
 
     @Override
     public void start(Stage stage) throws IOException {
         Parent root = FXMLLoader.load(
-                getClass().getResource("BrgyUser.fxml"));
+                getClass().getResource(KioskConstants.FXML_ROOT));
 
-        root.setOnMousePressed(e -> { xOffset = e.getSceneX(); yOffset = e.getSceneY(); });
-        root.setOnMouseDragged(e -> {
-            stage.setX(e.getScreenX() - xOffset);
-            stage.setY(e.getScreenY() - yOffset);
-        });
+        attachDragHandlers(root, stage);
 
         stage.setScene(new Scene(root));
-        stage.setTitle("CivicGuard — Disaster Response");
+        stage.setTitle(WINDOW_TITLE);
         stage.setMaximized(true);
         stage.show();
+    }
+
+    /** Lets the user drag the (typically undecorated) kiosk window by its body. */
+    private void attachDragHandlers(Parent root, Stage stage) {
+        root.setOnMousePressed(e -> {
+            dragOffsetX = e.getSceneX();
+            dragOffsetY = e.getSceneY();
+        });
+        root.setOnMouseDragged(e -> {
+            stage.setX(e.getScreenX() - dragOffsetX);
+            stage.setY(e.getScreenY() - dragOffsetY);
+        });
     }
 }
