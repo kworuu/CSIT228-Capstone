@@ -1,5 +1,7 @@
 package com.example.dashboard_kiosk.model;
 
+import java.util.List;
+
 /**
  * Immutable, read-only representation of an evacuation center as displayed
  * on the public kiosk dashboard.
@@ -19,6 +21,10 @@ package com.example.dashboard_kiosk.model;
  *   <li>{@code createdAt} — human-formatted creation timestamp.</li>
  *   <li>{@code latitude}  — WGS-84 latitude for map placement.</li>
  *   <li>{@code longitude} — WGS-84 longitude for map placement.</li>
+ *   <li>{@code eventLabel} — current active event for the center.</li>
+ *   <li>{@code updatedAt}  — last time the center status was updated.</li>
+ *   <li>{@code supplies}   — list of available supplies.</li>
+ *   <li>{@code photoPath}  — path to the center's image.</li>
  * </ul>
  */
 public record EvacuationSite(
@@ -29,6 +35,10 @@ public record EvacuationSite(
         String status,
         String createdAt,
         double latitude,
-        double longitude
+        double longitude,
+        String eventLabel,
+        String updatedAt,
+        List<String> supplies,
+        String photoPath
 ) {
 }

@@ -30,9 +30,9 @@ public final class KioskConstants {
     // 1. FXML / RESOURCE PATHS
     // ─────────────────────────────────────────────────────────────────────
 
-    public static final String FXML_ROOT          = "BrgyUser.fxml";
+    public static final String FXML_ROOT          = "barangay-user.fxml";
     public static final String FXML_DETAIL_MODAL  = "detail-modal.fxml";
-    public static final String FXML_EVENT_CELL    = "EventCell.fxml";
+    public static final String FXML_EVENT_CELL    = "event-cell.fxml";
     public static final String STYLESHEET         = "style.css";
 
     // ─────────────────────────────────────────────────────────────────────
