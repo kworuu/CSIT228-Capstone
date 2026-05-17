@@ -8,9 +8,12 @@ public record User(
         String passwordHash,
         String displayName,
         UserRole role,
-        String assignedBarangay,
         Double latitude,
         Double longitude,
-        LocalDateTime createdAt,
-        LocalDateTime lastLogin
-) {}
+        Integer zoom,
+        LocalDateTime lastLoginAt
+) {
+    public String assignedBarangay() {
+        return displayName;
+    }
+}

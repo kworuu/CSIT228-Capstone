@@ -1,7 +1,8 @@
 package com.example.auth;
 
-import com.example.dao.BarangayDao;
-import com.example.model.Barangay;
+import com.example.dao.UserDao;
+import com.example.model.User;
+import com.example.model.UserRole;
 import com.example.util.Route;
 import com.example.util.Router;
 
@@ -24,7 +25,7 @@ public class BarangayLoginController {
     @FXML private Label            errorLabel;
 
     private final AuthService  authService  = new AuthService();
-    private final BarangayDao  barangayDao  = new BarangayDao();
+    private final UserDao      userDao      = new UserDao();
 
     @FXML
     public void initialize() {
@@ -45,7 +46,6 @@ public class BarangayLoginController {
         setBusy(true);
 
         Thread worker = new Thread(() -> {
-            // No SQLException needs to be caught here because AuthService handles it
             LoginResult result = authService.loginBarangay(barangayName, password);
             Platform.runLater(() -> handleResult(result));
         }, "barangay-login-worker");
@@ -61,10 +61,13 @@ public class BarangayLoginController {
     private void loadBarangaysAsync() {
         Thread loader = new Thread(() -> {
             try {
-                List<Barangay> all = barangayDao.findAll();
-                List<String> names = all.stream().map(Barangay::getName).toList();
+                List<User> allUsers = userDao.findAll();
+                List<String> barangayNames = allUsers.stream()
+                        .filter(user -> user.role() == UserRole.BARANGAY)
+                        .map(User::displayName)
+                        .toList();
                 Platform.runLater(() ->
-                        barangayCombo.setItems(FXCollections.observableArrayList(names)));
+                        barangayCombo.setItems(FXCollections.observableArrayList(barangayNames)));
             } catch (SQLException e) {
                 Platform.runLater(() ->
                         showError("Could not load barangays. Check your database connection."));

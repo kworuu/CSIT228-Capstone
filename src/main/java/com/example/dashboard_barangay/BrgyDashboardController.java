@@ -143,20 +143,23 @@ public class BrgyDashboardController {
                 });
     }
 
+    // NEW WAY: Fetch geographic data directly from the Barangay User accounts
     private void loadBarangayCoordinates() {
-        String sql = "SELECT latitude, longitude, zoom FROM users WHERE display_name = ?";
-        try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "SELECT display_name AS name, latitude, longitude, zoom FROM users WHERE role = 'barangay' AND latitude IS NOT NULL";
 
-            ps.setString(1, CURRENT_BARANGAY);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    currentBrgyLat = rs.getDouble("latitude");
-                    currentBrgyLng = rs.getDouble("longitude");
-                    currentBrgyZoom = rs.getInt("zoom");
-                }
+        try (java.sql.Connection conn = com.example.util.DBConnectionManager.getInstance().getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String name = rs.getString("name");
+                double lat = rs.getDouble("latitude");
+                double lng = rs.getDouble("longitude");
+
+                // Keep whatever your code does with these variables next!
+                // For example: mapBridge.addBarangayMarker(name, lat, lng);
             }
-        } catch (SQLException e) {
+        } catch (java.sql.SQLException e) {
             System.err.println("Failed to load barangay coordinates: " + e.getMessage());
         }
     }

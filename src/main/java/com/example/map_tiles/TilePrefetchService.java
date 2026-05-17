@@ -20,13 +20,13 @@ import java.util.concurrent.CompletableFuture;
  * <p>This is the only class controllers should need to call. The typical
  * lifecycle is:</p>
  * <pre>{@code
- *   // On app startup (e.g. in your Application.start())
- *   TilePrefetchService prefetch = TilePrefetchService.getInstance();
- *   int port = prefetch.startServer();        // start serving cached tiles
- *   prefetch.prefetchAllBarangaysAsync(...);  // download in background
+ * // On app startup (e.g. in your Application.start())
+ * TilePrefetchService prefetch = TilePrefetchService.getInstance();
+ * int port = prefetch.startServer();        // start serving cached tiles
+ * prefetch.prefetchAllBarangaysAsync(...);  // download in background
  *
- *   // In your HTML template
- *   "L.tileLayer('http://localhost:" + port + "/{z}/{x}/{y}.png')"
+ * // In your HTML template
+ * "L.tileLayer('http://localhost:" + port + "/{z}/{x}/{y}.png')"
  * }</pre>
  *
  * <p>The prefetch is non-blocking — it returns a {@link CompletableFuture}
@@ -106,14 +106,15 @@ public final class TilePrefetchService {
     public List<TileCoord> computeAllBarangayTiles() throws SQLException {
         // Step 1: pull every barangay's center coordinates from the DB
         List<double[]> centers = new ArrayList<>();
-        String sql = "SELECT center_lat, center_lng FROM barangays";
+        String sql = "SELECT latitude, longitude FROM users WHERE role = 'barangay' AND latitude IS NOT NULL";
+
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 centers.add(new double[] {
-                        rs.getDouble("center_lat"),
-                        rs.getDouble("center_lng")
+                        rs.getDouble("latitude"),
+                        rs.getDouble("longitude")
                 });
             }
         }

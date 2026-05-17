@@ -4,11 +4,11 @@ import com.example.dao.InventoryItemDao;
 import com.example.model.InventoryItem;
 import com.example.util.SceneHelper;
 import com.example.util.SearchTableUtility;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 
 import java.sql.SQLException;
@@ -66,9 +66,10 @@ public class InventoryController {
     }
 
     private void setupTableColumns() {
-        colItemName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
-        colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
+        // FIXED: Replaced PropertyValueFactory with Record accessors
+        colItemName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().name()));
+        colCategory.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().category()));
+        colUnit.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().unit()));
 
         colStatus.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getStockStatus()));
@@ -82,10 +83,11 @@ public class InventoryController {
                     setGraphic(null);
                 } else {
                     setText(status.toString());
-                    getStyleClass().removeAll("status-ok", "status-low", "status-out-of-stock");
+                    getStyleClass().removeAll("status-ok", "status-low", "status-out-of-stock", "status-critical");
                     switch (status) {
                         case OK -> getStyleClass().add("status-ok");
                         case LOW_STOCK -> getStyleClass().add("status-low");
+                        case CRITICAL -> getStyleClass().add("status-critical");
                         case OUT_OF_STOCK -> getStyleClass().add("status-out-of-stock");
                     }
                 }
@@ -108,7 +110,7 @@ public class InventoryController {
                 setGraphic(empty ? null : container);
             }
         });
-        
+
         mainTable.setItems(masterData);
     }
 }

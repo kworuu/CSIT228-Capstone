@@ -6,7 +6,6 @@ public record Evacuee(
         long id,
         String fullNameEnc,
         String contactEnc,
-        String barangay,
         String photoPath,
         long evacuationCenterId,
         Long userId,
