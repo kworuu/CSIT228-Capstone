@@ -148,7 +148,7 @@
                                         <Insets bottom="16.0" left="20.0" right="20.0" />
                                     </padding>
                                 </HBox>
-                                <TableView fx:id="mainTable" VBox.vgrow="ALWAYS">
+                                <TableView fx:id="mainTable" styleClass="modern-slate-table" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colBrgy" prefWidth="135.0" text="BARANGAY" />
                                         <TableColumn fx:id="colItem" prefWidth="97.0" text="ITEM" />

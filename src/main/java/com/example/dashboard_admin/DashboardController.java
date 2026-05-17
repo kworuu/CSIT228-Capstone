@@ -15,7 +15,6 @@ import com.example.util.SceneHelper;
 import com.example.util.SearchTableUtility;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -59,7 +58,7 @@ public class DashboardController {
     @FXML private TableColumn<SupplyRequest, String> colDate;
     @FXML private TableColumn<SupplyRequest, String> colNotes;
     @FXML private TableColumn<SupplyRequest, String> colStatus;
-    @FXML private TableColumn<SupplyRequest, Void> colAction;
+    @FXML private TableColumn<SupplyRequest, String> colAction;
 
     private final ObservableList<SupplyRequest> masterData =
             FXCollections.observableArrayList();
@@ -136,39 +135,66 @@ public class DashboardController {
         colStatus.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().status().name())); // Using .name() is safer for debugging case matches
 
-        setupActionColumn();
-    }
-
-    private void setupActionColumn() {
-        if (colAction == null) return;
-
-        colAction.setCellFactory(column -> new TableCell<SupplyRequest, Void>() {
-            private final Button actionBtn = new Button("Deploy");
-
+        // 1. THE STATUS PILL UPGRADE
+        // Turns boring text into a beautifully colored, rounded badge
+        colStatus.setCellFactory(column -> new TableCell<>() {
+            private final Label badge = new Label();
             {
-                actionBtn.getStyleClass().add("btn-primary");
-                actionBtn.setMaxWidth(Double.MAX_VALUE);
+                // Base styling for the pill
+                badge.setStyle("-fx-padding: 4px 12px; -fx-background-radius: 12px; -fx-font-weight: bold; -fx-font-size: 11px;");
+            }
+            
+            @Override
+            protected void updateItem(String status, boolean empty) {
+                super.updateItem(status, empty);
+                if (empty || status == null) {
+                    setGraphic(null);
+                } else {
+                    badge.setText(status.toUpperCase());
+                    
+                    // Color code based on the status!
+                    if (status.equalsIgnoreCase("Pending")) {
+                        badge.setStyle(badge.getStyle() + "-fx-background-color: #fef08a; -fx-text-fill: #854d0e;"); // Warning Yellow
+                    } else if (status.equalsIgnoreCase("Approved") || status.equalsIgnoreCase("Dispatched")) {
+                        badge.setStyle(badge.getStyle() + "-fx-background-color: #bbf7d0; -fx-text-fill: #166534;"); // Success Green
+                    } else {
+                        badge.setStyle(badge.getStyle() + "-fx-background-color: #e2e8f0; -fx-text-fill: #475569;"); // Default Gray
+                    }
+                    setGraphic(badge);
+                }
+            }
+        });
+
+        // 2. THE ACTION BUTTON UPGRADE
+        // Injects a clickable "Deploy" button straight into the table row
+        colAction.setCellFactory(column -> new TableCell<>() {
+            private final Button actionBtn = new Button();
+            {
                 actionBtn.setOnAction(event -> {
-                    SupplyRequest rowData = getTableView().getItems().get(getIndex());
-                    handleDeployClick(rowData);
+                    SupplyRequest request = getTableView().getItems().get(getIndex());
+                    handleDeployClick(request);
                 });
             }
 
             @Override
-            protected void updateItem(Void item, boolean empty) {
+            protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-
-                if (empty || getIndex() >= getTableView().getItems().size()) {
+                if (empty) {
                     setGraphic(null);
-                    return;
-                }
-
-                SupplyRequest request = getTableView().getItems().get(getIndex());
-
-                if (request.status() == SupplyRequestStatus.PENDING) {
-                    setGraphic(actionBtn);
                 } else {
-                    setGraphic(null);
+                    SupplyRequest request = getTableView().getItems().get(getIndex());
+                    
+                    // If it needs attention, show a bright primary button
+                    if (request.status() == com.example.model.SupplyRequestStatus.PENDING) {
+                        actionBtn.setText("Deploy");
+                        actionBtn.setStyle("-fx-background-color: #059669; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 6px; -fx-padding: 6px 16px; -fx-font-weight: bold;");
+                        actionBtn.setDisable(false);
+                        setGraphic(actionBtn);
+                    } 
+                    // If it's already deployed, hide the button
+                    else {
+                        setGraphic(null);
+                    }
                 }
             }
         });
