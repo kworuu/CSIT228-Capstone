@@ -187,21 +187,31 @@
 
                 <VBox styleClass="brgy-card" VBox.vgrow="ALWAYS">
                     <children>
-                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="brgy-card-header">
+
+                        <!-- FOOLPROOF NESTED HEADER -->
+                        <HBox alignment="CENTER_LEFT" styleClass="brgy-card-header">
                             <padding><Insets bottom="14.0" left="20.0" right="20.0" top="18.0" /></padding>
                             <children>
-                                <Label styleClass="brgy-card-title" text="Evacuee Registrations" />
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button fx:id="buttonExportCsv" mnemonicParsing="false" styleClass="brgy-btn-ghost" text="↓ Export CSV" />
-                                <Button fx:id="buttonRegisterEvacuee" mnemonicParsing="false" onAction="#handleRegisterEvacuee" styleClass="brgy-btn-primary" text="+ Register Evacuee" />
-                            </children>
-                        </HBox>
 
-                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="brgy-table-controls">
-                            <padding><Insets bottom="12.0" left="20.0" right="20.0" /></padding>
-                            <children>
-                                <TextField fx:id="textFieldSearchEvacuees" prefHeight="36.0" prefWidth="300.0" promptText="Search by name, barangay, or center…" styleClass="brgy-search" />
-                                <Region HBox.hgrow="ALWAYS" />
+                                <!-- LEFT SIDE: Glues Title and Search Bar together -->
+                                <HBox alignment="CENTER_LEFT" spacing="16.0">
+                                    <children>
+                                        <Label styleClass="brgy-card-title" text="Evacuee Registrations" />
+                                        <TextField fx:id="textFieldSearchEvacuees" prefHeight="36.0" prefWidth="300.0" promptText="Search by name, barangay, or center…" styleClass="brgy-search" />
+                                    </children>
+                                </HBox>
+
+                                <!-- MIDDLE: The Spacer -->
+                                <Region HBox.hgrow="SOMETIMES" />
+
+                                <!-- RIGHT SIDE: Glues Buttons together -->
+                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                    <children>
+                                        <Button fx:id="buttonExportCsv" mnemonicParsing="false" styleClass="brgy-btn-ghost" text="↓ Export CSV" />
+                                        <Button fx:id="buttonRegisterEvacuee" mnemonicParsing="false" onAction="#handleRegisterEvacuee" styleClass="brgy-btn-primary" text="+ Register Evacuee" />
+                                    </children>
+                                </HBox>
+
                             </children>
                         </HBox>
 

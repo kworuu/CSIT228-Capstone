@@ -14,18 +14,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
+/**
+ * Data-access service for the kiosk dashboard.
+ */
 public final class KioskDataService {
-
-    // ── Singleton ──────────────────────────────────────────────────────────
 
     private static final KioskDataService INSTANCE = new KioskDataService();
 
     private KioskDataService() { /* singleton */ }
 
     public static KioskDataService getInstance() { return INSTANCE; }
-
-    // ── SQL ────────────────────────────────────────────────────────────────
 
     private static final String SQL_LOAD_CENTERS = """
             SELECT ec.id,
@@ -34,9 +35,18 @@ public final class KioskDataService {
                    u.display_name AS barangay,
                    ec.created_at,
                    ec.latitude,
-                   ec.longitude
+                   ec.longitude,
+                   ec.photo_path,
+                   csu.event_label,
+                   csu.updated_at,
+                   csu.available_item_ids
               FROM evacuation_centers ec
               JOIN users u ON ec.user_id = u.id
+              LEFT JOIN center_status_updates csu ON csu.id = (
+                  SELECT id FROM center_status_updates 
+                  WHERE center_id = ec.id 
+                  ORDER BY updated_at DESC LIMIT 1
+              )
              ORDER BY ec.name ASC
             """;
 
@@ -60,6 +70,11 @@ public final class KioskDataService {
                    ec.id
               FROM center_status_updates csu
               JOIN evacuation_centers ec ON csu.center_id = ec.id
+              WHERE csu.id = (
+                  SELECT id FROM center_status_updates 
+                  WHERE center_id = ec.id 
+                  ORDER BY updated_at DESC LIMIT 1
+              )
              ORDER BY csu.updated_at DESC
              LIMIT 15
             """;
@@ -72,15 +87,42 @@ public final class KioskDataService {
              LIMIT 50
             """;
 
-    // ── Public API ─────────────────────────────────────────────────────────
-
     public List<EvacuationSite> loadAllCenters() {
+        Map<Long, String> itemMap = new HashMap<>();
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT id, name FROM inventory_items");
+             ResultSet rs = ps.executeQuery()) {
+             while(rs.next()) {
+                 itemMap.put(rs.getLong("id"), rs.getString("name"));
+             }
+        } catch(SQLException ex) {
+             logError("loadAllCenters[inventory]", ex);
+        }
+
         List<EvacuationSite> sites = new ArrayList<>();
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_LOAD_CENTERS);
              ResultSet rs        = ps.executeQuery()) {
 
             while (rs.next()) {
+                String rawItems = rs.getString("available_item_ids");
+                List<String> supplies = new ArrayList<>();
+                if (rawItems != null && rawItems.length() > 2) {
+                    String cleaned = rawItems.replaceAll("[\\[\\] ]", "");
+                    if (!cleaned.isEmpty()) {
+                        for (String idStr : cleaned.split(",")) {
+                            try {
+                                long itemId = Long.parseLong(idStr.trim());
+                                String itemName = itemMap.get(itemId);
+                                if (itemName != null) supplies.add(itemName);
+                            } catch(Exception e) {}
+                        }
+                    }
+                }
+                
+                String eventLabel = rs.getString("event_label");
+                if (eventLabel == null || eventLabel.isBlank()) eventLabel = "No active event";
+
                 sites.add(new EvacuationSite(
                         String.valueOf(rs.getLong("id")),
                         rs.getString("name"),
@@ -89,7 +131,11 @@ public final class KioskDataService {
                         "ACTIVE",
                         formatTimestamp(rs.getString("created_at")),
                         rs.getDouble("latitude"),
-                        rs.getDouble("longitude")
+                        rs.getDouble("longitude"),
+                        eventLabel,
+                        formatTimestamp(rs.getString("updated_at")),
+                        supplies,
+                        rs.getString("photo_path")
                 ));
             }
         } catch (SQLException ex) {
@@ -169,8 +215,6 @@ public final class KioskDataService {
         }
         return names;
     }
-
-    // ── Helpers ────────────────────────────────────────────────────────────
 
     public static String formatTimestamp(String raw) {
         if (raw == null) return "—";
