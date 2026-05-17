@@ -20,11 +20,22 @@ public class EventCellController implements Initializable {
     private static final double ANIM_MS = 280.0;
     private boolean isOpen = false;
 
+    // Callback interface so KioskDashboardController knows when an event is clicked
+    private EventClickListener eventClickListener;
+
+    public interface EventClickListener {
+        void onEventClicked(String centerId);
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (eventCellRoot != null) {
             eventCellRoot.setTranslateX(DRAWER_WIDTH);
         }
+    }
+
+    public void setEventClickListener(EventClickListener listener) {
+        this.eventClickListener = listener;
     }
 
     public void setEvents(List<CenterEvent> events) {
@@ -56,6 +67,15 @@ public class EventCellController implements Initializable {
         bodyLbl.getStyleClass().add("alert-qty");
 
         card.getChildren().addAll(timeLbl, titleLbl, bodyLbl);
+
+        // Make the card clickable!
+        card.setStyle("-fx-cursor: hand;");
+        card.setOnMouseClicked(e -> {
+            if (eventClickListener != null) {
+                eventClickListener.onEventClicked(String.valueOf(event.centerId()));
+            }
+        });
+
         return card;
     }
 
