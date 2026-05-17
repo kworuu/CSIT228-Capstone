@@ -87,3 +87,22 @@
 .btn-outline:hover {
     -fx-background-color: #f1f5f9;
 }
+
+
+/* ════════════════════════════════════════════════════════
+   MODAL SPECIFIC CORNER CLIPPING HACKS
+   ════════════════════════════════════════════════════════ */
+.brgy-slate-modal {
+    -fx-overflow: hidden; /* Fallback for layout bounds clipping */
+}
+
+/* Force top corners of image to match modal frame curvatures */
+.brgy-slate-modal .brgy-overlay-img {
+    -fx-background-radius: 14 14 0 0;
+    -fx-border-radius: 14 14 0 0;
+}
+
+/* Adjust prompt/placeholder text color within slate text fields */
+.brgy-slate-input .text-input {
+    -fx-prompt-text-fill: #475569;
+}
