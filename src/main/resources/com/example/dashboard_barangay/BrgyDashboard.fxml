@@ -204,17 +204,14 @@
                             </children>
                         </HBox>
 
-                        <TableView fx:id="tableViewEvacuees" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="tableViewEvacuees" prefHeight="400.0" VBox.vgrow="ALWAYS" styleClass="brgy-table">
                             <columns>
-                                <TableColumn fx:id="tableColumnEvacId" prefWidth="90.0" text="ID" />
-                                <TableColumn fx:id="tableColumnEvacName" prefWidth="200.0" text="FULL NAME" />
-                                <TableColumn fx:id="tableColumnEvacCenter" prefWidth="200.0" text="CENTER" />
-                                <TableColumn fx:id="tableColumnEvacBrgy" prefWidth="140.0" text="BARANGAY" />
-                                <TableColumn fx:id="tableColumnEvacFamily" prefWidth="100.0" text="FAMILY SIZE" />
+                                <TableColumn fx:id="tableColumnEvacId" text="ID" prefWidth="60.0" />
+                                <TableColumn fx:id="tableColumnEvacName" text="Full Name" prefWidth="250.0" />
+                                <TableColumn fx:id="tableColumnEvacCenter" text="Evacuation Center" prefWidth="300.0" />
+                                <TableColumn fx:id="tableColumnEvacBrgy" text="Barangay" prefWidth="200.0" />
+                                <TableColumn fx:id="tableColumnEvacAction" text="Action" prefWidth="150.0" />
                             </columns>
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                            </columnResizePolicy>
                         </TableView>
                     </children>
                 </VBox>

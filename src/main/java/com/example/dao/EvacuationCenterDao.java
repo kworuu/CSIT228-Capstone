@@ -79,4 +79,12 @@ public class EvacuationCenterDao {
                 created != null ? created.toLocalDateTime() : null
         );
     }
+    public void delete(long id) throws SQLException {
+        String sql = "DELETE FROM evacuation_centers WHERE id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            ps.executeUpdate();
+        }
+    }
 }
