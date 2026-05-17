@@ -44,10 +44,10 @@ public final class TilePrefetchService {
     // ─── Tuning constants ───────────────────────────────────────
 
     /** Lowest zoom to prefetch (regional context — whole city visible). */
-    private static final int MIN_ZOOM = 13;
+    private static final int MIN_ZOOM = 14;
 
     /** Highest zoom to prefetch (street-level — individual buildings legible). */
-    private static final int MAX_ZOOM = 17;
+    private static final int MAX_ZOOM = 16;
 
     /**
      * How far around each barangay's center point to prefetch, in degrees.

@@ -15,6 +15,7 @@ import com.example.util.CenterEvent;
 import com.example.util.Route;
 import com.example.util.Router;
 import com.example.util.SearchTableUtility;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -68,7 +69,7 @@ public final class KioskDashboardController implements DashboardViewObserver {
 
     private final ObservableList<EvacuationSite> centerData  = FXCollections.observableArrayList();
     private final ObservableList<EvacueeRecord>  evacueeData = FXCollections.observableArrayList();
-
+    private boolean mapInitialized = false;
     private String selectedCenterId;
 
     private SessionMode sessionMode = new PublicSessionMode();
@@ -271,15 +272,22 @@ public final class KioskDashboardController implements DashboardViewObserver {
 
     private void refreshMapMarkers(List<EvacuationSite> centers) {
         if (miniMapWebView == null) return;
-
-        int tilePort = startTileServerSafely();
-        miniMapWebView.getEngine().loadContent(
-                BrgyMapHtmlProvider.getMapHTML(
-                        buildCentersJson(centers),
-                        KioskConstants.DEFAULT_MAP_LAT,
-                        KioskConstants.DEFAULT_MAP_LNG,
-                        KioskConstants.DEFAULT_MAP_ZOOM,
-                        tilePort));
+        if (!mapInitialized) {
+            int tilePort = startTileServerSafely();
+            miniMapWebView.getEngine().loadContent(
+                    BrgyMapHtmlProvider.getMapHTML(
+                            buildCentersJson(centers),
+                            KioskConstants.DEFAULT_MAP_LAT,
+                            KioskConstants.DEFAULT_MAP_LNG,
+                            KioskConstants.DEFAULT_MAP_ZOOM,
+                            tilePort));
+            mapInitialized = true;
+            return;
+        }
+        String json = buildCentersJson(centers);
+        Platform.runLater(() ->
+                miniMapWebView.getEngine().executeScript(
+                        "if(window.updateMarkers) window.updateMarkers(" + json + ");"));
     }
 
     private void focusCenterOnMap(String centerId) {

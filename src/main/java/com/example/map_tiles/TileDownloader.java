@@ -42,13 +42,13 @@ public final class TileDownloader {
     // ─── Configuration ──────────────────────────────────────────
 
     /** Pool size — also our concurrent-request ceiling. */
-    private static final int THREAD_POOL_SIZE = 4;
+    private static final int THREAD_POOL_SIZE = 8;
 
     /** OSM requires a descriptive User-Agent for bulk usage. */
     private static final String USER_AGENT = "CivicGuard/1.0 (Capstone Project; civicguard@example.com)";
 
     /** Per-thread politeness delay between downloads, in milliseconds. */
-    private static final long INTER_REQUEST_DELAY_MS = 100;
+    private static final long INTER_REQUEST_DELAY_MS = 50;
 
     /** HTTP request timeout. Slow internet is real — give tiles room to arrive. */
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(15);
