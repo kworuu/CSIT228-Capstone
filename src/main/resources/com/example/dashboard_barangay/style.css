@@ -814,3 +814,23 @@
     -fx-background-color: #1e293b;
     -fx-text-fill: #f8fafc;
 }
+
+/* Styling for the dynamic checkboxes in the Update Center Modal */
+.brgy-checkbox {
+    -fx-text-fill: #e2e8f0; /* Light gray/white text so it pops on dark background */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-padding: 4px;
+}
+
+/* Optional: Make the checkbox box itself look a bit cleaner */
+.brgy-checkbox .box {
+    -fx-background-color: #334155;
+    -fx-border-color: #475569;
+    -fx-border-radius: 3px;
+}
+
+/* Optional: Checkmark color when selected */
+.brgy-checkbox:selected .mark {
+    -fx-background-color: #38bdf8; /* Light blue checkmark */
+}

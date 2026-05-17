@@ -63,12 +63,13 @@ public class BrgyDashboardController {
     @FXML private Label  labelCenterCount;
     @FXML private ScrollPane scrollPaneCenterCards;
 
-    // ── FXML — Register panel ──────────────────────────────────────
+    // FXML — Register panel
     @FXML private TableView<EvacueeRow>    tableViewEvacuees;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacId;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacName;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacCenter;
     @FXML private TableColumn<EvacueeRow,String> tableColumnEvacBrgy;
+    @FXML private TableColumn<EvacueeRow, Void> tableColumnEvacAction; // NEW!
     @FXML private Button buttonRegisterEvacuee;
     @FXML private Button btnReturnHome;
 
@@ -143,7 +144,6 @@ public class BrgyDashboardController {
                 });
     }
 
-    // NEW WAY: Fetch geographic data directly from the Barangay User accounts
     private void loadBarangayCoordinates() {
         String sql = "SELECT display_name AS name, latitude, longitude, zoom FROM users WHERE role = 'barangay' AND latitude IS NOT NULL";
 
@@ -628,6 +628,59 @@ public class BrgyDashboardController {
                 new javafx.beans.property.SimpleStringProperty(d.getValue().center()));
         tableColumnEvacBrgy.setCellValueFactory(d ->
                 new javafx.beans.property.SimpleStringProperty(d.getValue().barangay()));
+
+        // NEW: Inline Action Buttons (Edit / Delete)
+        tableColumnEvacAction.setCellFactory(param -> new TableCell<>() {
+            private final Button editBtn = new Button("Edit");
+            private final Button deleteBtn = new Button("Delete");
+            private final HBox pane = new HBox(8, editBtn, deleteBtn);
+
+            {
+                // Basic styling for the buttons so they match the theme
+                editBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand;");
+                deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
+                pane.setAlignment(javafx.geometry.Pos.CENTER);
+
+                editBtn.setOnAction(event -> {
+                    EvacueeRow rowData = getTableView().getItems().get(getIndex());
+                    handleEditEvacuee(rowData);
+                });
+
+                deleteBtn.setOnAction(event -> {
+                    EvacueeRow rowData = getTableView().getItems().get(getIndex());
+                    handleDeleteEvacuee(rowData);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : pane);
+            }
+        });
+    }
+
+    private void handleDeleteEvacuee(EvacueeRow rowData) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete registration for " + rowData.name() + "?", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.YES) {
+                try {
+                    new com.example.dao.EvacueeDao().delete(Long.parseLong(rowData.id()));
+                    loadEvacueesFromDB(); // Refresh table instantly
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void handleEditEvacuee(EvacueeRow rowData) {
+        // Placeholder for now. We will build the edit modal in the next phase!
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Edit Mode");
+        alert.setHeaderText(null);
+        alert.setContentText("Edit logic for " + rowData.name() + " coming soon!");
+        alert.showAndWait();
     }
 
     private void loadEvacueesFromDB() {
@@ -635,7 +688,8 @@ public class BrgyDashboardController {
             SELECT e.id, e.full_name_enc, ec.name AS center_name, u.display_name AS barangay
             FROM evacuees e
             JOIN evacuation_centers ec ON e.evacuation_center_id = ec.id
-            JOIN users u ON e.user_id = u.id
+            -- FIXED: We now check who owns the CENTER, not who registered the evacuee!
+            JOIN users u ON ec.user_id = u.id 
             WHERE u.display_name = ?
             ORDER BY e.created_at DESC
             LIMIT 200
@@ -670,7 +724,15 @@ public class BrgyDashboardController {
             javafx.scene.Parent root = loader.load();
 
             UpdateCenterController controller = loader.getController();
-            controller.initData(selectedCenter.id(), selectedCenter.name(), selectedCenter.address());
+            // PASS THE EXTRA DATA SO THE MODAL CAN LOAD IT!
+            controller.initData(
+                    selectedCenter.id(),
+                    selectedCenter.name(),
+                    selectedCenter.address(),
+                    selectedCenter.photoPath(),
+                    selectedCenter.eventLabel(),
+                    selectedCenter.availableItems()
+            );
 
             javafx.stage.Stage stage = new javafx.stage.Stage();
             stage.setTitle("Update " + selectedCenter.name());
