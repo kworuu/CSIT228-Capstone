@@ -25,7 +25,8 @@ public class SupplyRequestDao {
             }
 
             ps.setInt(4, req.quantity());
-            ps.setString(5, req.status().name());
+            // FIX: Added .toLowerCase() to match database layout standards during insert
+            ps.setString(5, req.status().name().toLowerCase());
             ps.setString(6, req.notes());
             ps.executeUpdate();
         }
@@ -35,23 +36,19 @@ public class SupplyRequestDao {
         String sql = "UPDATE supply_requests SET status = ? WHERE id = ?";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, newStatus.name());
+            // FIX: Added .toLowerCase() to perfectly match the database ENUM data definition constraints
+            ps.setString(1, newStatus.name().toLowerCase());
             ps.setLong(2, requestId);
             ps.executeUpdate();
         }
     }
 
     private SupplyRequest mapRowToSupplyRequest(ResultSet rs) throws SQLException {
-        // Defensive mapping to prevent exceptions from bad data
-        SupplyRequestStatus status;
-        try {
-            status = SupplyRequestStatus.valueOf(rs.getString("status"));
-        } catch (IllegalArgumentException | NullPointerException e) {
-            status = SupplyRequestStatus.PENDING; // Default to PENDING if status is invalid or null
-        }
+        // FIX: Replaced valueOf directly with the new safe case-insensitive parsing method
+        SupplyRequestStatus status = SupplyRequestStatus.fromString(rs.getString("status"));
 
         Timestamp createdAtTimestamp = rs.getTimestamp("created_at");
-        LocalDateTime createdAt = (createdAtTimestamp != null) ? createdAtTimestamp.toLocalDateTime() : null;
+        java.time.LocalDateTime createdAt = (createdAtTimestamp != null) ? createdAtTimestamp.toLocalDateTime() : null;
 
         return new SupplyRequest(
                 rs.getLong("id"),
@@ -67,6 +64,7 @@ public class SupplyRequestDao {
                 createdAt
         );
     }
+
 
     public List<SupplyRequest> getRequestsByBarangay(String brgyName) throws SQLException {
         List<SupplyRequest> list = new ArrayList<>();
@@ -116,4 +114,5 @@ public class SupplyRequestDao {
         }
         return list;
     }
+
 }

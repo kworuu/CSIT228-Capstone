@@ -8,27 +8,30 @@ import java.sql.*;
 public class TransactionDao {
 
     public void recordTransaction(Transaction t) throws SQLException {
+        // Query updated to perfectly mirror table: transactions (direction, item_id, quantity, destination_id, created_by, notes)
         String sql = """
             INSERT INTO transactions 
-            (item_id, quantity, direction, destination_type, destination_id, user_id, notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (direction, item_id, quantity, destination_id, created_by, notes) 
+            VALUES (?, ?, ?, ?, ?, ?)
             """;
 
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, t.itemId());
-            ps.setInt(2, t.quantity());
-            ps.setString(3, t.direction());
-            ps.setString(4, t.destinationType());
+            ps.setString(1, t.direction().toLowerCase());
+            ps.setLong(2, t.itemId());
+            ps.setInt(3, t.quantity());
 
-            if (t.destinationId() != null) ps.setLong(5, t.destinationId());
-            else ps.setNull(5, Types.BIGINT);
+            // Check if destination_id is null before binding
+            if (t.destinationId() != null) {
+                ps.setLong(4, t.destinationId());
+            } else {
+                ps.setNull(4, Types.BIGINT);
+            }
 
-            if (t.userId() != null) ps.setLong(6, t.userId());
-            else ps.setNull(6, Types.BIGINT);
+            ps.setString(5, t.createdBy());
+            ps.setString(6, t.notes());
 
-            ps.setString(7, t.notes());
             ps.executeUpdate();
         }
     }

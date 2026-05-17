@@ -2,6 +2,7 @@ package com.example.dashboard_admin;
 
 import com.example.dao.InventoryItemDao;
 import com.example.dao.SupplyRequestDao;
+import com.example.dashboard_admin.views.DeployItemController;
 import com.example.map_logic.MapHtmlProvider;
 import com.example.model.InventoryItem;
 import com.example.model.SupplyRequest;
@@ -13,6 +14,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
@@ -164,6 +167,7 @@ public class DashboardController {
             List<SupplyRequest> requestsList = requestDao.findAllForAdmin();
             masterData.setAll(requestsList);
             setupSearch();
+            mainTable.refresh();
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Database connection error: Could not fetch supply requests.");
@@ -227,29 +231,42 @@ public class DashboardController {
      * Shows confirmation, updates DB status to FULFILLED, refreshes table.
      */
     private void handleDeployClick(SupplyRequest request) {
-        Alert confirm = new Alert(AlertType.CONFIRMATION);
-        confirm.setTitle("Confirm Deployment");
-        confirm.setHeaderText("Deploy supplies to " + request.barangay() + "?");
+        // 1. Open the modal and get the loader back
+        FXMLLoader loader = SceneHelper.showModalWithController(
+                "/com/example/dashboard_admin/modals/deploy-items.fxml",
+                "Deploy Supplies",
+                mainTable
+        );
 
-        String detail = "This will mark the request as fulfilled.";
-        if (request.notes() != null && !request.notes().isBlank()) {
-            detail += "\n\nNotes: " + request.notes();
-        }
-        confirm.setContentText(detail);
+        if (loader != null) {
+            // 2. Get the controller from the loader
+            DeployItemController controller = loader.getController();
 
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-                    requestDao.updateStatus(request.id(), SupplyRequestStatus.FULFILLED);
+            // 3. Pass your data
+            controller.setData(
+                    request.id(),
+                    request.itemId(),
+                    request.itemName(),
+                    request.userId(), // Barangay User ID
+                    request.barangay(),
+                    request.quantity()
+            );
+
+            // 4. Refresh data when the modal is closed
+            Parent root = loader.getRoot();
+            Stage stage = (Stage) root.getScene().getWindow();
+
+            stage.setOnHiding(event -> {
+                javafx.application.Platform.runLater(() -> {
                     loadData();
                     refreshStats();
-                } catch (SQLException e) {
-                    showError("Failed to update request status", e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        });
+                });
+            });
+
+            stage.show();
+        }
     }
+
 
     @FXML
     private void handleRefresh() {
