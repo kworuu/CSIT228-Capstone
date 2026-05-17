@@ -234,9 +234,15 @@ public class DashboardController {
                 showEmptyMessage();
             } else {
                 for (Transaction t : transactions) {
-                    String itemName = inventoryDao.findById(t.itemId())
-                            .map(InventoryItem::name)
-                            .orElse("Unknown Item");
+                    String itemName;
+
+                    if (t.itemId() == 0) {
+                        itemName = "Deleted Item";
+                    } else {
+                        itemName = inventoryDao.findById(t.itemId())
+                                .map(InventoryItem::name)
+                                .orElse("Unknown Item");
+                    }
 
                     ActivityLogHelper.addTransactionLogCard(
                             containerTransactionLog,
