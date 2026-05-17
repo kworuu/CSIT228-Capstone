@@ -108,7 +108,7 @@ public final class LocalTileServer {
                 return t;
             }
         };
-        ExecutorService serverPool = Executors.newFixedThreadPool(4, factory);
+        ExecutorService serverPool = Executors.newFixedThreadPool(8, factory);
         server.setExecutor(serverPool);
 
         server.createContext("/", this::handle);
