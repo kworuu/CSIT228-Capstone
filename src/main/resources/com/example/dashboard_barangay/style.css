@@ -199,12 +199,21 @@
     -fx-background-color: transparent;
     -fx-border-color: #e2e8f0;
     -fx-border-radius: 8;
-    -fx-text-fill: #3d4653;
+    -fx-text-fill: white;
     -fx-padding: 8 16;
     -fx-font-size: 12;
     -fx-cursor: hand;
 }
 
+.brgy-btn-refresh {
+    -fx-background-color: transparent;
+    -fx-border-color: #64748b;
+    -fx-border-radius: 8;
+    -fx-text-fill: #6e7888;
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+}
 .brgy-btn-ghost:hover {
     -fx-background-color: #f8fafc;
 }

@@ -281,6 +281,9 @@ public class MapViewController implements Initializable, com.example.util.Center
 
     private void showOverlay(CenterData c) {
         if (vboxMapOverlay == null) return;
+        vboxMapOverlay.setMinHeight(Region.USE_PREF_SIZE);
+        vboxMapOverlay.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        vboxMapOverlay.setMaxHeight(Region.USE_PREF_SIZE);
 
         selectedCenter = c;
         labelOverlayName.setText(c.name());

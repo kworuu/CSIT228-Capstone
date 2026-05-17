@@ -125,36 +125,6 @@ public class DashboardController {
         colNotes.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().notes()));
         colStatus.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().status().name()));
 
-        // 1. THE STATUS PILL UPGRADE
-        // Turns boring text into a beautifully colored, rounded badge
-        colStatus.setCellFactory(column -> new TableCell<>() {
-            private final Label badge = new Label();
-            {
-                // Base styling for the pill
-                badge.setStyle("-fx-padding: 4px 12px; -fx-background-radius: 12px; -fx-font-weight: bold; -fx-font-size: 11px;");
-            }
-
-            @Override
-            protected void updateItem(String status, boolean empty) {
-                super.updateItem(status, empty);
-                if (empty || status == null) {
-                    setGraphic(null);
-                } else {
-                    badge.setText(status.toUpperCase());
-
-                    // Color code based on the status!
-                    if (status.equalsIgnoreCase("Pending")) {
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: #fef08a; -fx-text-fill: #854d0e;"); // Warning Yellow
-                    } else if (status.equalsIgnoreCase("Approved") || status.equalsIgnoreCase("Dispatched")) {
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: #bbf7d0; -fx-text-fill: #166534;"); // Success Green
-                    } else {
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: #e2e8f0; -fx-text-fill: #475569;"); // Default Gray
-                    }
-                    setGraphic(badge);
-                }
-            }
-        });
-
         // 2. THE ACTION BUTTON UPGRADE
         // Injects a clickable "Deploy" button straight into the table row
         colAction.setCellFactory(column -> new TableCell<>() {

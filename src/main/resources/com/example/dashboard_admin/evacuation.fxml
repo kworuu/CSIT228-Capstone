@@ -79,7 +79,7 @@
                         </VBox>
                         <Region prefHeight="71.0" prefWidth="27.0" HBox.hgrow="ALWAYS" />
                           <HBox fx:id="hboxHeaderBar" alignment="CENTER_RIGHT" prefHeight="71.0" prefWidth="326.0" spacing="10.0" styleClass="brgy-header">
-                              <Button fx:id="buttonRefresh" mnemonicParsing="false" onAction="#handleRefresh" styleClass="brgy-btn-ghost" text="↻" />
+                              <Button fx:id="buttonRefresh" mnemonicParsing="false" onAction="#handleRefresh" styleClass="brgy-btn-refresh" text="↻" />
                               <Button fx:id="buttonLogout" alignment="CENTER" mnemonicParsing="false" onAction="#handleLogout" prefHeight="33.0" prefWidth="99.0" styleClass="brgy-btn-logout-custom" text="Log Out" textAlignment="CENTER" />
                           </HBox>
                     </children>
