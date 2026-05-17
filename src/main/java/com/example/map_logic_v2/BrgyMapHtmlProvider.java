@@ -145,7 +145,6 @@ public class BrgyMapHtmlProvider {
 
                         var html = '<div class="marker-wrap">'
                                  + '  <div id="pin-' + c.id + '">' + svgIcon + '</div>'
-                                 + '  <div class="pin-label">' + shortName + '</div>'
                                  + '</div>';
 
                         var icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [140, 60], iconAnchor: [70, 36] });
@@ -294,7 +293,6 @@ public class BrgyMapHtmlProvider {
 
                         var html = '<div class="marker-wrap">'
                                  + '  <div id="pin-' + c.id + '">' + svgIcon + '</div>'
-                                 + '  <div class="pin-label">' + shortName + '</div>'
                                  + '</div>';
 
                         var icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [140, 60], iconAnchor: [70, 36] });
