@@ -86,11 +86,16 @@ public class MapViewController implements Initializable {
     @FXML private Label      labelOverlayEvent;
     @FXML private Label      labelOverlayTimestamp;
     @FXML private Button     buttonOverlayClose;
+    @FXML private Button     btnReturnHome;
 
     // ── FXML — Sidebar nav buttons (existing) ─────────────────────
     @FXML private Button navEvacuations;
     @FXML private Button navInventory;
     @FXML private Button navActivity;
+    
+    // ── FXML — Header Bar (added) ─────────────────────────────────
+    @FXML private Button btnRefresh;
+    @FXML private Button buttonLogout;
 
     // ══════════════════════════════════════════════════════════════
     //  State
@@ -451,6 +456,39 @@ public class MapViewController implements Initializable {
     }
 
     // ══════════════════════════════════════════════════════════════
+    //  EVENT HANDLERS
+    // ══════════════════════════════════════════════════════════════
+    
+    @FXML
+    private void handleRefresh() {
+        loadCentersAsync();
+        if (selectedCenter != null) {
+            centers.stream()
+                    .filter(c -> c.id() == selectedCenter.id())
+                    .findFirst()
+                    .ifPresent(this::showOverlay);
+        }
+    }
+    
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
+    }
+    
+    @FXML
+    private void handleReturnHome() {
+        btnReturnHome.setVisible(false); // Hide immediately on click
+        try {
+            // Tell the Leaflet map to fly back to the center
+            mapWebView.getEngine().executeScript("if(window.flyHome) window.flyHome();");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // ══════════════════════════════════════════════════════════════
     //  Utility
     // ══════════════════════════════════════════════════════════════
 
@@ -478,6 +516,16 @@ public class MapViewController implements Initializable {
         /** Called from JavaScript when a marker is clicked. */
         public void onMarkerClick(String centerId) {
             Platform.runLater(() -> ctrl.onMarkerClicked(centerId));
+        }
+        
+        public void toggleHomeButton(boolean show) {
+            Platform.runLater(() -> {
+                if (ctrl.btnReturnHome != null) {
+                    if (ctrl.btnReturnHome.isVisible() != show) {
+                        ctrl.btnReturnHome.setVisible(show);
+                    }
+                }
+            });
         }
     }
 }
