@@ -36,7 +36,6 @@
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
                         <!-- Center Name -->
@@ -48,33 +47,19 @@
                         </VBox>
 
                         <!-- Photo Path with Browse Button and Preview -->
-                        <VBox spacing="10.0" GridPane.rowIndex="1">
-                            <children>
-                                <Label styleClass="brgy-slate-section-label" text="LOCATION" />
-                                <HBox spacing="10.0">
-                                    <children>
-                                        <TextField fx:id="addressPathField" editable="false" promptText="Pin Location on map" styleClass="brgy-slate-input" HBox.hgrow="ALWAYS" />
-                                        <Button fx:id="btnOpenMap_extension" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OpenMap_extension" prefHeight="34.0" prefWidth="83.0" styleClass="brgy-btn-primary" text="Open Map" />
-                                    </children>
-                                </HBox>
-                            </children>
-                        </VBox>
-                        <VBox spacing="10.0" GridPane.rowIndex="2">
-                            <children>
-                                <Label styleClass="brgy-slate-section-label" text="CENTER PHOTO" />
-                                <HBox spacing="10.0">
-                                    <children>
-                                        <TextField fx:id="photoPathField" editable="false" promptText="No file selected" styleClass="brgy-slate-input" HBox.hgrow="ALWAYS" />
-                                        <Button mnemonicParsing="false" onAction="#handleBrowsePhoto" prefHeight="40.0" styleClass="brgy-slate-btn-ghost" text="Browse" />
-                                    </children>
-                                </HBox>
-                                <StackPane prefHeight="180.0" style="-fx-border-color: #1e293b; -fx-background-color: #0f172a; -fx-border-radius: 5; -fx-background-radius: 5;">
-                                    <children>
-                                        <ImageView fx:id="photoPreview1" fitHeight="170.0" fitWidth="450.0" pickOnBounds="true" preserveRatio="true" />
-                                        <Label fx:id="placeholderLabel1" text="No Image Selected" textFill="#64748b" />
-                                    </children>
+                        <VBox spacing="8.0" GridPane.rowIndex="1">
+                            <Label text="EVACUATION CENTER PHOTO" styleClass="brgy-slate-section-label" style="-fx-font-size: 10px;"/>
+                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                <StackPane prefWidth="120" prefHeight="80" style="-fx-background-color: #1e293b; -fx-border-color: #334155; -fx-border-radius: 6px;">
+                                    <ImageView fx:id="imgPreview" fitWidth="120" fitHeight="80" preserveRatio="true"/>
+                                    <Label fx:id="lblNoImage" text="No Image" textFill="#64748b"/>
                                 </StackPane>
-                            </children>
+
+                                <VBox spacing="5.0" alignment="CENTER_LEFT">
+                                    <Button fx:id="btnUploadPhoto" text="Browse Files..." onAction="#handleUploadPhoto" styleClass="brgy-btn-ghost"/>
+                                    <Label text="Accepts .jpg, .png (Max 5MB)" textFill="#64748b" style="-fx-font-size: 11px;"/>
+                                </VBox>
+                            </HBox>
                         </VBox>
                     </children>
                 </GridPane>

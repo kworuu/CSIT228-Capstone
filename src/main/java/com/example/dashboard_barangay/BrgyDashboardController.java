@@ -228,11 +228,33 @@ public class BrgyDashboardController {
 
     @FXML
     private void handleAddCenter() {
+        // PHASE 1: Turn on Pinning Mode instead of opening the modal immediately
+        try {
+            webViewMap.getEngine().executeScript("window.enablePinningMode();");
+            
+            // Show a quick instruction to the user
+            Alert info = new Alert(Alert.AlertType.INFORMATION, "Click anywhere on the map to drop the pin for the new evacuation center.", ButtonType.OK);
+            info.setTitle("Pin Location");
+            info.setHeaderText("Map Pinning Mode Active");
+            info.show();
+        } catch (Exception e) {
+            System.err.println("Map script error: " + e.getMessage());
+        }
+    }
+
+    // PHASE 1: Opens the modal AFTER they click the map
+    public void openAddCenterModal(double lat, double lng) {
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
                     getClass().getResource("/com/example/dashboard_barangay/modals/add-brgyReg.fxml")
             );
             javafx.scene.Parent root = loader.load();
+
+            // Pass the coordinates to the old modal controller
+            AddBrgyController controller = loader.getController();
+            if(controller != null) {
+                controller.setLocationData(CURRENT_BARANGAY, lat, lng);
+            }
 
             javafx.stage.Stage stage = new javafx.stage.Stage();
             stage.setTitle("Register Evacuation Center");
@@ -241,7 +263,7 @@ public class BrgyDashboardController {
             stage.setScene(new javafx.scene.Scene(root));
 
             stage.showAndWait();
-            handleRefresh(); // Refresh after the modal is closed
+            handleRefresh(); // Refresh map after saving
         } catch (Exception e) {
             System.err.println("Failed to open Register Center modal: " + e.getMessage());
         }
@@ -844,6 +866,11 @@ public class BrgyDashboardController {
 
         public void onMarkerClick(String centerId) {
             Platform.runLater(() -> ctrl.onMarkerClicked(centerId));
+        }
+
+        // NEW: Receives the lat/lng from Phase 1
+        public void onMapClicked(double lat, double lng) {
+            Platform.runLater(() -> ctrl.openAddCenterModal(lat, lng));
         }
 
         public void toggleHomeButton(boolean show) {

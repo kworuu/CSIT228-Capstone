@@ -51,4 +51,12 @@ module com.example.capstone {
 
     exports com.example.dashboard_admin.views;
     opens com.example.dashboard_admin.views to javafx.fxml;
+    exports com.example.dashboard_kiosk.session;
+    opens com.example.dashboard_kiosk.session to javafx.fxml, javafx.graphics;
+    exports com.example.dashboard_kiosk.observer;
+    opens com.example.dashboard_kiosk.observer to javafx.fxml, javafx.graphics;
+    exports com.example.dashboard_kiosk.controller;
+    opens com.example.dashboard_kiosk.controller to javafx.fxml, javafx.graphics, jdk.jsobject;
+    exports com.example.dashboard_kiosk.service;
+    opens com.example.dashboard_kiosk.service to javafx.fxml, javafx.graphics;
 }

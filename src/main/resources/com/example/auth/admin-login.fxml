@@ -19,7 +19,7 @@
 -->
 
 <StackPane styleClass="root-pane"
-           stylesheets="@../dashboard_kiosk/style.css"
+           stylesheets="@../dashboard_kiosk/controller/style.css"
            xmlns="http://javafx.com/javafx/25"
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.example.auth.AdminLoginController">

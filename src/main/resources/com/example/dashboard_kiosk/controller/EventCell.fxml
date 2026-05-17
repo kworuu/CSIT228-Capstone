@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    EventCell.fxml — Right-edge sliding events drawer
+    ───────────────────────────────────────────────────
+    Controller: com.example.dashboard_kiosk.controller.EventCellController
+
+    • EventCellController.initialize() sets translateX = prefWidth (300)
+      so the panel starts fully off-screen.
+    • toggleDrawer() animates translateX between 300 (hidden) and 0 (open).
+    • This node is a direct child of the root AnchorPane (anchored
+      top/right/bottom) so when open it overlays the header, search field,
+      map, and bottom tabs — by design.
+    • A close button (✕) in the drawer header gives users a discoverable
+      affordance to dismiss the panel.
+
+    fx:id renames (post-refactor):
+      eventCellRoot         (unchanged — drawer root)
+      alertsContainerVBox   (was alertsContainer; now uses descriptive type suffix)
+      btnCloseDrawer        (unchanged — already well-named)
+-->
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.dashboard_kiosk.controller.EventCellController"
+      fx:id="eventCellRoot"
+      prefWidth="300.0"
+      maxWidth="300.0"
+      styleClass="kiosk-event-cell">
+
+    <children>
+
+        <!-- Drawer header: title + close button -->
+        <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="kiosk-event-header">
+            <padding>
+                <Insets bottom="14.0" left="18.0" right="12.0" top="14.0"/>
+            </padding>
+            <children>
+                <Label styleClass="kiosk-event-title" text="⚡ Events"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnCloseDrawer"
+                        mnemonicParsing="false"
+                        onAction="#handleClose"
+                        styleClass="btn-modal-close"
+                        text="✕"/>
+            </children>
+        </HBox>
+
+        <!-- Scrollable alert list -->
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="kiosk-event-scroll"
+                    VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="alertsContainerVBox" spacing="10.0">
+                    <padding>
+                        <Insets bottom="18.0" left="14.0" right="14.0" top="10.0"/>
+                    </padding>
+                    <!-- Alert cards are inserted by EventCellController -->
+                </VBox>
+            </content>
+        </ScrollPane>
+
+    </children>
+</VBox>
