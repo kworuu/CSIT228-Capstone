@@ -146,21 +146,22 @@ public class BrgyDashboardController {
     }
 
     private void loadBarangayCoordinates() {
-        String sql = "SELECT display_name AS name, latitude, longitude, zoom FROM users WHERE role = 'barangay' AND latitude IS NOT NULL";
+        String sql = "SELECT latitude, longitude, zoom FROM users WHERE role = 'barangay' AND display_name = ?";
 
-        try (java.sql.Connection conn = com.example.util.DBConnectionManager.getInstance().getConnection();
-             java.sql.PreparedStatement ps = conn.prepareStatement(sql);
-             java.sql.ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                String name = rs.getString("name");
-                double lat = rs.getDouble("latitude");
-                double lng = rs.getDouble("longitude");
+            ps.setString(1, CURRENT_BARANGAY);
 
-                // For example: mapBridge.addBarangayMarker(name, lat, lng);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    currentBrgyLat = rs.getDouble("latitude");
+                    currentBrgyLng = rs.getDouble("longitude");
+                    currentBrgyZoom = rs.getInt("zoom");
+                }
             }
-        } catch (java.sql.SQLException e) {
-            System.err.println("Failed to load barangay coordinates: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Failed to load coordinates for barangay " + CURRENT_BARANGAY + ": " + e.getMessage());
         }
     }
 
