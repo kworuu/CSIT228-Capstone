@@ -79,7 +79,7 @@
                         <Region HBox.hgrow="ALWAYS" />
                         <HBox alignment="CENTER" spacing="16.0">
                             <children>
-                                <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="brgy-btn-ghost" text="↻" />
+                                <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="brgy-btn-refresh" text="↻" />
                             </children>
                         </HBox>
                     </children>
