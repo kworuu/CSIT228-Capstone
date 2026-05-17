@@ -320,11 +320,16 @@
 }
 
 .alert-title {
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-text-fill: #f8fafc;
+    -fx-text-fill: #334155;
 }
 
+.alert-quantity {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #c23737;
+}
 .alert-location {
     -fx-font-size: 11px;
     -fx-text-fill: #94a3b8;

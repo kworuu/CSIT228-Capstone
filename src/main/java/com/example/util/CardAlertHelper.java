@@ -18,7 +18,7 @@ public class CardAlertHelper {
         // 1. The Main Wrapper (VBox)
         VBox card = new VBox();
         // Matching your FXML: styleClass="alert-item, alert-item-critical"
-        card.getStyleClass().addAll("alert-item", "alert-item-critical");
+        card.getStyleClass().addAll("stat-card", "stat-card-warning");
         card.setSpacing(5); // Adjust spacing as needed
 
         // 2. The Header Row (HBox)
@@ -32,7 +32,7 @@ public class CardAlertHelper {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label qtyLabel = new Label(item.stockQuantity() + " left");
-        qtyLabel.getStyleClass().add("alert-qty");
+        qtyLabel.getStyleClass().add("alert-quantity");
 
         header.getChildren().addAll(nameLabel, spacer, qtyLabel);
 
@@ -40,12 +40,12 @@ public class CardAlertHelper {
         Separator separator = new Separator();
         separator.setPrefWidth(200.0);
         // Matching your FXML: padding bottom 10
-        VBox.setMargin(separator, new Insets(0, 0, 10, 0));
+        VBox.setMargin(separator, new Insets(0, 0, 5, 0));
 
         // 4. The Action Button
         Button restockBtn = new Button("Restock necessary");
         restockBtn.setMnemonicParsing(false);
-        restockBtn.setPrefHeight(22.0);
+        restockBtn.setPrefHeight(15.0);
         restockBtn.setPrefWidth(252.0); // Match your FXML width
         restockBtn.getStyleClass().add("btn-link-sm");
 
