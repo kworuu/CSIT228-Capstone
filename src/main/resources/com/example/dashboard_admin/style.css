@@ -808,21 +808,23 @@
     -fx-text-fill: #f8fafc;
 }
 
-.brgy-btn-logout-custom {
+
+.brgy-btn-logout-custom{
     -fx-background-color: transparent;
-    -fx-border-color: #c23737; /* Soft Red Border */
+    -fx-border-color: #c23737;
     -fx-border-radius: 8;
-    -fx-text-fill: #c23737; /* Red Text */
+    -fx-background-radius: 8;
+    -fx-text-fill: #c23737;
     -fx-padding: 8 16;
     -fx-font-size: 12;
     -fx-cursor: hand;
     -fx-font-weight: bold;
 }
 
-.brgy-btn-logout-custom:hover {
-    -fx-background-color: #fef2f2; /* Ultra-light red tint background on hover */
-    -fx-border-color: #dc2626;     /* Darker red border on hover */
-    -fx-text-fill: #dc2626;        /* Darker red text on hover */
+.brgy-btn-logout-custom:hover{
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #dc2626;
+    -fx-text-fill: #dc2626;
 }
 
 
@@ -894,4 +896,42 @@
     -fx-font-size: 12;
     -fx-font-weight: bold;
     -fx-text-fill: #6ee7b7;
+}
+
+.brgy-btn-refresh {
+    -fx-background-color: transparent;
+    -fx-border-color: #64748b;
+    -fx-border-radius: 8;
+    -fx-text-fill: #64748b;
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+}
+
+.btn-action-edit{
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 9 18;
+    -fx-cursor: hand;
+}
+
+
+.btn-action-delete{
+    -fx-background-color: transparent;
+    -fx-border-color: #c23737;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #c23737;
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.btn-action-delete:hover{
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #dc2626;
+    -fx-text-fill: #dc2626;
 }

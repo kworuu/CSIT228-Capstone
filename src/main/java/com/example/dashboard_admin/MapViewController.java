@@ -281,6 +281,9 @@ public class MapViewController implements Initializable, com.example.util.Center
 
     private void showOverlay(CenterData c) {
         if (vboxMapOverlay == null) return;
+        vboxMapOverlay.setMinHeight(Region.USE_PREF_SIZE);
+        vboxMapOverlay.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        vboxMapOverlay.setMaxHeight(Region.USE_PREF_SIZE);
 
         selectedCenter = c;
         labelOverlayName.setText(c.name());
@@ -346,7 +349,7 @@ public class MapViewController implements Initializable, com.example.util.Center
             title.getStyleClass().add("alert-title");
             title.setWrapText(true);
 
-            Label eventLabel = new Label("⚠️ " + event.eventLabel());
+            Label eventLabel = new Label(event.eventLabel());
             eventLabel.getStyleClass().add("alert-location");
             eventLabel.setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
             eventLabel.setWrapText(true);

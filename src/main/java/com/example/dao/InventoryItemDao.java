@@ -15,9 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Data Access Object for {@link InventoryItem} entities.
- */
 public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
 
     private static final String COLS =
@@ -113,14 +110,13 @@ public class InventoryItemDao implements GenericDao<InventoryItem, Long> {
             stmt.setInt(5, item.lowThreshold());
             stmt.setInt(6, item.stockQuantity());
 
-            // FIX 1: Index 7 is configured for 'created_by_user_id' inside SQL_INSERT statement
+
             if (item.createdByUserId() != null) {
                 stmt.setLong(7, item.createdByUserId());
             } else {
                 stmt.setNull(7, Types.BIGINT);
             }
 
-            // FIX 2: Index 8 is mapped for the 'created_at' timestamp string field
             stmt.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
 
             stmt.executeUpdate();

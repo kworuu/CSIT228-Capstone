@@ -28,4 +28,5 @@ public class EvacueeRecord {
     public String getAssignedCenter() { return assignedCenter; }
     public String getBarangay()       { return barangay; }
     public String getRegisteredAt()   { return registeredAt; }
+    public String getStatus()         { return "Active"; }
 }

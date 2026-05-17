@@ -5,7 +5,6 @@ import com.example.dao.InventoryItemDao;
 import com.example.dao.SupplyRequestDao;
 import com.example.dao.TransactionDao;
 import com.example.dashboard_admin.views.DeployItemController;
-import com.example.map_logic.MapHtmlProvider;
 import com.example.model.InventoryItem;
 import com.example.model.SupplyRequest;
 import com.example.model.SupplyRequestStatus;
@@ -22,28 +21,21 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import com.example.model.Transaction;
 import com.example.util.*;
 import javafx.application.Platform;
-import com.example.util.CardAlertHelper;
-
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class DashboardController {
 
-    @FXML private Button btnNewEvacCenter;
+
     @FXML private TextField searchEvacCenter;
     @FXML private Button navInventory;
     @FXML private Button navMap;
-    @FXML private Button btnExpandMap;
-    @FXML private WebView webviewMiniMap;
-    @FXML private Button navActivity;
 
     // Toggle Tab Filters
     @FXML private Button filterAll;
@@ -75,7 +67,7 @@ public class DashboardController {
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
     private final TransactionDao transactionDao = new TransactionDao();
 
-    // FIX: Changed to an Observable Property so listeners update items automatically
+    //Observable Property so listeners update items automatically
     private final StringProperty selectedStatusFilter = new SimpleStringProperty("ALL");
 
 
@@ -84,21 +76,6 @@ public class DashboardController {
         // Navigation
         navInventory.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/inventory.fxml", navInventory));
         navMap.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", navMap));
-
-        // Minimap
-        if (webviewMiniMap != null) {
-            webviewMiniMap.getEngine().setJavaScriptEnabled(true);
-            webviewMiniMap.getEngine().loadContent(MapHtmlProvider.getMapHTML());
-        }
-
-        if (btnExpandMap != null) {
-            btnExpandMap.setOnAction(event -> SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", btnExpandMap));
-        }
-
-        // Modals
-        if (btnNewEvacCenter != null) {
-            btnNewEvacCenter.setOnAction(event -> SceneHelper.showModal("/com/example/dashboard_admin/modals/add-brgyReg.fxml", "Register Evacuation Center", btnNewEvacCenter));
-        }
 
         // Tab switches
         if (filterAll != null && filterPending != null && filterApproved != null) {
@@ -111,7 +88,7 @@ public class DashboardController {
         setupTable();
         loadData();
         refreshStats();
-        refreshAlerts(1L); // Replace with actual logged-in user ID if available
+        refreshAlerts(1L);
         refreshTransactionLogs();
     }
 
@@ -125,38 +102,7 @@ public class DashboardController {
         colNotes.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().notes()));
         colStatus.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().status().name()));
 
-        // 1. THE STATUS PILL UPGRADE
-        // Turns boring text into a beautifully colored, rounded badge
-        colStatus.setCellFactory(column -> new TableCell<>() {
-            private final Label badge = new Label();
-            {
-                // Base styling for the pill
-                badge.setStyle("-fx-padding: 4px 12px; -fx-background-radius: 12px; -fx-font-weight: bold; -fx-font-size: 11px;");
-            }
 
-            @Override
-            protected void updateItem(String status, boolean empty) {
-                super.updateItem(status, empty);
-                if (empty || status == null) {
-                    setGraphic(null);
-                } else {
-                    badge.setText(status.toUpperCase());
-
-                    // Color code based on the status!
-                    if (status.equalsIgnoreCase("Pending")) {
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: #fef08a; -fx-text-fill: #854d0e;"); // Warning Yellow
-                    } else if (status.equalsIgnoreCase("Approved") || status.equalsIgnoreCase("Dispatched")) {
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: #bbf7d0; -fx-text-fill: #166534;"); // Success Green
-                    } else {
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: #e2e8f0; -fx-text-fill: #475569;"); // Default Gray
-                    }
-                    setGraphic(badge);
-                }
-            }
-        });
-
-        // 2. THE ACTION BUTTON UPGRADE
-        // Injects a clickable "Deploy" button straight into the table row
         colAction.setCellFactory(column -> new TableCell<>() {
             private final Button actionBtn = new Button();
             {
@@ -174,14 +120,13 @@ public class DashboardController {
                 } else {
                     SupplyRequest request = getTableView().getItems().get(getIndex());
 
-                    // If it needs attention, show a bright primary button
+
                     if (request.status() == com.example.model.SupplyRequestStatus.PENDING) {
                         actionBtn.setText("Deploy");
                         actionBtn.setStyle("-fx-background-color: #059669; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 6px; -fx-padding: 6px 16px; -fx-font-weight: bold;");
                         actionBtn.setDisable(false);
                         setGraphic(actionBtn);
                     }
-                    // If it's already deployed, hide the button
                     else {
                         setGraphic(null);
                     }
@@ -253,7 +198,6 @@ public class DashboardController {
             DeployItemController controller = loader.getController();
             controller.setData(request.id(), request.itemId(), request.itemName(), request.userId(), request.barangay(), request.quantity());
 
-            // Cast explicitly to Parent to allow clean .getScene() structural traversal
             Parent root = loader.getRoot();
             Stage stage = (Stage) root.getScene().getWindow();
             stage.setOnHiding(event -> Platform.runLater(this::handleRefresh));
@@ -294,7 +238,6 @@ public class DashboardController {
                             .map(InventoryItem::name)
                             .orElse("Unknown Item");
 
-                    // Renders self-contained layout blocks into the parent node
                     ActivityLogHelper.addTransactionLogCard(
                             containerTransactionLog,
                             t,

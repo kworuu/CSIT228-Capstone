@@ -38,10 +38,8 @@ public class UserDao {
         Double lng = rs.getObject("longitude") != null ? rs.getDouble("longitude") : null;
         Integer zoom = rs.getObject("zoom") != null ? rs.getInt("zoom") : null;
 
-        // Fixed column name to match the DB
         Timestamp loginTs = rs.getTimestamp("last_login_at");
 
-        // Uses the newly updated User record structure
         return new User(
                 rs.getLong("id"),
                 rs.getString("username"),

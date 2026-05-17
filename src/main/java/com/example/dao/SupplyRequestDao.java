@@ -25,7 +25,6 @@ public class SupplyRequestDao {
             }
 
             ps.setInt(4, req.quantity());
-            // FIX: Added .toLowerCase() to match database layout standards during insert
             ps.setString(5, req.status().name().toLowerCase());
             ps.setString(6, req.notes());
             ps.executeUpdate();
@@ -36,7 +35,6 @@ public class SupplyRequestDao {
         String sql = "UPDATE supply_requests SET status = ? WHERE id = ?";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            // FIX: Added .toLowerCase() to perfectly match the database ENUM data definition constraints
             ps.setString(1, newStatus.name().toLowerCase());
             ps.setLong(2, requestId);
             ps.executeUpdate();
@@ -44,7 +42,6 @@ public class SupplyRequestDao {
     }
 
     private SupplyRequest mapRowToSupplyRequest(ResultSet rs) throws SQLException {
-        // FIX: Replaced valueOf directly with the new safe case-insensitive parsing method
         SupplyRequestStatus status = SupplyRequestStatus.fromString(rs.getString("status"));
 
         Timestamp createdAtTimestamp = rs.getTimestamp("created_at");

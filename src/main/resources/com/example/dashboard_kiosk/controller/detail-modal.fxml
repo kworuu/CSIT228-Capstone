@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="modalRoot"
+            managed="false"
+            maxWidth="340.0"
+            prefWidth="320.0"
+            styleClass="detail-modal"
+            visible="false"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.dashboard_kiosk.controller.DetailModalController">
+
+    <children>
+
+        <VBox spacing="10.0"
+              AnchorPane.bottomAnchor="0.0"
+              AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0">
+            <padding><Insets bottom="16.0" left="18.0" right="18.0" top="16.0"/></padding>
+            <children>
+
+                <!-- Hero image -->
+                <ImageView fx:id="imgOverlayCenter"
+                           fitHeight="140.0"
+                           fitWidth="284.0"
+                           preserveRatio="false"/>
+
+                <!-- Center name + address -->
+                <VBox spacing="2.0">
+                    <padding><Insets right="20.0"/></padding>
+                    <children>
+                        <Label fx:id="labelOverlayName"
+                               styleClass="detail-title"
+                               text="Center Name"
+                               wrapText="true"/>
+                        <Label fx:id="labelOverlayAddress"
+                               styleClass="detail-meta"
+                               text="Address"
+                               wrapText="true"/>
+                    </children>
+                </VBox>
+
+                <!-- Available supplies -->
+                <VBox fx:id="vboxOverlayItemsBox" spacing="6.0">
+                    <children>
+                        <Label styleClass="detail-section-label" text="AVAILABLE SUPPLIES"/>
+                        <FlowPane fx:id="flowPaneOverlayPills"
+                                  hgap="6.0"
+                                  prefWrapLength="290.0"
+                                  vgap="6.0"/>
+                    </children>
+                </VBox>
+
+                <!-- Current event -->
+                <VBox spacing="4.0">
+                    <children>
+                        <Label styleClass="detail-section-label" text="CURRENT EVENT"/>
+                        <Label fx:id="labelOverlayEvent"
+                               styleClass="detail-section-body"
+                               text="No active event"
+                               wrapText="true"/>
+                    </children>
+                </VBox>
+
+                <!-- Timestamp -->
+                <Label fx:id="labelOverlayTimestamp"
+                       styleClass="detail-meta"
+                       text="Updated: —"/>
+
+                <!-- View Evacuee Roster (only permitted action) -->
+                <Button fx:id="buttonViewRoster"
+                        maxWidth="Infinity"
+                        mnemonicParsing="false"
+                        onAction="#handleViewRoster"
+                        styleClass="btn-outline"
+                        text="View Evacuee Roster"/>
+
+            </children>
+        </VBox>
+
+        <!-- Close button pinned top-right -->
+        <Button fx:id="buttonOverlayClose"
+                mnemonicParsing="false"
+                onAction="#handleClose"
+                styleClass="btn-modal-close"
+                text="✕"
+                AnchorPane.rightAnchor="15.0"
+                AnchorPane.topAnchor="15.0"/>
+
+    </children>
+</AnchorPane>

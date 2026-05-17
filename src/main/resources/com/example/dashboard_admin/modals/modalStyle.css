@@ -16,7 +16,7 @@
     -fx-background-color: #f8fafc;
     -fx-background-radius: 16px;
     -fx-border-radius: 16px;
-    -fx-border-color: white;
+    -fx-border-color: #0f172a;
     -fx-border-width: 1px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 30, 0, 0, 15);
 }

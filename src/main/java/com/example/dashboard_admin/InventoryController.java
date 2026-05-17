@@ -1,15 +1,18 @@
 package com.example.dashboard_admin;
 
 import com.example.dao.InventoryItemDao;
+import com.example.dashboard_admin.views.EditItemController;
 import com.example.model.InventoryItem;
 import com.example.util.SceneHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -41,7 +44,6 @@ public class InventoryController {
 
     @FXML
     public void initialize() {
-        // FIX 1: Initialize FilteredList FIRST so setupTableColumns handles it safely
         filteredData = new FilteredList<>(masterData, p -> true);
 
         setupTableColumns();
@@ -125,11 +127,9 @@ public class InventoryController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    // FIX 2: Format status string with space instead of raw underscore text layout
                     setText(status == InventoryItem.StockStatus.CRITICAL ? "CRITICAL" : status.toString());
 
                     getStyleClass().removeAll("status-ok", "status-low", "status-out-of-stock");
-                    // FIX 3: Match your enum variables (OK, LOW, CRITICAL)
                     switch (status) {
                         case GREAT -> getStyleClass().add("status-ok");
                         case LOW -> getStyleClass().add("status-low");
@@ -145,31 +145,17 @@ public class InventoryController {
             private final HBox container = new HBox(8, editBtn, deleteBtn);
 
             {
-                // Apply your exact CSS stylesheet rules here
-                editBtn.getStyleClass().add("btn-primary");
-                deleteBtn.getStyleClass().add("btn-outline");
-
-                // Add a helper class to deleteBtn if you want tailored row-action styles
-                deleteBtn.getStyleClass().add("btn-table-delete");
-
-                // Match the layout dimensions of clean action buttons
-                editBtn.setStyle("-fx-padding: 4px 12px; -fx-font-size: 11px;");
-                deleteBtn.setStyle("-fx-padding: 4px 12px; -fx-font-size: 11px;");
-
-                container.setAlignment(Pos.CENTER);
+                editBtn.getStyleClass().add("btn-action-edit");
+                deleteBtn.getStyleClass().add("btn-action-delete");
 
                 editBtn.setOnAction(event -> {
                     InventoryItem item = getTableRow().getItem();
-                    if (item != null) {
-                        handleEdit(item);
-                    }
+                    handleEdit(item);
                 });
 
                 deleteBtn.setOnAction(event -> {
                     InventoryItem item = getTableRow().getItem();
-                    if (item != null) {
-                        handleDelete(item);
-                    }
+                    handleDelete(item);
                 });
             }
 
@@ -189,7 +175,21 @@ public class InventoryController {
 
     private void handleEdit(InventoryItem item) {
         if (item == null) return;
-        System.out.println("Editing: " + item.name());
+
+        FXMLLoader loader = SceneHelper.showModalWithController(
+                "/com/example/dashboard_admin/modals/edit-inventory.fxml",
+                "Update Item",
+                mainTable
+        );
+
+        if (loader != null) {
+            EditItemController controller = loader.getController();
+            controller.setItemData(item);
+            Parent root = loader.getRoot();
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setOnHiding(event -> loadData());
+            stage.show();
+        }
     }
 
     private void handleDelete(InventoryItem item) {

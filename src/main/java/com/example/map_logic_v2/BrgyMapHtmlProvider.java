@@ -29,6 +29,17 @@ public class BrgyMapHtmlProvider {
 
     private BrgyMapHtmlProvider() {}
 
+    // NEW: Reads the local files directly into Java memory to bypass security blocks
+    private static String readLocalResource(String path) {
+        try (java.io.InputStream is = BrgyMapHtmlProvider.class.getResourceAsStream(path)) {
+            if (is == null) return null;
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            System.err.println("Failed to read local resource: " + path);
+            return null;
+        }
+    }
+
     /**
      * Returns the full HTML string for the barangay WebView map.
      *
@@ -37,14 +48,31 @@ public class BrgyMapHtmlProvider {
      */
     // 1. UPDATE THE METHOD SIGNATURE to accept the center coordinates
     public static String getMapHTML(String centersJson, double brgyLat, double brgyLng, int zoom, int tilePort) {
+        // 1. Read the raw text of the CSS and JS files
+        String localCss = readLocalResource("/leaflet/leaflet.css");
+        String localJs = readLocalResource("/leaflet/leaflet.js");
+
+        String headInjection;
+
+        // 2. INJECT INLINE: If the local files exist, inject them directly into the HTML! 
+        if (localCss != null && localJs != null) {
+            headInjection = "<style>\n" + localCss + "\n</style>\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script>\n" + localJs + "\n</script>\n";
+        } else {
+            // Fallback to internet just in case you haven't clicked "Rebuild Project" yet
+            headInjection = "<link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>\n";
+        }
+
+        // 3. Build the HTML Template
         String htmlTemplate = """
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8" />
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-            <script>var L_DISABLE_3D = true;</script>
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            __HEAD_INJECTION__
             <style>
                 body { padding: 0; margin: 0; background-color: #0f172a; }
                 html, body, #map { height: 100%; width: 100%; }
@@ -99,6 +127,16 @@ public class BrgyMapHtmlProvider {
                 var centers = __CENTERS_JSON__;
                 var markerMap = {};   
 
+                // --- NEW: PHASE 1 PINNING LOGIC ---
+                var isPinning = false;
+
+                window.enablePinningMode = function() {
+                    isPinning = true;
+                    // Force the cursor to a crosshair for both the div and Leaflet container
+                    document.getElementById('map').style.cursor = 'crosshair';
+                    document.querySelector('.leaflet-container').style.cursor = 'crosshair';
+                };
+
                 setTimeout(function () {
                     var brgyLat = __BRGY_LAT__;
                     var brgyLng = __BRGY_LNG__;
@@ -114,6 +152,20 @@ public class BrgyMapHtmlProvider {
                     });
 
                     L.tileLayer('http://localhost:__TILE_PORT__/{z}/{x}/{y}.png').addTo(map);
+
+                    // --- NEW: MAP CLICK LISTENER ---
+                    map.on('click', function(e) {
+                        if (isPinning) {
+                            isPinning = false; // Turn off pinning mode
+                            document.getElementById('map').style.cursor = ''; // Reset cursor
+                            document.querySelector('.leaflet-container').style.cursor = '';
+                            
+                            // Send the coordinates back to Java!
+                            if (window.javaBridge) {
+                                window.javaBridge.onMapClicked(e.latlng.lat, e.latlng.lng);
+                            }
+                        }
+                    });
 
                     // --- NEW: DISTANCE TRACKER ---
                     var thresholdMeters = 1500; // 1.5 Kilometers
@@ -145,7 +197,6 @@ public class BrgyMapHtmlProvider {
 
                         var html = '<div class="marker-wrap">'
                                  + '  <div id="pin-' + c.id + '">' + svgIcon + '</div>'
-                                 + '  <div class="pin-label">' + shortName + '</div>'
                                  + '</div>';
 
                         var icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [140, 60], iconAnchor: [70, 36] });
@@ -168,6 +219,7 @@ public class BrgyMapHtmlProvider {
         </html>
         """;
         return htmlTemplate
+                .replace("__HEAD_INJECTION__", headInjection)
                 .replace("__CENTERS_JSON__", centersJson)
                 .replace("__BRGY_LAT__", String.valueOf(brgyLat))
                 .replace("__BRGY_LNG__", String.valueOf(brgyLng))
@@ -180,14 +232,30 @@ public class BrgyMapHtmlProvider {
                                         double neLat, double neLng,
                                         double centerLat, double centerLng,
                                         int maxZoom, int tilePort) {
+        // 1. Read the raw text of the CSS and JS files
+        String localCss = readLocalResource("/leaflet/leaflet.css");
+        String localJs = readLocalResource("/leaflet/leaflet.js");
+
+        String headInjection;
+
+        // 2. INJECT INLINE: If the local files exist, inject them directly into the HTML! 
+        if (localCss != null && localJs != null) {
+            headInjection = "<style>\n" + localCss + "\n</style>\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script>\n" + localJs + "\n</script>\n";
+        } else {
+            // Fallback to internet just in case you haven't clicked "Rebuild Project" yet
+            headInjection = "<link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>\n";
+        }
+                                            
         String htmlTemplate = """
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8" />
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-            <script>var L_DISABLE_3D = true;</script>
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            __HEAD_INJECTION__
             <style>
                 body { padding: 0; margin: 0; background-color: #0f172a; }
                 html, body, #map { height: 100%; width: 100%; }
@@ -294,7 +362,6 @@ public class BrgyMapHtmlProvider {
 
                         var html = '<div class="marker-wrap">'
                                  + '  <div id="pin-' + c.id + '">' + svgIcon + '</div>'
-                                 + '  <div class="pin-label">' + shortName + '</div>'
                                  + '</div>';
 
                         var icon = L.divIcon({ className: 'custom-icon', html: html, iconSize: [140, 60], iconAnchor: [70, 36] });
@@ -317,6 +384,7 @@ public class BrgyMapHtmlProvider {
         </html>
         """;
         return htmlTemplate
+                .replace("__HEAD_INJECTION__", headInjection)
                 .replace("__CENTERS_JSON__", centersJson)
                 .replace("__SW_LAT__", String.valueOf(swLat))
                 .replace("__SW_LNG__", String.valueOf(swLng))

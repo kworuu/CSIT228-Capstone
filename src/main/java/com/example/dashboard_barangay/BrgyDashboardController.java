@@ -22,9 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import com.example.map_tiles.TilePrefetchService;
 
-/**
- * Controller for BrgyDashboard.fxml
- */
 public class BrgyDashboardController {
 
     // ── FXML — Sidebar ─────────────────────────────────────────────
@@ -111,7 +108,7 @@ public class BrgyDashboardController {
     private static final DateTimeFormatter DISPLAY_FMT =
             DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
 
-    // ── Simple row models ──────────────────────────────────────────
+    // Simple row models
 
     public record EvacueeRow(
             String id, String name, String center, String barangay) {}
@@ -125,10 +122,6 @@ public class BrgyDashboardController {
             return name;
         }
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  INIT
-    // ══════════════════════════════════════════════════════════════
 
     @FXML
     public void initialize() {
@@ -164,16 +157,12 @@ public class BrgyDashboardController {
                 double lat = rs.getDouble("latitude");
                 double lng = rs.getDouble("longitude");
 
-                // Keep whatever your code does with these variables next!
                 // For example: mapBridge.addBarangayMarker(name, lat, lng);
             }
         } catch (java.sql.SQLException e) {
             System.err.println("Failed to load barangay coordinates: " + e.getMessage());
         }
     }
-    // ══════════════════════════════════════════════════════════════
-    //  SIDEBAR NAV
-    // ══════════════════════════════════════════════════════════════
 
     @FXML private void handleNavMap() {
         showPanel(vboxPanelMap);
@@ -228,11 +217,32 @@ public class BrgyDashboardController {
 
     @FXML
     private void handleAddCenter() {
+
+        try {
+            webViewMap.getEngine().executeScript("window.enablePinningMode();");
+            
+            // Show a quick instruction to the user
+            Alert info = new Alert(Alert.AlertType.INFORMATION, "Click anywhere on the map to drop the pin for the new evacuation center.", ButtonType.OK);
+            info.setTitle("Pin Location");
+            info.setHeaderText("Map Pinning Mode Active");
+            info.show();
+        } catch (Exception e) {
+            System.err.println("Map script error: " + e.getMessage());
+        }
+    }
+
+    public void openAddCenterModal(double lat, double lng) {
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
                     getClass().getResource("/com/example/dashboard_barangay/modals/add-brgyReg.fxml")
             );
             javafx.scene.Parent root = loader.load();
+
+            // Pass the coordinates to the old modal controller
+            AddBrgyController controller = loader.getController();
+            if(controller != null) {
+                controller.setLocationData(CURRENT_BARANGAY, lat, lng);
+            }
 
             javafx.stage.Stage stage = new javafx.stage.Stage();
             stage.setTitle("Register Evacuation Center");
@@ -241,7 +251,7 @@ public class BrgyDashboardController {
             stage.setScene(new javafx.scene.Scene(root));
 
             stage.showAndWait();
-            handleRefresh(); // Refresh after the modal is closed
+            handleRefresh();
         } catch (Exception e) {
             System.err.println("Failed to open Register Center modal: " + e.getMessage());
         }
@@ -261,10 +271,6 @@ public class BrgyDashboardController {
         if (!active.getStyleClass().contains("brgy-nav-active"))
             active.getStyleClass().add("brgy-nav-active");
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  DATABASE — Centers
-    // ══════════════════════════════════════════════════════════════
 
     private void loadCentersFromDB() {
         centers.clear();
@@ -360,10 +366,6 @@ public class BrgyDashboardController {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  MAP
-    // ══════════════════════════════════════════════════════════════
-
     private void setupMap() {
         webViewMap.getEngine().setJavaScriptEnabled(true);
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
@@ -429,10 +431,6 @@ public class BrgyDashboardController {
 
         highlightCard(id);
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  MAP OVERLAY
-    // ══════════════════════════════════════════════════════════════
 
     private void showOverlay(CenterData c) {
         selectedCenter = c;
@@ -519,10 +517,6 @@ public class BrgyDashboardController {
                 v.getStyleClass().remove("brgy-center-card-selected"));
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  CENTER CARDS STRIP
-    // ══════════════════════════════════════════════════════════════
-
     private void setupCenterCards() {
         hboxCenterCardsRow.getChildren().clear();
         mapCardByCenterId.clear();
@@ -575,7 +569,7 @@ public class BrgyDashboardController {
         lblAddress.setWrapText(true);
         lblAddress.setMaxWidth(196);
 
-        Label lblEvent = new Label("📌 " + c.eventLabel());
+        Label lblEvent = new Label(c.eventLabel());
         lblEvent.getStyleClass().add("brgy-card-center-event");
         lblEvent.setWrapText(true);
         lblEvent.setMaxWidth(196);
@@ -625,10 +619,6 @@ public class BrgyDashboardController {
         } catch (Exception ignored) {}
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  DATABASE — Evacuees
-    // ══════════════════════════════════════════════════════════════
-
     private void setupRegistrationTable() {
         tableColumnEvacId.setCellValueFactory(d ->
                 new javafx.beans.property.SimpleStringProperty(d.getValue().id()));
@@ -646,7 +636,7 @@ public class BrgyDashboardController {
             private final HBox pane = new HBox(8, editBtn, deleteBtn);
 
             {
-                // Basic styling for the buttons so they match the theme
+
                 editBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand;");
                 deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;");
                 pane.setAlignment(javafx.geometry.Pos.CENTER);
@@ -795,10 +785,6 @@ public class BrgyDashboardController {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  DATABASE — Activity Log
-    // ══════════════════════════════════════════════════════════════
-
     private void setupActivityTable() {
         tableColumnActTime.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().timestamp()));
         tableColumnActAction.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().action()));
@@ -823,10 +809,6 @@ public class BrgyDashboardController {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  UTILITY
-    // ══════════════════════════════════════════════════════════════
-
     private static String esc(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\")
@@ -834,16 +816,17 @@ public class BrgyDashboardController {
                 .replace("\n", " ");
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  JS → Java bridge
-    // ══════════════════════════════════════════════════════════════
-
     public static class BrgyMapBridge {
         private final BrgyDashboardController ctrl;
         public BrgyMapBridge(BrgyDashboardController ctrl) { this.ctrl = ctrl; }
 
         public void onMarkerClick(String centerId) {
             Platform.runLater(() -> ctrl.onMarkerClicked(centerId));
+        }
+
+        // NEW: Receives the lat/lng from Phase 1
+        public void onMapClicked(double lat, double lng) {
+            Platform.runLater(() -> ctrl.openAddCenterModal(lat, lng));
         }
 
         public void toggleHomeButton(boolean show) {
@@ -899,7 +882,7 @@ public class BrgyDashboardController {
             int evacueeCount = evacDao.countByCenter(centerId);
 
             if (evacueeCount > 0) {
-                // 1. If there are evacuees, grab all OTHER centers in the barangay
+                // If there are evacuees, grab all OTHER centers in the barangay
                 List<CenterData> otherCenters = centers.stream()
                         .filter(c -> c.id() != centerId)
                         .toList();
@@ -910,13 +893,13 @@ public class BrgyDashboardController {
                     return;
                 }
 
-                // 2. Ask the user where to move them using a native JavaFX ChoiceDialog
+                // where to move
                 ChoiceDialog<CenterData> dialog = new ChoiceDialog<>(otherCenters.get(0), otherCenters);
                 dialog.setTitle("Evacuee Mass Reassignment");
                 dialog.setHeaderText("This center currently houses " + evacueeCount + " evacuees.\nYou must reassign them to another center before demolishing this one.");
                 dialog.setContentText("Select destination center:");
 
-                // 3. If they click OK, run the mass migration and delete!
+                // migration and delete!
                 dialog.showAndWait().ifPresent(chosenCenter -> {
                     try {
                         evacDao.reassignAll(centerId, chosenCenter.id());

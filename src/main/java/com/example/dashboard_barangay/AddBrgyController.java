@@ -17,84 +17,101 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class AddBrgyController {
     @FXML private TextField centerNameField;
-    @FXML private TextField addressPathField;
-    @FXML private TextField photoPathField;
-    @FXML private ImageView photoPreview1;
-    @FXML private Label placeholderLabel1;
-    @FXML private Button btnOpenMap_extension;
+    @FXML private ImageView imgPreview;
+    @FXML private Label lblNoImage;
+    @FXML private Button btnUploadPhoto;
     @FXML private Button btnCancel;
 
     private BigDecimal selectedLat;
     private BigDecimal selectedLon;
-    private File selectedPhotoFile;
+    private File selectedImageFile; // Temporarily holds the file they picked
     private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
 
     public void initialize() {
         btnCancel.setOnAction(e -> closeWindow());
-        placeholderLabel1.setVisible(true);
-        photoPreview1.setImage(null);
+        lblNoImage.setVisible(true);
+        imgPreview.setImage(null);
     }
 
-    public void setLocationData(String address, double lat, double lon) {
-        addressPathField.setText(address);
+    public void setLocationData(String barangayName, double lat, double lon) {
         this.selectedLat = BigDecimal.valueOf(lat);
         this.selectedLon = BigDecimal.valueOf(lon);
     }
 
     @FXML
-    private void OpenMap_extension(ActionEvent event) {
-        FXMLLoader loader = SceneHelper.openNestedModal(
-                "/com/example/dashboard_barangay/modals/add-brgy_extension.fxml",
-                "Select Location", btnOpenMap_extension);
-        if (loader != null) {
-            AddBrgyExtensionController extensionController = loader.getController();
-            extensionController.setParentController(this);
-        }
-    }
-
-    @FXML
-    private void handleBrowsePhoto(ActionEvent event) {
+    private void handleUploadPhoto() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select Center Photo");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        fileChooser.setTitle("Select Evacuation Center Photo");
+        // Restrict them to only pick images
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
         );
-        File selectedFile = fileChooser.showOpenDialog(centerNameField.getScene().getWindow());
-        if (selectedFile != null) {
-            selectedPhotoFile = selectedFile;
-            photoPathField.setText(selectedFile.getAbsolutePath());
-            Image image = new Image(selectedFile.toURI().toString());
-            photoPreview1.setImage(image);
-            placeholderLabel1.setVisible(false);
+
+        File file = fileChooser.showOpenDialog(btnUploadPhoto.getScene().getWindow());
+
+        if (file != null) {
+            this.selectedImageFile = file;
+            // Show a preview of the image in the UI
+            Image image = new Image(file.toURI().toString());
+            imgPreview.setImage(image);
+            lblNoImage.setVisible(false); // Hide the "No Image" text
         }
     }
 
     @FXML
     private void handleInsert(ActionEvent event) {
         String name = centerNameField.getText().trim();
-        String address = addressPathField.getText().trim();
-        String photoPath = (selectedPhotoFile != null) ? selectedPhotoFile.getAbsolutePath() : null;
+        String address = String.format("Lat: %.4f, Lng: %.4f", selectedLat.doubleValue(), selectedLon.doubleValue());
 
-        if (name.isEmpty() || address.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Validation Error", "Name and Address are required.");
+        if (name.isEmpty() || selectedLat == null || selectedLon == null) {
+            showAlert(Alert.AlertType.WARNING, "Validation Error", "Center Name and Location are required.");
             return;
         }
+
+        String databasePhotoPath = null; // Default to null if no photo was uploaded
+
+        if (selectedImageFile != null) {
+            try {
+
+                File destDir = new File("src/main/resources/images");
+                if (!destDir.exists()) {
+                    destDir.mkdirs(); // Create the folder if it doesn't exist
+                }
+
+                String uniqueFileName = System.currentTimeMillis() + "_" + selectedImageFile.getName();
+                File destinationFile = new File(destDir, uniqueFileName);
+
+
+                Files.copy(selectedImageFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+
+                databasePhotoPath = "/images/" + uniqueFileName;
+
+            } catch (Exception e) {
+                System.err.println("Failed to copy image file: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "File Error", "Failed to save image: " + e.getMessage());
+                return; // Stop saving if image fails
+            }
+        }
+
         try {
             SessionContext session = SessionContext.current();
-            if (session == null || session.getUser() == null) return;
+            if (session == null || session.getUser() == null) {
+                showAlert(Alert.AlertType.ERROR, "Session Error", "No active user session found.");
+                return;
+            }
             Long userId = session.getUser().id();
 
-            Double lat = selectedLat != null ? selectedLat.doubleValue() : 10.3157;
-            Double lon = selectedLon != null ? selectedLon.doubleValue() : 123.8854;
-
             EvacuationCenter center = new EvacuationCenter(
-                    0, name, address, userId, photoPath, lat, lon, LocalDateTime.now()
+                    0, name, address, userId, databasePhotoPath, selectedLat.doubleValue(), selectedLon.doubleValue(), LocalDateTime.now()
             );
             centerDao.save(center);
             showAlert(Alert.AlertType.INFORMATION, "Success", "Center '" + name + "' registered!");
