@@ -73,7 +73,7 @@ public class MapViewController implements Initializable, com.example.util.Center
             long id, String name, String address, String barangay,
             double lat, double lng,
             String eventLabel, List<String> availableItems,
-            String updatedAt, String photoPath, int capacity) {}
+            String updatedAt, String photoPath) {}
 
 
     @Override
@@ -152,7 +152,7 @@ public class MapViewController implements Initializable, com.example.util.Center
         String sql = """
             SELECT
                 ec.id, ec.name, ec.address, u.display_name as barangay, ec.photo_path,
-                ec.latitude, ec.longitude, ec.capacity,
+                ec.latitude, ec.longitude,
                 csu.event_label, csu.available_item_ids, csu.updated_at
             FROM evacuation_centers ec
             LEFT JOIN users u ON ec.user_id = u.id
@@ -177,7 +177,6 @@ public class MapViewController implements Initializable, com.example.util.Center
                 String photoPath = rs.getString("photo_path");
                 double lat = rs.getDouble("latitude");
                 double lng = rs.getDouble("longitude");
-                int capacity = rs.getInt("capacity");
 
                 String eventLabel = rs.getString("event_label");
                 if (eventLabel == null) eventLabel = "No active event";
@@ -187,7 +186,7 @@ public class MapViewController implements Initializable, com.example.util.Center
 
                 String updatedAt = formatTimestamp(rs.getString("updated_at"));
 
-                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity));
+                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath));
             }
         } catch (SQLException e) {
             System.err.println("[AdminMap] DB error loading centers: " + e.getMessage());
