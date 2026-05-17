@@ -29,7 +29,7 @@
                   <VBox spacing="8.0">
                       <children>
                           <Label styleClass="field-label" text="LOCATION SELECTION (MAP)" />
-                          <TextField fx:id="mapSearchField" promptText="Search location on map..." styleClass="search-field" />
+                          <TextField fx:id="mapSearchField" focusTraversable="false" promptText="Search location on map..." styleClass="search-field" />
                           <!-- Placeholder for the Map -->
                           <StackPane fx:id="mapContainer" prefHeight="200.0" style="-fx-background-color: #f0f0f0; -fx-border-color: #ddd; -fx-border-radius: 5;" styleClass="map-placeholder">
                               <children>
@@ -42,8 +42,8 @@
                 <!-- Action Buttons -->
                 <HBox spacing="15.0">
                     <children>
-                        <Button fx:id="btnSaveLoc" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-primary" text="Save Location" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="btnCancel" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-outline" text="Cancel" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnSaveLoc" focusTraversable="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-primary" text="Save Location" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnCancel" focusTraversable="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-outline" text="Cancel" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
             </children>

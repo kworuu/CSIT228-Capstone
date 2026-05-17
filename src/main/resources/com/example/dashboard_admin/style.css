@@ -935,3 +935,25 @@
     -fx-border-color: #dc2626;
     -fx-text-fill: #dc2626;
 }
+
+/* Style for custom uneditable text fields */
+.uneditable-field {
+    -fx-background-color: #ffffff; /* Keeps background white instead of gray */
+    -fx-border-color: #10b981;     /* Emergency Green border */
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #64748b;        /* Slate gray text matching your bottom hint placeholder text */
+    -fx-opacity: 1.0;              /* Prevents JavaFX from fading it out automatically */
+}
+
+/* Optional: Slight background tint to visually signal it's locked, while keeping the green theme */
+.uneditable-field-tinted {
+    -fx-background-color: #f0fdf4; /* Very light subtle green tint background */
+    -fx-border-color: #10b981;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #64748b;        /* Matches bottom hint color */
+    -fx-opacity: 1.0;
+}

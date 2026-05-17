@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="450" spacing="20" style="-fx-padding: 30;" styleClass="card-container" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.views.AddItemController">
+<VBox prefWidth="450" spacing="20" style="-fx-padding: 30;" styleClass="card-container" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.views.AddItemController">
     <children>
         <VBox spacing="5">
             <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" styleClass="modal-title" text="Insert New Inventory Item" />
@@ -28,32 +28,32 @@
             <children>
                 <VBox spacing="5" GridPane.columnSpan="2">
                     <Label styleClass="field-label" text="ITEM NAME" />
-                    <TextField fx:id="nameField" promptText="e.g. Rice (5kg sack)" styleClass="search-field" />
+                    <TextField fx:id="nameField" focusTraversable="false" promptText="e.g. Rice (5kg sack)" styleClass="search-field" />
                 </VBox>
 
                 <VBox spacing="5" GridPane.rowIndex="1">
                     <Label styleClass="field-label" text="CATEGORY" />
-                    <ComboBox fx:id="categoryCombo" prefWidth="Infinity" styleClass="search-field" />
+                    <ComboBox fx:id="categoryCombo" focusTraversable="false" prefWidth="Infinity" styleClass="search-field" />
                 </VBox>
 
                 <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                     <Label styleClass="field-label" text="UNIT" />
-                    <TextField fx:id="unitField" promptText="sack, can, pack..." styleClass="search-field" />
+                    <TextField fx:id="unitField" focusTraversable="false" promptText="sack, can, pack..." styleClass="search-field" />
                 </VBox>
 
                 <VBox spacing="5" GridPane.rowIndex="2">
                     <Label styleClass="field-label" text="LOW STOCK WARNING" />
-                    <TextField fx:id="lowThresholdField" promptText="300" styleClass="search-field" />
+                    <TextField fx:id="lowThresholdField" focusTraversable="false" promptText="300" styleClass="search-field" />
                 </VBox>
 
                 <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="2">
                     <Label styleClass="field-label" text="CRITICAL THRESHOLD" />
-                    <TextField fx:id="criticalThresholdField" promptText="100" styleClass="search-field" />
+                    <TextField fx:id="criticalThresholdField" focusTraversable="false" promptText="100" styleClass="search-field" />
                 </VBox>
 
-                <VBox spacing="5" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                <VBox spacing="5" GridPane.columnSpan="2" GridPane.rowIndex="3">
                     <Label styleClass="field-label" text="INITIAL STOCK QUANTITY" />
-                    <TextField fx:id="quantityField" promptText="e.g. 0 or 500" styleClass="search-field" />
+                    <TextField fx:id="quantityField" focusTraversable="false" promptText="e.g. 0 or 500" styleClass="search-field" />
                 </VBox>
             </children>
             <rowConstraints>

@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefWidth="550.0" spacing="20.0" styleClass="modal-overlay" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.views.AddBrgyController">
+<VBox alignment="CENTER" prefWidth="550.0" spacing="20.0" styleClass="modal-overlay" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.views.AddBrgyController">
     <children>
         <VBox prefWidth="520.0" spacing="25.0" styleClass="card-container">
             <children>
@@ -45,7 +45,7 @@
                         <VBox spacing="8.0">
                             <children>
                                 <Label styleClass="field-label" text="EVACUATION CENTER NAME" />
-                                <TextField fx:id="centerNameField" promptText="e.g. Central Elementary School" styleClass="search-field" />
+                                <TextField fx:id="centerNameField" focusTraversable="false" promptText="e.g. Central Elementary School" styleClass="search-field" />
                             </children>
                         </VBox>
 
@@ -53,7 +53,7 @@
                         <VBox spacing="8.0" GridPane.rowIndex="1">
                             <children>
                                 <Label styleClass="field-label" text="BARANGAY" />
-                                <TextField fx:id="barangayField" promptText="Enter Barangay name" styleClass="search-field" />
+                                <TextField fx:id="barangayField" focusTraversable="false" promptText="Enter Barangay name" styleClass="search-field" />
                             </children>
                         </VBox>
 
@@ -63,8 +63,8 @@
                                 <Label styleClass="field-label" text="LOCATION" />
                                 <HBox spacing="10.0">
                                     <children>
-                                        <TextField fx:id="addressPathField" editable="false" promptText="Pin Location on map" styleClass="search-field" HBox.hgrow="ALWAYS" />
-                                        <Button fx:id="btnOpenMap_extension" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OpenMap_extension" prefHeight="34.0" prefWidth="83.0" styleClass="btn-primary" text="Open Map" />
+                                        <TextField fx:id="addressPathField" editable="false" focusTraversable="false" promptText="Pin Location on map" styleClass="search-field" HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="btnOpenMap_extension" focusTraversable="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OpenMap_extension" prefHeight="34.0" prefWidth="83.0" styleClass="btn-primary" text="Open Map" />
                                     </children>
                                 </HBox>
                             </children>
@@ -74,8 +74,8 @@
                                 <Label styleClass="field-label" text="CENTER PHOTO" />
                                 <HBox spacing="10.0">
                                     <children>
-                                        <TextField fx:id="photoPathField" editable="false" promptText="No file selected" styleClass="search-field" HBox.hgrow="ALWAYS" />
-                                        <Button mnemonicParsing="false" onAction="#handleBrowsePhoto" prefHeight="40.0" styleClass="btn-outline" text="Browse" />
+                                        <TextField fx:id="photoPathField" editable="false" focusTraversable="false" promptText="No file selected" styleClass="search-field" HBox.hgrow="ALWAYS" />
+                                        <Button focusTraversable="false" mnemonicParsing="false" onAction="#handleBrowsePhoto" prefHeight="40.0" styleClass="btn-outline" text="Browse" />
                                     </children>
                                 </HBox>
                                 <StackPane prefHeight="180.0" style="-fx-border-color: #ddd; -fx-background-color: #f9f9f9; -fx-border-radius: 5; -fx-background-radius: 5;">
@@ -92,8 +92,8 @@
                 <!-- Action Buttons -->
                 <HBox spacing="15.0">
                     <children>
-                        <Button fx:id="insertButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleInsert" prefHeight="45.0" styleClass="btn-primary" text="Register Center" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="btnCancel" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-outline" text="Cancel" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="insertButton" focusTraversable="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleInsert" prefHeight="45.0" styleClass="btn-primary" text="Register Center" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnCancel" focusTraversable="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="45.0" styleClass="btn-outline" text="Cancel" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
             </children>

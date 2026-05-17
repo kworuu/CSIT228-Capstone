@@ -32,8 +32,8 @@ public class DeployItemController {
     private final SupplyRequestDao requestDao = new SupplyRequestDao();
 
     private long currentItemId;
-    private long currentRequestId; // To update the status of the specific request
-    private Long currentBrgyUserId; // Based on your DAO, barangay is the requesting_user_id
+    private long currentRequestId;
+    private Long currentBrgyUserId;
 
     @FXML
     public void initialize() {
@@ -52,11 +52,41 @@ public class DeployItemController {
         itemNameField.setText(itemName);
         brgyField.setText(brgyName);
         qtyField.setText(String.valueOf(requestedQty));
+
+        // 1. Lock fields from user modification
+        itemNameField.setEditable(false);
+        brgyField.setEditable(false);
+        qtyField.setEditable(false);
+
+        // Inject custom style: light gray background (grayed out) with your green border accent
+        String uneditableStyle = "-fx-background-color: #ecfdf5; " + // Light grayed-out background
+//                "-fx-border-color: #064e3b; " +     // Keeps your signature Emergency Green border
+                "-fx-border-width: 1.5px; " +
+                "-fx-border-radius: 6px; " +
+                "-fx-background-radius: 6px; " +
+                "-fx-text-fill: #94a3b8; " +        // Muted gray text color matching "Deploy By"
+                "-fx-opacity: 1.0;";                // Forces JavaFX to show our exact gray/green specs cleanly
+
+        itemNameField.setStyle(uneditableStyle);
+        brgyField.setStyle(uneditableStyle);
+        qtyField.setStyle(uneditableStyle);
     }
 
     private void handleDeploy(ActionEvent event) {
         try {
-            int amountToDeploy = Integer.parseInt(qtyField.getText());
+            // FIXED: Read from deployField (user input) instead of qtyField (read-only reference value)
+            String deployText = deployField.getText().trim();
+            if (deployText.isEmpty()) {
+                showError("Input Error", "Please specify the quantity you want to deploy.");
+                return;
+            }
+
+            int amountToDeploy = Integer.parseInt(deployText);
+
+            if (amountToDeploy <= 0) {
+                showError("Input Error", "Deployment quantity must be greater than zero.");
+                return;
+            }
 
             // 1. Fetch current inventory to check if we have enough stock
             InventoryItem item = inventoryDao.findById(currentItemId)
@@ -68,16 +98,16 @@ public class DeployItemController {
             }
 
             // 2. Create Transaction Record matching your new SQL model schema
-            // Structure: id, direction, itemId, quantity, destinationId, createdBy, createdAt, notes
+            // TODO: If deployField was intended for the quantity, make sure 'createdBy' passes the actual current admin's identifier/name string (e.g., "Admin")
             Transaction t = new Transaction(
-                    0,                      // id (auto-incremented)
-                    "outflow",              // direction
-                    currentItemId,          // item_id
-                    amountToDeploy,         // quantity
-                    currentBrgyUserId,      // destination_id (linked to users.id)
-                    deployField.getText(),                     // created_by (1L for Admin session ID)
-                    null,                   // created_at (null lets MySQL handle CURRENT_TIMESTAMP)
-                    notesField.getText()    // notes
+                    0,
+                    "outflow",
+                    currentItemId,
+                    amountToDeploy,
+                    currentBrgyUserId,
+                    "Admin",                // Hardcoded session placeholder or resolved name string
+                    null,
+                    notesField.getText()
             );
             transactionDao.recordTransaction(t);
 
@@ -85,7 +115,7 @@ public class DeployItemController {
             InventoryItem updatedItem = new InventoryItem(
                     item.id(), item.name(), item.category(), item.unit(),
                     item.criticalThreshold(), item.lowThreshold(),
-                    item.stockQuantity() - amountToDeploy, // New Quantity
+                    item.stockQuantity() - amountToDeploy,
                     item.createdAt(), item.createdByUserId()
             );
             inventoryDao.update(updatedItem);
@@ -97,7 +127,7 @@ public class DeployItemController {
             SceneHelper.closeWindow(event);
 
         } catch (NumberFormatException e) {
-            showError("Input Error", "Please enter a valid number for quantity.");
+            showError("Input Error", "Please enter a valid whole number for deployment quantity.");
         } catch (IllegalArgumentException e) {
             showError("Validation Error", e.getMessage());
         } catch (SQLException e) {
