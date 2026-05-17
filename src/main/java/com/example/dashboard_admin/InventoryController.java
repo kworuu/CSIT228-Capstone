@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
@@ -144,17 +145,31 @@ public class InventoryController {
             private final HBox container = new HBox(8, editBtn, deleteBtn);
 
             {
-                editBtn.getStyleClass().add("btn-action-edit");
-                deleteBtn.getStyleClass().add("btn-action-delete");
+                // Apply your exact CSS stylesheet rules here
+                editBtn.getStyleClass().add("btn-primary");
+                deleteBtn.getStyleClass().add("btn-outline");
+
+                // Add a helper class to deleteBtn if you want tailored row-action styles
+                deleteBtn.getStyleClass().add("btn-table-delete");
+
+                // Match the layout dimensions of clean action buttons
+                editBtn.setStyle("-fx-padding: 4px 12px; -fx-font-size: 11px;");
+                deleteBtn.setStyle("-fx-padding: 4px 12px; -fx-font-size: 11px;");
+
+                container.setAlignment(Pos.CENTER);
 
                 editBtn.setOnAction(event -> {
                     InventoryItem item = getTableRow().getItem();
-                    handleEdit(item);
+                    if (item != null) {
+                        handleEdit(item);
+                    }
                 });
 
                 deleteBtn.setOnAction(event -> {
                     InventoryItem item = getTableRow().getItem();
-                    handleDelete(item);
+                    if (item != null) {
+                        handleDelete(item);
+                    }
                 });
             }
 
