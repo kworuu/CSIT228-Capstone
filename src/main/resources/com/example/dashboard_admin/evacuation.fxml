@@ -148,7 +148,7 @@
                                         <Insets bottom="16.0" left="20.0" right="20.0" />
                                     </padding>
                                 </HBox>
-                                <TableView fx:id="mainTable" VBox.vgrow="ALWAYS">
+                                <TableView fx:id="mainTable" styleClass="modern-slate-table" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colBrgy" prefWidth="135.0" text="BARANGAY" />
                                         <TableColumn fx:id="colItem" prefWidth="97.0" text="ITEM" />
@@ -224,27 +224,30 @@
                 <VBox spacing="12.0" VBox.vgrow="ALWAYS">
                     <children>
                         <Label styleClass="side-panel-header" text="ACTIVITY LOG" />
-                  <VBox>
+                  <VBox fx:id="containerTransactionLog">
                      <children>
                         <HBox alignment="CENTER_LEFT">
                            <children>
                               <Label fx:id="itemName2" styleClass="deploy-logText" text="Deploy Item" />
                               <Region HBox.hgrow="ALWAYS" />
-                              <Label fx:id="lblCreatedBy" styleClass="alert-qty" text="Alleah Dela Pena" textFill="WHITE" />
+                              <Label fx:id="lblCreatedBy" text="Alleah Dela Pena" textFill="WHITE" />
                            </children>
                         </HBox>
                         <Separator prefWidth="200.0">
                            <padding>
-                              <Insets bottom="10.0" />
+                              <Insets bottom="10.0" top="5.0" />
                            </padding>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
                         </Separator>
                         <HBox alignment="CENTER_LEFT">
                            <children>
-                              <Label fx:id="itemName21" styleClass="deploy-logText" text="Sardinas" />
+                              <Label fx:id="lblItem" styleClass="deploy-logText-details" text="Sardinas" />
                               <Region prefHeight="15.0" prefWidth="7.0" />
-                              <Label fx:id="lblCreatedBy1" styleClass="alert-qty" text="10" textFill="WHITE" />
+                              <Label fx:id="lblQty" styleClass="deploy-logText-details" text="10" textFill="WHITE" />
                               <Region HBox.hgrow="ALWAYS" />
-                              <Label fx:id="lblCreatedBy11" styleClass="alert-qty" text="2026-05-15" textFill="WHITE" />
+                              <Label fx:id="lblDate" styleClass="deploy-logText-details" text="2026-05-15" textFill="WHITE" />
                            </children>
                         </HBox>
                      </children>
