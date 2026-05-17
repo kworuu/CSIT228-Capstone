@@ -13,7 +13,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.web.WebView?>
 
 <AnchorPane fx:id="rootPane" prefHeight="800.0" prefWidth="1280.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_kiosk.controller.KioskDashboardController">
@@ -37,28 +36,15 @@
                             </children>
                         </HBox>
 
-                        <VBox spacing="4.0" VBox.vgrow="ALWAYS">
+                        <VBox prefHeight="720.0" prefWidth="229.0" spacing="4.0" VBox.vgrow="ALWAYS">
                             <padding><Insets left="14.0" right="14.0" top="8.0" /></padding>
                             <children>
                                 <Label styleClass="nav-header" text="PORTAL" />
-                                <Button alignment="BASELINE_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item, nav-active" text="🗺  Evacuee Portal" />
+                                <Button alignment="BASELINE_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="nav-item, nav-active" text="Evacuee Portal" />
                             </children>
                         </VBox>
 
                         <Region VBox.vgrow="ALWAYS" />
-
-                        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="profile-section">
-                            <padding><Insets bottom="22.0" left="22.0" right="22.0" top="22.0" /></padding>
-                            <children>
-                                <Circle radius="17.0" styleClass="avatar-circle" />
-                                <VBox alignment="CENTER_LEFT">
-                                    <children>
-                                        <Label styleClass="profile-name" text="Public View" />
-                                        <Label styleClass="profile-role" text="Read-only access" />
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
                     </children>
                 </VBox>
 
@@ -81,13 +67,6 @@
 
                                 <HBox alignment="CENTER" spacing="10.0">
                                     <children>
-                                        <HBox alignment="CENTER" spacing="7.0" styleClass="status-pill">
-                                            <padding><Insets left="12.0" right="12.0" /></padding>
-                                            <children>
-                                                <Circle fill="#10b981" radius="4.0" styleClass="pulse-circle" />
-                                                <Label styleClass="status-text" text="Live" />
-                                            </children>
-                                        </HBox>
 
                                         <Button fx:id="btnBarangayLogin" mnemonicParsing="false" onAction="#handleBarangayLogin" styleClass="btn-outline" text="Barangay Login" />
                                         <Button fx:id="btnAdminLogin" mnemonicParsing="false" onAction="#handleAdminLogin" styleClass="btn-primary" text="Admin Login" />
@@ -111,7 +90,7 @@
                                         <HBox fx:id="topRightOverlay" alignment="CENTER_RIGHT" maxHeight="-Infinity" maxWidth="-Infinity" pickOnBounds="false" spacing="8.0" StackPane.alignment="TOP_RIGHT">
                                             <StackPane.margin><Insets right="16.0" top="16.0" /></StackPane.margin>
                                             <children>
-                                                <TextField fx:id="searchField" prefHeight="38.0" prefWidth="260.0" promptText="🔍  Search center…" styleClass="search-field" />
+                                                <TextField fx:id="searchField" prefHeight="38.0" prefWidth="260.0" promptText="🔍" styleClass="search-field" />
                                                 <Button fx:id="btnEventsToggle" mnemonicParsing="false" onAction="#handleMenuClick" styleClass="btn-outline" text="Events" />
                                             </children>
                                         </HBox>
