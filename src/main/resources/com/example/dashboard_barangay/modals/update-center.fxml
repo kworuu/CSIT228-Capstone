@@ -63,7 +63,6 @@
 
                         <HBox spacing="12.0" alignment="CENTER_RIGHT">
                             <children>
-                                <Button fx:id="buttonDelete" text="Delete Center" styleClass="brgy-btn-danger" style="-fx-background-color: #ef4444; -fx-text-fill: white;" onAction="#handleDelete"/>
                                 <Button fx:id="buttonSave" text="Save Update" styleClass="brgy-btn-primary" onAction="#handleSave"/>
                             </children>
                         </HBox>

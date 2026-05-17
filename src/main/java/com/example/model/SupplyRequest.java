@@ -5,10 +5,14 @@ import java.time.LocalDateTime;
 public record SupplyRequest(
         long id,
         long itemId,
+        String itemName,
+        Long targetCenterId,
+        String targetCenterName,
         int quantity,
         SupplyRequestStatus status,
-        String requestingBarangay, // Populated dynamically via JOIN
-        Long requestingUserId,
+        String barangay,
+        long userId,
         String notes,
         LocalDateTime createdAt
-) {}
+) {
+}

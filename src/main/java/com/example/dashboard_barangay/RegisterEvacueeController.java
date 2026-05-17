@@ -4,7 +4,6 @@ import com.example.auth.SessionContext;
 import com.example.dao.EvacuationCenterDao;
 import com.example.dao.EvacueeDao;
 import com.example.model.EvacuationCenter;
-import com.example.model.Evacuee;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -30,6 +29,8 @@ public class RegisterEvacueeController {
 
     private String currentBarangay;
     private Runnable onRegistrationSuccess;
+    private boolean isEditMode = false;
+    private long editingEvacueeId = 0;
 
     @FXML
     public void initialize() {
@@ -42,9 +43,21 @@ public class RegisterEvacueeController {
         this.onRegistrationSuccess = onSuccess;
         loadEvacuationCenters();
     }
+    public void initEditData(long evacueeId, String currentName, String barangay, Runnable onSuccess) {
+        this.isEditMode = true;
+        this.editingEvacueeId = evacueeId;
+        this.currentBarangay = barangay;
+        this.onRegistrationSuccess = onSuccess;
+
+        // Change the UI text to look like an Edit Modal
+        buttonRegister.setText("Save Changes");
+        textFieldName.setText(currentName);
+
+        loadEvacuationCenters();
+    }
 
     private void setupComboBox() {
-        comboBoxCenter.setConverter(new StringConverter<EvacuationCenter>() {
+        comboBoxCenter.setConverter(new StringConverter<>() {
             @Override
             public String toString(EvacuationCenter center) {
                 return center == null ? null : center.name();
@@ -52,7 +65,10 @@ public class RegisterEvacueeController {
 
             @Override
             public EvacuationCenter fromString(String string) {
-                return null;
+                return comboBoxCenter.getItems().stream()
+                        .filter(c -> c.name().equals(string))
+                        .findFirst()
+                        .orElse(null);
             }
         });
     }
@@ -92,36 +108,32 @@ public class RegisterEvacueeController {
         }
 
         try {
-            Long userId = SessionContext.current() != null && SessionContext.current().getUser() != null
-                    ? SessionContext.current().getUser().id() : null;
+            if (isEditMode) {
+                // UPDATE EXISTING
+                String finalContact = contact.isEmpty() ? null : contact;
+                evacueeDao.updateEvacuee(editingEvacueeId, name, finalContact, selectedCenter.id());
 
-            // FIXED: Removed the 'currentBarangay' ghost! Uses 8 parameters now.
-            Evacuee newEvacuee = new Evacuee(
-                    0,
-                    name,
-                    contact.isEmpty() ? null : contact,
-                    null,
-                    selectedCenter.id(),
-                    userId,
-                    null,
-                    null
-            );
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Evacuee updated successfully!", ButtonType.OK);
+                alert.showAndWait();
+            } else {
+                // REGISTER NEW
+                Long userId = SessionContext.current() != null && SessionContext.current().getUser() != null
+                        ? SessionContext.current().getUser().id() : null;
 
-            evacueeDao.saveEvacuee(newEvacuee);
+                com.example.model.Evacuee newEvacuee = new com.example.model.Evacuee(
+                        0, name, contact.isEmpty() ? null : contact, null, selectedCenter.id(), userId, null, null);
+                evacueeDao.saveEvacuee(newEvacuee);
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText(name + " has been successfully assigned to " + selectedCenter.name() + ".");
-            alert.showAndWait();
-
-            if (onRegistrationSuccess != null) {
-                onRegistrationSuccess.run();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, name + " assigned to " + selectedCenter.name() + ".", ButtonType.OK);
+                alert.showAndWait();
             }
 
+            if (onRegistrationSuccess != null) onRegistrationSuccess.run();
             closeWindow();
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Database error: Failed to register evacuee.");
+            showError("Database error: Failed to process request.");
         }
     }
 

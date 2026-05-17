@@ -9,10 +9,8 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -64,6 +62,7 @@ public class MapViewController implements Initializable, com.example.util.Center
     @FXML private Button navInventory;
     @FXML private Button navActivity;
     @FXML private Button btnRefresh;
+    @FXML private Button buttonLogout; // Added for logout functionality
 
     private final List<CenterData> centers = new ArrayList<>();
     private CenterData selectedCenter;
@@ -74,7 +73,7 @@ public class MapViewController implements Initializable, com.example.util.Center
             long id, String name, String address, String barangay,
             double lat, double lng,
             String eventLabel, List<String> availableItems,
-            String updatedAt, String photoPath, int capacity, int evacuees) {}
+            String updatedAt, String photoPath, int capacity) {}
 
 
     @Override
@@ -154,12 +153,12 @@ public class MapViewController implements Initializable, com.example.util.Center
             SELECT
                 ec.id, ec.name, ec.address, u.display_name as barangay, ec.photo_path,
                 ec.latitude, ec.longitude, ec.capacity,
-                csu.event_label, csu.available_item_ids, csu.updated_at, csu.evacuees
+                csu.event_label, csu.available_item_ids, csu.updated_at
             FROM evacuation_centers ec
             LEFT JOIN users u ON ec.user_id = u.id
             LEFT JOIN (
                 SELECT center_id,
-                       event_label, available_item_ids, updated_at, evacuees,
+                       event_label, available_item_ids, updated_at,
                        ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
                 FROM center_status_updates
             ) csu ON csu.center_id = ec.id AND csu.rn = 1
@@ -179,7 +178,6 @@ public class MapViewController implements Initializable, com.example.util.Center
                 double lat = rs.getDouble("latitude");
                 double lng = rs.getDouble("longitude");
                 int capacity = rs.getInt("capacity");
-                int evacuees = rs.getInt("evacuees");
 
                 String eventLabel = rs.getString("event_label");
                 if (eventLabel == null) eventLabel = "No active event";
@@ -189,7 +187,7 @@ public class MapViewController implements Initializable, com.example.util.Center
 
                 String updatedAt = formatTimestamp(rs.getString("updated_at"));
 
-                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity, evacuees));
+                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity));
             }
         } catch (SQLException e) {
             System.err.println("[AdminMap] DB error loading centers: " + e.getMessage());
@@ -397,6 +395,12 @@ public class MapViewController implements Initializable, com.example.util.Center
         if (selectedCenter != null) {
             centers.stream().filter(c -> c.id() == selectedCenter.id()).findFirst().ifPresent(this::showOverlay);
         }
+    }
+
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
     }
 
     @FXML private void handleReturnHome() {

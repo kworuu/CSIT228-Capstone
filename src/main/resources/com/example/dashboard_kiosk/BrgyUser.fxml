@@ -16,69 +16,6 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.web.WebView?>
 
-<!--
-    BrgyUser.fxml — Public-facing Kiosk Dashboard (Refactored v3)
-    ═══════════════════════════════════════════════════════════════════
-    LAYOUT STRATEGY  (mirrors BrgyDashboard.fxml approach)
-    ───────────────────────────────────────────────────────────────────
-    Root: AnchorPane (full screen)
-      ├─ HBox [fills root] — Sidebar + Main content column
-      │    ├─ VBox.sidebar (prefWidth=230, fixed)
-      │    └─ VBox [HBox.hgrow=ALWAYS] — Header bar + Body
-      │         ├─ HBox.header-bar (prefHeight=64)
-      │         └─ VBox [vgrow=ALWAYS] — Map region + Bottom TabPane
-      │              ├─ StackPane [vgrow=ALWAYS] ← MAP FILLS THIS
-      │              │    ├─ WebView (fx:id=webViewMiniMap, full AnchorPane)
-      │              │    ├─ AnchorPane (floating overlays, mouse-transparent=false)
-      │              │    │    ├─ HBox.search-row (TOP-LEFT: search + hamburger)
-      │              │    │    ├─ fx:include detail-modal (BOTTOM-LEFT)
-      │              │    │    └─ HBox.login-pill (TOP-RIGHT: live pill + logins)
-      │              └─ TabPane.card-container [vgrow=NEVER, prefHeight=280]
-      │                   ├─ Tab: Centers Overview  → mainTable1
-      │                   └─ Tab: Evacuees          → kioskEvacueeTable
-      └─ fx:include EventCell.fxml (anchored top/right/bottom — true overlay)
-
-    FX:ID PRESERVATION CHECKLIST (all must survive refactor):
-      ✔ webViewMiniMap      WebView — map engine
-      ✔ detailModal         VBox    — show/hide by KioskDashboardController
-      ✔ lblModalTitle       Label   — populated by showDetailModal()
-      ✔ lblModalDesc        Label   — populated by showDetailModal()
-      ✔ mainTable1          TableView<SimpleCenter>
-      ✔ colId1              TableColumn
-      ✔ colName1            TableColumn
-      ✔ colCenter1          TableColumn
-      ✔ colBarangay1        TableColumn
-      ✔ colStatus1          TableColumn
-      ✔ colAction1          TableColumn
-      ✔ searchField1        TextField — wired to SearchTableUtility
-      ✔ eventCell / eventCellController  fx:include
-      ✔ mapOverlayPane      AnchorPane — holds floating children, used by map loader
-
-    HANDLER METHODS PRESERVED:
-      ✔ #handleMenuClick    → eventCellController.toggleDrawer()
-      ✔ #handleAdminLogin   → Router → Route.ADMIN_LOGIN
-      ✔ #handleBarangayLogin → Router → Route.BARANGAY_LOGIN
-      ✔ #hideDetailModal    → hides detailModal VBox
-
-    NEW FX:IDs (require @FXML fields added to KioskDashboardController):
-      • kioskEvacueeTable   TableView — Tab 2 evacuee registry
-      • colEvacId           TableColumn
-      • colEvacName         TableColumn
-      • colEvacCenter       TableColumn
-      • colEvacBrgy         TableColumn
-      • colEvacRegisteredAt TableColumn
-
-    STYLE CLASSES USED — all defined in style.css:
-      root-pane, sidebar, logo-icon-bg, logo-icon, logo-text,
-      nav-header, nav-item, nav-active, profile-section, avatar-circle,
-      profile-name, profile-role, header-bar, header-title, header-subtitle,
-      status-pill, pulse-circle, status-text, btn-refresh, btn-primary,
-      btn-outline, btn-modal-close, search-field, card-container,
-      card-header, card-title, map-overlay-pane, alert-item-warning,
-      detail-modal (via fx:include), kiosk-event-cell (via fx:include)
-    ═══════════════════════════════════════════════════════════════════
--->
-
 <AnchorPane
         fx:id="mainRoot"
         prefHeight="800.0"
@@ -90,13 +27,6 @@
         fx:controller="com.example.dashboard_kiosk.KioskDashboardController">
 
     <children>
-
-        <!-- ════════════════════════════════════════════════════════════
-             TIER 1 — MAIN LAYOUT HBox
-             Sidebar (fixed) + Content column (fills remaining width).
-             This HBox is the base layer; EventCell overlays it via the
-             root AnchorPane's second child.
-             ════════════════════════════════════════════════════════════ -->
         <HBox
                 AnchorPane.topAnchor="0.0"
                 AnchorPane.bottomAnchor="0.0"
@@ -110,8 +40,6 @@
                         styleClass="sidebar"
                         HBox.hgrow="NEVER">
                     <children>
-
-                        <!-- Logotype row -->
                         <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="logo-container">
                             <padding>
                                 <Insets top="28.0" bottom="28.0" left="22.0" right="22.0"/>
@@ -126,7 +54,6 @@
                             </children>
                         </HBox>
 
-                        <!-- Navigation section -->
                         <VBox spacing="4.0" VBox.vgrow="ALWAYS">
                             <padding>
                                 <Insets top="8.0" left="14.0" right="14.0"/>
@@ -144,7 +71,6 @@
 
                         <Region VBox.vgrow="ALWAYS"/>
 
-                        <!-- Profile footer -->
                         <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="profile-section">
                             <padding>
                                 <Insets top="22.0" bottom="22.0" left="22.0" right="22.0"/>
@@ -159,7 +85,6 @@
                                 </VBox>
                             </children>
                         </HBox>
-
                     </children>
                 </VBox>
                 <!-- ── end SIDEBAR ─────────────────────────────────── -->
@@ -169,10 +94,6 @@
                     <children>
 
                         <!-- ── TOP HEADER BAR ─────────────────────── -->
-                        <!--
-                            Compact 64px bar. Login buttons and hamburger
-                            live here — they never compete with map space.
-                        -->
                         <HBox
                                 alignment="CENTER_LEFT"
                                 prefHeight="64.0"
@@ -192,11 +113,8 @@
 
                                 <Region HBox.hgrow="ALWAYS"/>
 
-                                <!-- Right-side controls -->
                                 <HBox alignment="CENTER" spacing="10.0">
                                     <children>
-
-                                        <!-- Live status pill -->
                                         <HBox alignment="CENTER" spacing="7.0" styleClass="status-pill">
                                             <padding>
                                                 <Insets left="12.0" right="12.0"/>
@@ -207,7 +125,6 @@
                                             </children>
                                         </HBox>
 
-                                        <!-- Auth shortcuts -->
                                         <Button
                                                 fx:id="btnBarangayLogin"
                                                 mnemonicParsing="false"
@@ -221,12 +138,10 @@
                                                 styleClass="btn-primary"
                                                 text="Admin Login"/>
 
-                                        <!-- Refresh (decorative; hook in controller if needed) -->
                                         <Button
                                                 mnemonicParsing="false"
                                                 styleClass="btn-refresh"
                                                 text="↻"/>
-
                                     </children>
                                 </HBox>
 
@@ -236,19 +151,12 @@
 
                         <!-- ═══════════════════════════════════════════
                              TIER 2 — MAP REGION + BOTTOM TABPANE
-                             VBox fills all remaining vertical space.
-                             The StackPane inside takes vgrow=ALWAYS so
-                             the map WebView truly fills the viewport.
                              ═══════════════════════════════════════════ -->
                         <VBox VBox.vgrow="ALWAYS">
                             <children>
 
-                                <!-- ══ FULL-BLEED MAP LAYER ═══════════
-                                     StackPane expands to fill all space
-                                     not taken by the TabPane below.
-                                     All floating controls overlay here.
-                                     ════════════════════════════════════ -->
-                                <StackPane VBox.vgrow="ALWAYS">
+                                <!-- ══ FULL-BLEED MAP LAYER ═══════════ -->
+                                <StackPane VBox.vgrow="ALWAYS" pickOnBounds="false">
                                     <children>
 
                                         <!-- The map WebView — fills the StackPane entirely -->
@@ -257,148 +165,112 @@
                                                 maxHeight="1.7976931348623157E308"
                                                 maxWidth="1.7976931348623157E308"/>
 
-                                        <!-- ── FLOATING OVERLAY LAYER ─────────────────
-                                             AnchorPane sits on top of the WebView inside
-                                             the same StackPane cell. mouseTransparent=false
-                                             so controls receive clicks normally.
-                                             mouse events NOT consumed by controls fall
-                                             through to the WebView underneath automatically
-                                             because AnchorPane background is transparent.
-                                        ─────────────────────────────────────────────── -->
-                                        <AnchorPane
-                                                fx:id="mapOverlayPane"
-                                                styleClass="map-overlay-pane"
-                                                maxHeight="1.7976931348623157E308"
-                                                maxWidth="1.7976931348623157E308">
+                                        <!-- ── TOP-RIGHT: Search + Events button ────── -->
+                                        <HBox
+                                                alignment="CENTER_RIGHT"
+                                                spacing="8.0"
+                                                maxWidth="-Infinity"
+                                                maxHeight="-Infinity"
+                                                pickOnBounds="false"
+                                                StackPane.alignment="TOP_RIGHT">
+                                            <StackPane.margin>
+                                                <Insets top="16.0" right="16.0"/>
+                                            </StackPane.margin>
                                             <children>
 
-                                                <!-- ── TOP-RIGHT: Search + Events button ──────
-                                                     Anchored RIGHT so it never overlaps the
-                                                     Leaflet zoom +/- controls (which Leaflet
-                                                     renders top-LEFT by default).
-                                                     16px gap from right edge matches the
-                                                     bottom-left modal's 16px gap for visual
-                                                     symmetry.
-                                                ─────────────────────────────────────────── -->
-                                                <HBox
-                                                        alignment="CENTER_RIGHT"
-                                                        spacing="8.0"
-                                                        AnchorPane.topAnchor="16.0"
-                                                        AnchorPane.rightAnchor="16.0">
+                                                <TextField
+                                                        fx:id="searchField1"
+                                                        prefHeight="38.0"
+                                                        prefWidth="260.0"
+                                                        promptText="🔍  Search center…"
+                                                        styleClass="search-field"/>
+
+                                                <!-- Events drawer trigger -->
+                                                <Button
+                                                        fx:id="btnHamburger"
+                                                        mnemonicParsing="false"
+                                                        onAction="#handleMenuClick"
+                                                        styleClass="btn-outline"
+                                                        text="⚡  Events"/>
+
+                                            </children>
+                                        </HBox>
+
+                                        <!-- ── BOTTOM-LEFT: Floating Detail Modal ────── -->
+                                        <VBox
+                                                fx:id="detailModal"
+                                                maxWidth="370.0"
+                                                maxHeight="-Infinity"
+                                                prefWidth="350.0"
+                                                spacing="12.0"
+                                                styleClass="detail-modal"
+                                                visible="false"
+                                                managed="false"
+                                                StackPane.alignment="BOTTOM_LEFT">
+                                            <StackPane.margin>
+                                                <Insets bottom="16.0" left="16.0"/>
+                                            </StackPane.margin>
+                                            <padding>
+                                                <Insets top="16.0" bottom="16.0" left="18.0" right="18.0"/>
+                                            </padding>
+                                            <children>
+
+                                                <!-- Header: center name + close button -->
+                                                <HBox alignment="TOP_LEFT" spacing="8.0">
                                                     <children>
-
-                                                        <TextField
-                                                                fx:id="searchField1"
-                                                                prefHeight="38.0"
-                                                                prefWidth="260.0"
-                                                                promptText="🔍  Search center…"
-                                                                styleClass="search-field"/>
-
-                                                        <!-- Events drawer trigger -->
+                                                        <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label
+                                                                        fx:id="lblModalTitle"
+                                                                        styleClass="detail-title"
+                                                                        text="Evacuation Center"
+                                                                        wrapText="true"/>
+                                                                <Label
+                                                                        fx:id="lblModalDesc"
+                                                                        styleClass="detail-meta"
+                                                                        text="Address —"
+                                                                        wrapText="true"/>
+                                                            </children>
+                                                        </VBox>
+                                                        <Region HBox.hgrow="ALWAYS"/>
                                                         <Button
-                                                                fx:id="btnHamburger"
                                                                 mnemonicParsing="false"
-                                                                onAction="#handleMenuClick"
-                                                                styleClass="btn-outline"
-                                                                text="⚡  Events"/>
-
+                                                                onAction="#hideDetailModal"
+                                                                styleClass="btn-modal-close"
+                                                                text="✕"/>
                                                     </children>
                                                 </HBox>
 
-                                                <!-- ── BOTTOM-LEFT: Floating Detail Modal ──────
-                                                     READ-ONLY view panel. Opens when a map pin
-                                                     or table row is clicked.
-                                                     Shows: center name, address, evacuee count,
-                                                     and the list of evacuees registered at that
-                                                     center by Barangay staff. No write actions.
-                                                     Refreshes automatically via Observer pattern
-                                                     when Barangay dashboard adds/edits evacuees.
-                                                     Starts hidden (visible=false, managed=false).
-                                                ────────────────────────────────────────────── -->
-                                                <VBox
-                                                        fx:id="detailModal"
-                                                        maxWidth="370.0"
-                                                        prefWidth="350.0"
-                                                        spacing="12.0"
-                                                        styleClass="detail-modal"
-                                                        visible="false"
-                                                        managed="false"
-                                                        AnchorPane.bottomAnchor="16.0"
-                                                        AnchorPane.leftAnchor="16.0">
-                                                    <padding>
-                                                        <Insets top="16.0" bottom="16.0" left="18.0" right="18.0"/>
-                                                    </padding>
+                                                <!-- Evacuee count badge row — read-only -->
+                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                     <children>
-
-                                                        <!-- Header: center name + close button -->
-                                                        <HBox alignment="TOP_LEFT" spacing="8.0">
-                                                            <children>
-                                                                <VBox spacing="3.0" HBox.hgrow="ALWAYS">
-                                                                    <children>
-                                                                        <Label
-                                                                                fx:id="lblModalTitle"
-                                                                                styleClass="detail-title"
-                                                                                text="Evacuation Center"
-                                                                                wrapText="true"/>
-                                                                        <Label
-                                                                                fx:id="lblModalDesc"
-                                                                                styleClass="detail-meta"
-                                                                                text="Address —"
-                                                                                wrapText="true"/>
-                                                                    </children>
-                                                                </VBox>
-                                                                <Region HBox.hgrow="ALWAYS"/>
-                                                                <Button
-                                                                        mnemonicParsing="false"
-                                                                        onAction="#hideDetailModal"
-                                                                        styleClass="btn-modal-close"
-                                                                        text="✕"/>
-                                                            </children>
-                                                        </HBox>
-
-                                                        <!-- Evacuee count badge row — read-only -->
-                                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                                            <children>
-                                                                <Label
-                                                                        styleClass="detail-section-label"
-                                                                        text="REGISTERED EVACUEES"/>
-                                                                <Region HBox.hgrow="ALWAYS"/>
-                                                                <Label
-                                                                        fx:id="lblEvacueeCount"
-                                                                        styleClass="status-tag, status-tag-open"
-                                                                        text="0 registered"/>
-                                                            </children>
-                                                        </HBox>
-
-                                                        <!-- Evacuee name list for this center.
-                                                             Populated by loadEvacueesForCenter()
-                                                             in KioskDashboardController.
-                                                             Reflects whatever Barangay staff
-                                                             have registered — no actions here. -->
-                                                        <VBox
-                                                                fx:id="vboxEvacueeList"
-                                                                spacing="4.0"
-                                                                maxHeight="140.0"
-                                                                styleClass="evacuee-list-box"/>
-
+                                                        <Label
+                                                                styleClass="detail-section-label"
+                                                                text="REGISTERED EVACUEES"/>
+                                                        <Region HBox.hgrow="ALWAYS"/>
+                                                        <Label
+                                                                fx:id="lblEvacueeCount"
+                                                                styleClass="status-tag, status-tag-open"
+                                                                text="0 registered"/>
                                                     </children>
-                                                </VBox>
-                                                <!-- ── end DETAIL MODAL ──────────────────── -->
+                                                </HBox>
+
+                                                <!-- Evacuee name list for this center. -->
+                                                <VBox
+                                                        fx:id="vboxEvacueeList"
+                                                        spacing="4.0"
+                                                        maxHeight="140.0"
+                                                        styleClass="evacuee-list-box"/>
 
                                             </children>
-                                        </AnchorPane>
-                                        <!-- ── end FLOATING OVERLAY LAYER ────────────── -->
+                                        </VBox>
+                                        <!-- ── end DETAIL MODAL ──────────────────── -->
 
                                     </children>
                                 </StackPane>
                                 <!-- ══ end FULL-BLEED MAP LAYER ═════════════ -->
 
-                                <!-- ══ BOTTOM TABPANE ════════════════════════
-                                     Fixed height panel below the map.
-                                     prefHeight=280 gives two visible table rows
-                                     at a 52px cell size without crowding the map.
-                                     vgrow=NEVER keeps map from being squeezed.
-                                     ════════════════════════════════════════════ -->
+                                <!-- ══ BOTTOM TABPANE ════════════════════════ -->
                                 <TabPane
                                         prefHeight="280.0"
                                         styleClass="card-container"
@@ -412,7 +284,6 @@
                                                 <VBox>
                                                     <children>
 
-                                                        <!-- Tab toolbar: count label -->
                                                         <HBox
                                                                 alignment="CENTER_LEFT"
                                                                 spacing="12.0"
@@ -431,7 +302,6 @@
                                                             </children>
                                                         </HBox>
 
-                                                        <!-- Centers TableView — all fx:ids preserved -->
                                                         <TableView
                                                                 fx:id="mainTable1"
                                                                 prefHeight="200.0"
@@ -471,7 +341,6 @@
                                                 </VBox>
                                             </content>
                                         </Tab>
-                                        <!-- ── end TAB 1 ─────────────────── -->
 
                                         <!-- ── TAB 2: Evacuees Registry ──── -->
                                         <Tab text="🧑‍🤝‍🧑  Evacuees">
@@ -479,7 +348,6 @@
                                                 <VBox>
                                                     <children>
 
-                                                        <!-- Tab toolbar -->
                                                         <HBox
                                                                 alignment="CENTER_LEFT"
                                                                 spacing="12.0"
@@ -498,16 +366,6 @@
                                                             </children>
                                                         </HBox>
 
-                                                        <!--
-                                                            Evacuee TableView.
-                                                            NEW fx:ids — add to KioskDashboardController:
-                                                              @FXML private TableView<EvacueeRecord> kioskEvacueeTable;
-                                                              @FXML private TableColumn<EvacueeRecord, String> colEvacId;
-                                                              @FXML private TableColumn<EvacueeRecord, String> colEvacName;
-                                                              @FXML private TableColumn<EvacueeRecord, String> colEvacCenter;
-                                                              @FXML private TableColumn<EvacueeRecord, String> colEvacBrgy;
-                                                              @FXML private TableColumn<EvacueeRecord, String> colEvacRegisteredAt;
-                                                        -->
                                                         <TableView
                                                                 fx:id="kioskEvacueeTable"
                                                                 prefHeight="200.0"
@@ -543,39 +401,19 @@
                                                 </VBox>
                                             </content>
                                         </Tab>
-                                        <!-- ── end TAB 2 ─────────────────── -->
 
                                     </tabs>
                                 </TabPane>
-                                <!-- ══ end BOTTOM TABPANE ════════════════════ -->
 
                             </children>
                         </VBox>
-                        <!-- ═══ end TIER 2 ════════════════════════════════ -->
 
                     </children>
                 </VBox>
-                <!-- ── end MAIN CONTENT COLUMN ─────────────────────── -->
 
             </children>
         </HBox>
-        <!-- ════ end TIER 1 MAIN LAYOUT HBox ════════════════════════════ -->
 
-        <!-- ════════════════════════════════════════════════════════════
-             TIER 3 — EVENTS DRAWER (true full-height overlay)
-             ────────────────────────────────────────────────────────────
-             Direct child of the root AnchorPane, anchored top/right/bottom.
-             This makes it overlay EVERYTHING — header, map, and TabPane —
-             when slid open via EventCellController.toggleDrawer().
-
-             EventCellController.initialize() sets translateX = 300 so
-             the panel starts fully off-screen (right edge).
-             #handleMenuClick calls eventCellController.toggleDrawer().
-
-             The fx:id="eventCell" injection automatically creates the
-             field alias "eventCellController" in KioskDashboardController
-             because JavaFX appends "Controller" to the fx:id for includes.
-             ════════════════════════════════════════════════════════════ -->
         <fx:include
                 fx:id="eventCell"
                 source="EventCell.fxml"
