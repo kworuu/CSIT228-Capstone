@@ -56,8 +56,6 @@
                                         <Label fx:id="lblUserRole" styleClass="profile-role" text="Administrator" />
                                     </children>
                                 </VBox>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button minWidth="24.0" mnemonicParsing="false" styleClass="btn-icon-soft" text="⋮" />
                             </children>
                         </HBox>
                     </children>
@@ -92,7 +90,7 @@
                                         <Insets left="12.0" right="12.0" />
                                     </padding>
                                 </HBox>
-                                <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="btn-refresh" text="↻" />
+                                <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="brgy-btn-ghost" text="↻  Refresh" />
                             </children>
                         </HBox>
                     </children>
