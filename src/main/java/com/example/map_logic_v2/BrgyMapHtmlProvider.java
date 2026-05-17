@@ -243,17 +243,35 @@ public class BrgyMapHtmlProvider {
                    var southWest = L.latLng(__SW_LAT__, __SW_LNG__);
                    var northEast = L.latLng(__NE_LAT__, __NE_LNG__);
                    var bounds = L.latLngBounds(southWest, northEast);
+                   
+                   var homeLatLng = L.latLng(__CENTER_LAT__, __CENTER_LNG__);
+                   var brgyZoom = 12;
     
                    var map = L.map('map', {
                        center: [__CENTER_LAT__, __CENTER_LNG__],
-                       zoom: 12,
+                       zoom: brgyZoom,
                        minZoom: 11,
-                       maxZoom: __MAX_ZOOM__,
-                       maxBounds: bounds,
-                       maxBoundsViscosity: 0.5
+                       maxZoom: __MAX_ZOOM__
                    });
 
                     L.tileLayer('http://localhost:__TILE_PORT__/{z}/{x}/{y}.png').addTo(map);
+
+                    // --- NEW: DISTANCE TRACKER ---
+                    var thresholdMeters = 3000; // 3 Kilometers
+                    map.on('move', function() {
+                        var currentCenter = map.getCenter();
+                        var dist = map.distance(homeLatLng, currentCenter);
+                        
+                        // Tell Java to show button if distance > 3000m, hide if closer
+                        if (window.javaBridge) {
+                            window.javaBridge.toggleHomeButton(dist > thresholdMeters);
+                        }
+                    });
+
+                    // --- NEW: FLY HOME COMMAND ---
+                    window.flyHome = function() {
+                        map.flyTo(homeLatLng, brgyZoom, { duration: 1.5 }); // Smooth flight animation
+                    };
 
                     centers.forEach(function (c) {
                         var shortName = c.name.length > 22 ? c.name.substring(0, 20) + '…' : c.name;
