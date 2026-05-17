@@ -60,9 +60,6 @@ public class MapViewController implements Initializable, com.example.util.Center
 
     @FXML private Button navEvacuations;
     @FXML private Button navInventory;
-    @FXML private Button navActivity;
-    @FXML private Button btnRefresh;
-    @FXML private Button buttonLogout; // Added for logout functionality
 
     private final List<CenterData> centers = new ArrayList<>();
     private CenterData selectedCenter;
@@ -347,11 +344,12 @@ public class MapViewController implements Initializable, com.example.util.Center
             titleVBox.setSpacing(2.0);
             Label title = new Label(event.centerName());
             title.getStyleClass().add("alert-title");
+            title.setStyle("-fx-text-fill: #ffffff;");
             title.setWrapText(true);
 
-            Label eventLabel = new Label("⚠️ " + event.eventLabel());
+            Label eventLabel = new Label(event.eventLabel());
             eventLabel.getStyleClass().add("alert-location");
-            eventLabel.setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
+            eventLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
             eventLabel.setWrapText(true);
             titleVBox.getChildren().addAll(title, eventLabel);
 
@@ -363,6 +361,7 @@ public class MapViewController implements Initializable, com.example.util.Center
 
             Label timestampLabel = new Label(event.timestamp());
             timestampLabel.getStyleClass().add("alert-location");
+            timestampLabel.setStyle("-fx-text-fill: #ffffff;");
 
             detailsBox.getChildren().addAll(spacer, timestampLabel);
             card.getChildren().addAll(titleVBox, detailsBox);

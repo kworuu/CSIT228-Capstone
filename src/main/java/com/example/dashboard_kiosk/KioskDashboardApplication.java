@@ -8,12 +8,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * JavaFX entry point for the public kiosk dashboard.
- *
- * <p>The scene is loaded from {@link KioskConstants#FXML_ROOT} and made
- * draggable so the kiosk window can be repositioned during setup.</p>
- */
 public final class KioskDashboardApplication extends Application {
 
     private static final String WINDOW_TITLE = "CivicGuard — Disaster Response";
@@ -34,7 +28,7 @@ public final class KioskDashboardApplication extends Application {
         stage.show();
     }
 
-    /** Lets the user drag the (typically undecorated) kiosk window by its body. */
+
     private void attachDragHandlers(Parent root, Stage stage) {
         root.setOnMousePressed(e -> {
             dragOffsetX = e.getSceneX();
