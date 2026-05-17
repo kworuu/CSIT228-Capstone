@@ -75,26 +75,24 @@ public class AddBrgyController {
             showAlert(Alert.AlertType.WARNING, "Validation Error", "Center Name and Location are required.");
             return;
         }
-        
-        // --- NEW: PHASE 2 FILE SAVING LOGIC ---
+
         String databasePhotoPath = null; // Default to null if no photo was uploaded
 
         if (selectedImageFile != null) {
             try {
-                // 1. Point to your project's resources/images folder
+
                 File destDir = new File("src/main/resources/images");
                 if (!destDir.exists()) {
                     destDir.mkdirs(); // Create the folder if it doesn't exist
                 }
 
-                // 2. Give the file a unique name so it doesn't overwrite existing photos
                 String uniqueFileName = System.currentTimeMillis() + "_" + selectedImageFile.getName();
                 File destinationFile = new File(destDir, uniqueFileName);
 
-                // 3. Physically copy the file from their computer into the project folder!
+
                 Files.copy(selectedImageFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                // 4. This is the exact string we save to the SQL database (e.g., "/images/123456_school.jpg")
+
                 databasePhotoPath = "/images/" + uniqueFileName;
 
             } catch (Exception e) {

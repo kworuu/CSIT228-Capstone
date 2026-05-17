@@ -27,42 +27,29 @@
       alertsContainerVBox   (was alertsContainer; now uses descriptive type suffix)
       btnCloseDrawer        (unchanged — already well-named)
 -->
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.dashboard_kiosk.controller.EventCellController"
-      fx:id="eventCellRoot"
-      prefWidth="300.0"
-      maxWidth="300.0"
-      styleClass="kiosk-event-cell">
+
+<VBox fx:id="eventCellRoot" maxWidth="300.0" prefWidth="300.0" styleClass="kiosk-event-cell" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_kiosk.controller.EventCellController">
 
     <children>
 
         <!-- Drawer header: title + close button -->
         <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="kiosk-event-header">
             <padding>
-                <Insets bottom="14.0" left="18.0" right="12.0" top="14.0"/>
+                <Insets bottom="14.0" left="18.0" right="12.0" top="14.0" />
             </padding>
             <children>
-                <Label styleClass="kiosk-event-title" text="⚡ Events"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="btnCloseDrawer"
-                        mnemonicParsing="false"
-                        onAction="#handleClose"
-                        styleClass="btn-modal-close"
-                        text="✕"/>
+                <Label styleClass="kiosk-event-title" text="Events" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnCloseDrawer" mnemonicParsing="false" onAction="#handleClose" styleClass="btn-modal-close" text="✕" />
             </children>
         </HBox>
 
         <!-- Scrollable alert list -->
-        <ScrollPane fitToWidth="true"
-                    hbarPolicy="NEVER"
-                    vbarPolicy="AS_NEEDED"
-                    styleClass="kiosk-event-scroll"
-                    VBox.vgrow="ALWAYS">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="kiosk-event-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
             <content>
                 <VBox fx:id="alertsContainerVBox" spacing="10.0">
                     <padding>
-                        <Insets bottom="18.0" left="14.0" right="14.0" top="10.0"/>
+                        <Insets bottom="18.0" left="14.0" right="14.0" top="10.0" />
                     </padding>
                     <!-- Alert cards are inserted by EventCellController -->
                 </VBox>

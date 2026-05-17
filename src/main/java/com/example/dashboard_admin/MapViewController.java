@@ -349,7 +349,7 @@ public class MapViewController implements Initializable, com.example.util.Center
             title.getStyleClass().add("alert-title");
             title.setWrapText(true);
 
-            Label eventLabel = new Label("⚠️ " + event.eventLabel());
+            Label eventLabel = new Label(event.eventLabel());
             eventLabel.getStyleClass().add("alert-location");
             eventLabel.setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
             eventLabel.setWrapText(true);
