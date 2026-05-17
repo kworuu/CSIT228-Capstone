@@ -144,9 +144,10 @@
 
                                         <Label fx:id="labelOverlayTimestamp" styleClass="brgy-overlay-ts" text="Updated: —" />
 
-                                        <Button fx:id="buttonViewRoster" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="brgy-btn-ghost" text="📋  View Center Roster" />
+                                        <Button fx:id="buttonUpdateCenter" text="Update Center Status" maxWidth="Infinity" styleClass="brgy-btn-primary"/>
+                                        <Button fx:id="buttonViewRoster" text="View Evacuee Roster" maxWidth="Infinity" styleClass="brgy-btn-secondary"/>
 
-                                        <Button fx:id="buttonUpdateCenter" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUpdateCenter" styleClass="brgy-btn-primary" text="✏  Update Center Info" />
+                                        <Button fx:id="buttonDeleteCenter" text="Delete Center" maxWidth="Infinity" styleClass="brgy-btn-danger" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;"/>
                                     </children>
                                 </VBox>
                                 <Button fx:id="buttonOverlayClose" mnemonicParsing="false" onAction="#handleOverlayClose" styleClass="brgy-overlay-close" text="✕" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
@@ -212,6 +213,9 @@
                                 <TableColumn fx:id="tableColumnEvacBrgy" text="Barangay" prefWidth="200.0" />
                                 <TableColumn fx:id="tableColumnEvacAction" text="Action" prefWidth="150.0" />
                             </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
                         </TableView>
                     </children>
                 </VBox>

@@ -1,5 +1,6 @@
 package com.example.dashboard_kiosk;
 
+import com.example.map_logic_v2.BrgyMapHtmlProvider;
 import com.example.map_tiles.TilePrefetchService;
 import com.example.util.CenterEvent;
 import com.example.util.CenterEventManager;
@@ -29,7 +30,7 @@ import java.util.List;
 
 public class KioskDashboardController implements CenterEventObserver {
 
-    @FXML private WebView webViewMiniMap;
+    @FXML private WebView webViewMiniMap; // This branch uses webViewMiniMap
     @FXML private VBox detailModal;
     @FXML private Label lblModalTitle;
     @FXML private Label lblModalDesc;
@@ -57,7 +58,7 @@ public class KioskDashboardController implements CenterEventObserver {
 
     private final List<SimpleCenter> allCenters = new ArrayList<>();
     private final ObservableList<EvacueeRecord> evacueeData = FXCollections.observableArrayList();
-    private MapBridge mapBridge;
+    private KioskMapBridge mapBridge;
 
     private double currentBrgyLat = 10.3157;
     private double currentBrgyLng = 123.8854;
@@ -78,6 +79,19 @@ public class KioskDashboardController implements CenterEventObserver {
         loadEventsFromDB();
         setupMap();
         CenterEventManager.getInstance().addObserver(this);
+        
+        // Link the Event drawer clicks to Map interactions
+        if (eventCellController != null) {
+            eventCellController.setEventClickListener(centerId -> {
+                Platform.runLater(() -> {
+                    triggerMapMarkerHighlight(centerId);
+                    allCenters.stream()
+                            .filter(c -> c.id().equals(centerId))
+                            .findFirst()
+                            .ifPresent(this::showDetailModal);
+                });
+            });
+        }
     }
 
     private void setupInventoryTable() {
@@ -169,7 +183,7 @@ public class KioskDashboardController implements CenterEventObserver {
         """;
 
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
+             PreparedStatement ps =prepareStatement(conn, sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -186,6 +200,11 @@ public class KioskDashboardController implements CenterEventObserver {
         }
 
         Platform.runLater(() -> evacueeData.setAll(rows));
+    }
+    
+    // Helper method
+    private PreparedStatement prepareStatement(Connection conn, String sql) throws SQLException {
+         return conn.prepareStatement(sql);
     }
 
     @Override
@@ -205,7 +224,6 @@ public class KioskDashboardController implements CenterEventObserver {
                 eventCellController.addEventToTop(event);
             }
 
-            setupMap();
         });
     }
 
@@ -270,6 +288,29 @@ public class KioskDashboardController implements CenterEventObserver {
         }
     }
 
+    // ── JavaScript Bridge Class (Must be a public class for JS reflection) ──
+    public static class KioskMapBridge {
+        private final KioskDashboardController ctrl;
+
+        public KioskMapBridge(KioskDashboardController ctrl) {
+            this.ctrl = ctrl;
+        }
+
+        public void onMarkerClick(String centerId) {
+            Platform.runLater(() -> {
+                ctrl.triggerMapMarkerHighlight(centerId);
+                ctrl.allCenters.stream()
+                        .filter(c -> c.id().equals(centerId))
+                        .findFirst()
+                        .ifPresent(ctrl::showDetailModal);
+            });
+        }
+
+        public void toggleHomeButton(boolean show) {
+            // No-op for Kiosk, but absolutely critical so Javascript doesn't crash on drag!
+        }
+    }
+
     private void setupMap() {
         if (webViewMiniMap == null) return;
 
@@ -277,42 +318,30 @@ public class KioskDashboardController implements CenterEventObserver {
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         webViewMiniMap.getEngine().setUserAgent("CivicGuard/1.0");
 
-        webViewMiniMap.setMaxWidth(Double.MAX_VALUE);
-        webViewMiniMap.setMaxHeight(Double.MAX_VALUE);
+        webViewMiniMap.getEngine().setOnAlert(event ->
+                System.out.println("[MAP-DEBUG] " + event.getData()));
 
         webViewMiniMap.getEngine().getLoadWorker().stateProperty()
-                .addListener((obs, old, state) -> {
+                .addListener((_obs, _old, state) -> {
                     if (state == Worker.State.SUCCEEDED) {
-                        JSObject win = (JSObject) webViewMiniMap.getEngine().executeScript("window");
-
-                        this.mapBridge = centerId -> Platform.runLater(() ->
-                                allCenters.stream()
-                                        .filter(c -> c.id().equals(centerId))
-                                        .findFirst()
-                                        .ifPresent(this::showDetailModal));
-
+                        JSObject win = (JSObject) webViewMiniMap.getEngine()
+                                .executeScript("window");
+                                
+                        this.mapBridge = new KioskMapBridge(this);
                         win.setMember("javaBridge", this.mapBridge);
-
-                        webViewMiniMap.getEngine().executeScript(
-                                "try {" +
-                                        "  if (window._leafletMap) {" +
-                                        "    window._leafletMap.dragging.enable();" +
-                                        "    window._leafletMap.scrollWheelZoom.enable();" +
-                                        "  }" +
-                                        "} catch(e) {}"
-                        );
                     }
                 });
 
-        int tilePort = -1;
+        int tilePort;
         try {
             tilePort = TilePrefetchService.getInstance().startServer();
         } catch (Exception e) {
-            System.err.println("[KioskDashboard] Tile server error: " + e.getMessage());
+            System.err.println("[BrgyDashboard] Could not start tile server: " + e.getMessage());
+            tilePort = -1;
         }
 
         webViewMiniMap.getEngine().loadContent(
-                com.example.map_logic_v2.BrgyMapHtmlProvider.getMapHTML(
+                BrgyMapHtmlProvider.getMapHTML(
                         buildCentersJson(),
                         currentBrgyLat,
                         currentBrgyLng,
@@ -320,6 +349,14 @@ public class KioskDashboardController implements CenterEventObserver {
                         tilePort
                 )
         );
+    }
+    
+    private void triggerMapMarkerHighlight(String centerId) {
+        if (webViewMiniMap == null) return;
+        try {
+            webViewMiniMap.getEngine()
+                    .executeScript("if(window.highlightMarker) window.highlightMarker(" + centerId + ")");
+        } catch (Exception ignored) {}
     }
 
     private String buildCentersJson() {
@@ -340,7 +377,10 @@ public class KioskDashboardController implements CenterEventObserver {
         return s.replace("\"", "\\\"").replace("\n", " ");
     }
 
-    public interface MapBridge { void onMarkerClick(String centerId); }
+    public interface MapBridge { 
+        void onMarkerClick(String centerId); 
+        void toggleHomeButton(boolean show); 
+    }
 
     private void loadEvacueesForCenter(String centerId) {
         if (vboxEvacueeList == null || lblEvacueeCount == null) return;

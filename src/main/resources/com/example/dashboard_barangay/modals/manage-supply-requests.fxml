@@ -74,9 +74,10 @@
             <VBox styleClass="brgy-slate-table-container" VBox.vgrow="ALWAYS">
                 <TableView fx:id="tableHistory" VBox.vgrow="ALWAYS" styleClass="brgy-slate-table">
                     <columns>
-                        <TableColumn fx:id="colHistoryDate" text="DATE" prefWidth="130"/>
-                        <TableColumn fx:id="colHistoryStatus" text="STATUS" prefWidth="120"/>
-                        <TableColumn fx:id="colHistoryNotes" text="NOTES" prefWidth="300"/>
+                        <TableColumn fx:id="colHistoryDate" text="DATE" prefWidth="120"/>
+                        <TableColumn fx:id="colHistoryItem" text="ITEM (QTY)" prefWidth="180"/>
+                        <TableColumn fx:id="colHistoryCenter" text="DESTINATION" prefWidth="180"/>
+                        <TableColumn fx:id="colHistoryStatus" text="STATUS" prefWidth="100"/>
                     </columns>
                     <placeholder>
                         <Label text="No previous requests found." textFill="#64748b"/>

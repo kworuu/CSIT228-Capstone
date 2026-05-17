@@ -1,4 +1,3 @@
-// D:/CSIT228-Capstone/src/main/java/com/example/model/SupplyRequest.java
 package com.example.model;
 
 import java.time.LocalDateTime;
@@ -6,11 +5,14 @@ import java.time.LocalDateTime;
 public record SupplyRequest(
         long id,
         long itemId,
-        String itemName, // Added for display purposes
+        String itemName,
+        Long targetCenterId,
+        String targetCenterName,
         int quantity,
         SupplyRequestStatus status,
-        String requestingBarangay,
-        Long requestingUserId,
+        String barangay,
+        long userId,
         String notes,
         LocalDateTime createdAt
-) {}
+) {
+}

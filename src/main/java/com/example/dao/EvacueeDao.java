@@ -60,4 +60,38 @@ public class EvacueeDao {
             ps.executeUpdate();
         }
     }
+    public void updateEvacuee(long evacueeId, String newName, String newContact, long newCenterId) throws SQLException {
+        String sql = "UPDATE evacuees SET full_name_enc = ?, contact_enc = ?, evacuation_center_id = ? WHERE id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newName);
+            ps.setString(2, newContact);
+            ps.setLong(3, newCenterId);
+            ps.setLong(4, evacueeId);
+            ps.executeUpdate();
+        }
+    }
+    // Counts how many evacuees are currently in a specific center
+    public int countByCenter(long centerId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM evacuees WHERE evacuation_center_id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, centerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    // Mass migrates everyone from an old center to a new center
+    public void reassignAll(long oldCenterId, long newCenterId) throws SQLException {
+        String sql = "UPDATE evacuees SET evacuation_center_id = ? WHERE evacuation_center_id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, newCenterId);
+            ps.setLong(2, oldCenterId);
+            ps.executeUpdate();
+        }
+    }
 }
