@@ -59,8 +59,6 @@
                                         <Label fx:id="lblUserRole" styleClass="profile-role" text="Response Lead" />
                                     </children>
                                 </VBox>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button minWidth="24.0" mnemonicParsing="false" styleClass="btn-icon-soft" text="⋮" />
                             </children>
                         </HBox>
                     </children>
@@ -97,7 +95,8 @@
                                         <Insets left="12.0" right="12.0" />
                                     </padding>
                                 </HBox>
-                                <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="btn-refresh" text="↻" />
+                                <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="btn-outline" text="↻  Refresh" onAction="#handleRefresh"/>
+                                <Button fx:id="buttonLogout" text="⎋  Log Out" mnemonicParsing="false" styleClass="btn-outline" onAction="#handleLogout"/>
                             </children>
                         </HBox>
                     </children>
@@ -110,6 +109,17 @@
                 <StackPane VBox.vgrow="ALWAYS">
                     <children>
                         <WebView fx:id="mapWebView" />
+
+                        <Button fx:id="btnReturnHome"
+                                text="📍 Return to Cebu Bounds"
+                                onAction="#handleReturnHome"
+                                styleClass="btn-primary"
+                                visible="false"
+                                StackPane.alignment="BOTTOM_CENTER">
+                            <StackPane.margin>
+                                <Insets bottom="30.0" />
+                            </StackPane.margin>
+                        </Button>
 
                         <AnchorPane fx:id="vboxMapOverlay"
                               maxWidth="340.0"
