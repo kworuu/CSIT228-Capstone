@@ -99,6 +99,16 @@ public class BrgyMapHtmlProvider {
                 var centers = __CENTERS_JSON__;
                 var markerMap = {};   
 
+                // --- NEW: PHASE 1 PINNING LOGIC ---
+                var isPinning = false;
+
+                window.enablePinningMode = function() {
+                    isPinning = true;
+                    // Force the cursor to a crosshair for both the div and Leaflet container
+                    document.getElementById('map').style.cursor = 'crosshair';
+                    document.querySelector('.leaflet-container').style.cursor = 'crosshair';
+                };
+
                 setTimeout(function () {
                     var brgyLat = __BRGY_LAT__;
                     var brgyLng = __BRGY_LNG__;
@@ -114,6 +124,20 @@ public class BrgyMapHtmlProvider {
                     });
 
                     L.tileLayer('http://localhost:__TILE_PORT__/{z}/{x}/{y}.png').addTo(map);
+
+                    // --- NEW: MAP CLICK LISTENER ---
+                    map.on('click', function(e) {
+                        if (isPinning) {
+                            isPinning = false; // Turn off pinning mode
+                            document.getElementById('map').style.cursor = ''; // Reset cursor
+                            document.querySelector('.leaflet-container').style.cursor = '';
+                            
+                            // Send the coordinates back to Java!
+                            if (window.javaBridge) {
+                                window.javaBridge.onMapClicked(e.latlng.lat, e.latlng.lng);
+                            }
+                        }
+                    });
 
                     // --- NEW: DISTANCE TRACKER ---
                     var thresholdMeters = 1500; // 1.5 Kilometers
