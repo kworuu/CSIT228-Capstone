@@ -7,28 +7,18 @@ public record InventoryItem(
         String name,
         String category,
         String unit,
-        int lowThreshold,
-        int criticalThreshold,
+        int criticalThreshold,  // Added
+        int lowThreshold,       // Added
         int stockQuantity,
+        LocalDateTime createdAt,
         Long createdByUserId
 ) {
-    public int totalQuantity() {
-        return stockQuantity;
-
-    }
-
-    public int minimumThreshold() {
-        return lowThreshold;
-    }
-
-    public enum StockStatus {
-        OK, LOW_STOCK, CRITICAL, OUT_OF_STOCK
-    }
-
+    // Optional: Helper to determine status based on thresholds
     public StockStatus getStockStatus() {
-        if (stockQuantity <= 0) return StockStatus.OUT_OF_STOCK;
         if (stockQuantity <= criticalThreshold) return StockStatus.CRITICAL;
-        if (stockQuantity <= lowThreshold) return StockStatus.LOW_STOCK;
-        return StockStatus.OK;
+        if (stockQuantity <= lowThreshold) return StockStatus.LOW;
+        return StockStatus.GREAT;
     }
+
+    public enum StockStatus { GREAT, LOW, CRITICAL }
 }

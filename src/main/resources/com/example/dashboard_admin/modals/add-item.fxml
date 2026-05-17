@@ -11,55 +11,61 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="450" spacing="20" style="-fx-padding: 30;" styleClass="card-container" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.views.AddItemController"> <children>
-    <VBox spacing="5">
-        <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" styleClass="modal-title" text="Insert New Inventory Item" />
-        <Label styleClass="modal-description" text="Add supplies to the LGU Central Warehouse tracking system." />
-    </VBox>
+<VBox prefWidth="450" spacing="20" style="-fx-padding: 30;" styleClass="card-container" stylesheets="@modalStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dashboard_admin.views.AddItemController">
+    <children>
+        <VBox spacing="5">
+            <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" styleClass="modal-title" text="Insert New Inventory Item" />
+            <Label styleClass="modal-description" text="Add supplies to the LGU Central Warehouse tracking system." />
+        </VBox>
 
-    <Separator />
+        <Separator />
 
-    <GridPane hgap="15" vgap="15">
-        <columnConstraints>
-            <ColumnConstraints percentWidth="50" />
-            <ColumnConstraints percentWidth="50" />
-        </columnConstraints>
-        <children>
-            <VBox spacing="5" GridPane.columnSpan="2">
-                <Label styleClass="field-label" text="ITEM NAME" />
-                <TextField fx:id="nameField" promptText="e.g. Rice (5kg sack)" styleClass="search-field" />
-            </VBox>
+        <GridPane hgap="15" vgap="15">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50" />
+                <ColumnConstraints percentWidth="50" />
+            </columnConstraints>
+            <children>
+                <VBox spacing="5" GridPane.columnSpan="2">
+                    <Label styleClass="field-label" text="ITEM NAME" />
+                    <TextField fx:id="nameField" promptText="e.g. Rice (5kg sack)" styleClass="search-field" />
+                </VBox>
 
-            <VBox spacing="5" GridPane.rowIndex="1">
-                <Label styleClass="field-label" text="CATEGORY" />
-                <ComboBox fx:id="categoryCombo" prefWidth="Infinity" styleClass="search-field" />
-            </VBox>
+                <VBox spacing="5" GridPane.rowIndex="1">
+                    <Label styleClass="field-label" text="CATEGORY" />
+                    <ComboBox fx:id="categoryCombo" prefWidth="Infinity" styleClass="search-field" />
+                </VBox>
 
-            <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                <Label styleClass="field-label" text="UNIT" />
-                <TextField fx:id="unitField" promptText="sack, can, pack..." styleClass="search-field" />
-            </VBox>
+                <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label styleClass="field-label" text="UNIT" />
+                    <TextField fx:id="unitField" promptText="sack, can, pack..." styleClass="search-field" />
+                </VBox>
 
-            <VBox spacing="5" GridPane.rowIndex="2">
-                <Label styleClass="field-label" text="LOW STOCK WARNING" />
-                <TextField fx:id="lowThresholdField" promptText="300" styleClass="search-field" />
-            </VBox>
+                <VBox spacing="5" GridPane.rowIndex="2">
+                    <Label styleClass="field-label" text="LOW STOCK WARNING" />
+                    <TextField fx:id="lowThresholdField" promptText="300" styleClass="search-field" />
+                </VBox>
 
-            <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                <Label styleClass="field-label" text="CRITICAL THRESHOLD" />
-                <TextField fx:id="criticalThresholdField" promptText="100" styleClass="search-field" />
-            </VBox>
-        </children>
-         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-         </rowConstraints>
-    </GridPane>
+                <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <Label styleClass="field-label" text="CRITICAL THRESHOLD" />
+                    <TextField fx:id="criticalThresholdField" promptText="100" styleClass="search-field" />
+                </VBox>
 
-    <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 10 0 0 0;">
-        <Button fx:id="btnCancel" prefHeight="38.0" prefWidth="120.0" styleClass="btn-back" text="Cancel" />
-        <Button fx:id="btnSave" prefHeight="38.0" prefWidth="120" styleClass="btn-primary" text="Save Item" />
-    </HBox>
-</children>
+                <VBox spacing="5" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                    <Label styleClass="field-label" text="INITIAL STOCK QUANTITY" />
+                    <TextField fx:id="quantityField" promptText="e.g. 0 or 500" styleClass="search-field" />
+                </VBox>
+            </children>
+            <rowConstraints>
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints /> </rowConstraints>
+        </GridPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 10 0 0 0;">
+            <Button fx:id="btnCancel" prefHeight="38.0" prefWidth="120.0" styleClass="btn-back" text="Cancel" />
+            <Button fx:id="btnSave" prefHeight="38.0" prefWidth="120" styleClass="btn-primary" text="Save Item" />
+        </HBox>
+    </children>
 </VBox>

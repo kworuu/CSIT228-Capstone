@@ -54,8 +54,8 @@ public class DBConnectionSmokeTest {
         List<InventoryItem> all = dao.findAll();
         System.out.println("  findAll() -> " + all.size() + " items");
         for (InventoryItem i : all) {
-            System.out.println("    - " + i + " [min=" + i.minimumThreshold()
-                    + ", total=" + i.totalQuantity() + "]");
+            System.out.println("    - " + i + " [min=" + i.criticalThreshold()
+                    + ", total=" + i.stockQuantity() + "]");
         }
         System.out.println("  findByCategory(\"food\") -> " + dao.findByCategory("food").size());
     }

@@ -45,5 +45,5 @@ mvnw
 mvnw.cmd
 .mvn/
 
-### CivicGuard Cache ###
-.civicguard/
+### ignore tiles ###
+.civicguard/tiles/
