@@ -150,6 +150,37 @@
 /* ════════════════════════════════════════════════════════
    BUTTONS
    ════════════════════════════════════════════════════════ */
+.brgy-btn-logout-custom {
+    -fx-background-color: transparent;
+    -fx-border-color: #c23737; /* Soft Red Border */
+    -fx-border-radius: 8;
+    -fx-text-fill: #c23737; /* Red Text */
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.brgy-btn-logout-custom:hover {
+    -fx-background-color: #fef2f2; /* Ultra-light red tint background on hover */
+    -fx-border-color: #dc2626;     /* Darker red border on hover */
+    -fx-text-fill: #dc2626;        /* Darker red text on hover */
+}
+
+.brgy-btn-add-center {
+    -fx-background-color: #059669; /* CG Badge Emerald Green */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+}
+
+.brgy-btn-add-center:hover {
+    -fx-background-color: #047857; /* Slightly darker green for hover effect */
+}
+
 .brgy-btn-primary {
     -fx-background-color: #059669;
     -fx-text-fill: white;
@@ -168,7 +199,7 @@
     -fx-background-color: transparent;
     -fx-border-color: #e2e8f0;
     -fx-border-radius: 8;
-    -fx-text-fill: #475569;
+    -fx-text-fill: #3d4653;
     -fx-padding: 8 16;
     -fx-font-size: 12;
     -fx-cursor: hand;
@@ -782,4 +813,24 @@
 .brgy-slate-btn-close:hover {
     -fx-background-color: #1e293b;
     -fx-text-fill: #f8fafc;
+}
+
+/* Styling for the dynamic checkboxes in the Update Center Modal */
+.brgy-checkbox {
+    -fx-text-fill: #e2e8f0; /* Light gray/white text so it pops on dark background */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-padding: 4px;
+}
+
+/* Optional: Make the checkbox box itself look a bit cleaner */
+.brgy-checkbox .box {
+    -fx-background-color: #334155;
+    -fx-border-color: #475569;
+    -fx-border-radius: 3px;
+}
+
+/* Optional: Checkmark color when selected */
+.brgy-checkbox:selected .mark {
+    -fx-background-color: #38bdf8; /* Light blue checkmark */
 }

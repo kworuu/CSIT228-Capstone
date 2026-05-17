@@ -1,5 +1,7 @@
 package com.example.dashboard_barangay;
 
+import com.example.auth.SessionContext;
+import com.example.model.User;
 import com.example.map_logic_v2.PickerMapHtmlProvider;
 import com.example.map_tiles.TilePrefetchService;
 import javafx.application.Platform;
@@ -33,8 +35,7 @@ public class AddBrgyExtensionController {
 
     private void setupMap() {
         extensionWebViewMap.getEngine().setJavaScriptEnabled(true);
-        
-        // Setup the JS Bridge
+
         extensionWebViewMap.getEngine().getLoadWorker().stateProperty().addListener((obs, old, state) -> {
             if (state == javafx.concurrent.Worker.State.SUCCEEDED) {
                 JSObject win = (JSObject) extensionWebViewMap.getEngine().executeScript("window");
@@ -42,16 +43,26 @@ public class AddBrgyExtensionController {
             }
         });
 
-        // Use the Barangay's center coordinates to start (example: Lahug)
-        double startLat = 10.3340; 
-        double startLng = 123.8950;
-        
+        // FIXED: Dynamically fetch the current logged-in Barangay's location!
+        double startLat = 10.3157; // Fallback to Cebu City Center
+        double startLng = 123.8854;
+        int startZoom = 15;
+
+        User currentUser = SessionContext.current() != null ? SessionContext.current().getUser() : null;
+        if (currentUser != null && currentUser.latitude() != null && currentUser.longitude() != null) {
+            startLat = currentUser.latitude();
+            startLng = currentUser.longitude();
+            if (currentUser.zoom() != null) {
+                startZoom = currentUser.zoom();
+            }
+        }
+
         int tilePort = -1;
         try { tilePort = TilePrefetchService.getInstance().startServer(); } catch (Exception ignored) {}
 
-        // Load the new Picker HTML!
+        // Load the new bounded Picker HTML!
         extensionWebViewMap.getEngine().loadContent(
-                PickerMapHtmlProvider.getMapHTML(startLat, startLng, 15, tilePort)
+                PickerMapHtmlProvider.getMapHTML(startLat, startLng, startZoom, tilePort)
         );
     }
 
@@ -62,9 +73,7 @@ public class AddBrgyExtensionController {
             alert.showAndWait();
             return;
         }
-        
-        // Pass the coordinates back to the main form!
-        // We will pass a generic address string for now, but the coordinates are the real prize.
+
         if (parentController != null) {
             parentController.setLocationData("Pinned from Map", selectedLat, selectedLng);
         }
@@ -81,14 +90,12 @@ public class AddBrgyExtensionController {
         stage.close();
     }
 
-    // --- Inner class for JS Bridge ---
     public class PickerBridge {
         public void setCoordinates(double lat, double lng) {
             Platform.runLater(() -> {
                 selectedLat = lat;
                 selectedLng = lng;
                 hasSelected = true;
-                // Optional: You could enable/highlight the confirm button here
             });
         }
     }
