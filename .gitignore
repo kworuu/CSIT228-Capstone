@@ -44,3 +44,6 @@ target/
 mvnw
 mvnw.cmd
 .mvn/
+
+### ignore tiles ###
+.civicguard/tiles/
