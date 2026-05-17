@@ -258,13 +258,21 @@ public class BrgyMapHtmlProvider {
 
                     // --- NEW: DISTANCE TRACKER ---
                     var thresholdMeters = 3000; // 3 Kilometers
+                    
+                    // Add zoom distance tracking
+                    var isZoomedIn = false;
+
+                    map.on('zoomend', function() {
+                         isZoomedIn = map.getZoom() > 14; 
+                    });
+
                     map.on('move', function() {
                         var currentCenter = map.getCenter();
                         var dist = map.distance(homeLatLng, currentCenter);
                         
-                        // Tell Java to show button if distance > 3000m, hide if closer
+                        // Tell Java to show button if distance > 3000m or if it is zoomed in, hide if closer
                         if (window.javaBridge) {
-                            window.javaBridge.toggleHomeButton(dist > thresholdMeters);
+                            window.javaBridge.toggleHomeButton(dist > thresholdMeters || isZoomedIn);
                         }
                     });
 
