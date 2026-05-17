@@ -15,7 +15,9 @@ import javafx.scene.control.*;
 import com.example.util.SceneHelper;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -47,6 +49,7 @@ public class DashboardController {
     // --- UPDATED DEPENDENCIES ---
     private final SupplyRequestDao requestDao = new SupplyRequestDao();
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
+
 
     @FXML
     public void initialize() {
@@ -158,5 +161,15 @@ public class DashboardController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
+    }
+
+    @FXML private void handleRefresh() {
+        initialize();
     }
 }
