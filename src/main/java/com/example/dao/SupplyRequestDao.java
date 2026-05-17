@@ -31,6 +31,16 @@ public class SupplyRequestDao {
         }
     }
 
+    public void updateStatus(long requestId, SupplyRequestStatus newStatus) throws SQLException {
+        String sql = "UPDATE supply_requests SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newStatus.name());
+            ps.setLong(2, requestId);
+            ps.executeUpdate();
+        }
+    }
+
     private SupplyRequest mapRowToSupplyRequest(ResultSet rs) throws SQLException {
         // Defensive mapping to prevent exceptions from bad data
         SupplyRequestStatus status;

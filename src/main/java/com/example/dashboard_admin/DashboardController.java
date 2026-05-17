@@ -229,7 +229,7 @@ public class DashboardController {
     private void handleDeployClick(SupplyRequest request) {
         Alert confirm = new Alert(AlertType.CONFIRMATION);
         confirm.setTitle("Confirm Deployment");
-        confirm.setHeaderText("Deploy supplies to " + request.requestingBarangay() + "?");
+        confirm.setHeaderText("Deploy supplies to " + request.barangay() + "?");
 
         String detail = "This will mark the request as fulfilled.";
         if (request.notes() != null && !request.notes().isBlank()) {
@@ -249,6 +249,17 @@ public class DashboardController {
                 }
             }
         });
+    }
+
+    @FXML
+    private void handleRefresh() {
+        loadData();
+        refreshStats();
+    }
+
+    @FXML
+    private void handleLogout() {
+        // Implement logout logic
     }
 
     private void showError(String header, String message) {
