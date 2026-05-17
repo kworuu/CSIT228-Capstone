@@ -32,12 +32,10 @@ public class RosterModalController {
 
     @FXML
     public void initialize() {
-        // 1. Setup Table Columns
         colName.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().name()));
         colStatus.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().status()));
         colDate.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().date()));
 
-        // 2. Setup Live Search Filter
         filteredList = new FilteredList<>(masterList, b -> true);
 
         fieldSearch.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -51,13 +49,9 @@ public class RosterModalController {
         tableRoster.setItems(filteredList);
     }
 
-    /**
-     * Called by BrgyDashboardController right after opening the modal
-     */
     public void initData(long centerId, String centerName) {
         labelCenterName.setText(centerName);
 
-        // Load REAL data from the database
         try {
             com.example.dao.EvacueeDao dao = new com.example.dao.EvacueeDao();
             masterList.setAll(dao.getRosterByCenter(centerId));

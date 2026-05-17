@@ -15,6 +15,7 @@ import com.example.util.Route;
 import com.example.util.Router;
 import com.example.util.SearchTableUtility;
 import javafx.application.Platform;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,7 +23,9 @@ import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import javafx.util.Duration;
 import netscape.javascript.JSObject;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +52,8 @@ public final class KioskDashboardController implements DashboardViewObserver {
     @FXML private TableColumn<EvacuationSite, String> colCenterCreatedAt;
 
     // ─── Header controls ───────────────────────────────────────────────────
+
+    @FXML private HBox      topRightOverlay;
     @FXML private TextField searchField;
     @FXML private Button    btnBarangayLogin;
     @FXML private Button    btnAdminLogin;
@@ -130,6 +135,16 @@ public final class KioskDashboardController implements DashboardViewObserver {
     private void wireEventDrawer() {
         if (eventCellController == null) return;
         eventCellController.setOnEventSelected(this::focusCenterOnMap);
+        
+        // Let the eventCellController know what happens when it closes via its own 'X' button
+        eventCellController.setOnToggleComplete(() -> {
+            if (topRightOverlay != null) {
+                TranslateTransition transition = new TranslateTransition(
+                        Duration.millis(EventCellController.SLIDE_DURATION_MS), topRightOverlay);
+                transition.setToX(eventCellController.isDrawerOpen() ? -EventCellController.DRAWER_WIDTH_PX : 0);
+                transition.play();
+            }
+        });
     }
 
     private void wireDetailModal() {
@@ -174,7 +189,17 @@ public final class KioskDashboardController implements DashboardViewObserver {
 
     // ─── UI event handlers ─────────────────────────────────────────────────
     @FXML private void handleMenuClick() {
-        if (eventCellController != null) eventCellController.toggleDrawer();
+        if (eventCellController != null) {
+            boolean opening = !eventCellController.isDrawerOpen();
+            eventCellController.toggleDrawer();
+            
+            if (topRightOverlay != null) {
+                TranslateTransition transition = new TranslateTransition(
+                        Duration.millis(EventCellController.SLIDE_DURATION_MS), topRightOverlay);
+                transition.setToX(opening ? -EventCellController.DRAWER_WIDTH_PX : 0);
+                transition.play();
+            }
+        }
     }
 
     @FXML private void handleAdminLogin()    { Router.getInstance().navigate(Route.ADMIN_LOGIN);    }

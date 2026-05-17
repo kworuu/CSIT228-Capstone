@@ -27,16 +27,16 @@
             <children>
                 <VBox spacing="5" GridPane.columnSpan="2">
                     <Label styleClass="field-label" text="ITEM NAME" />
-                    <TextField fx:id="itemField" promptText="e.g. Rice (5kg sack)" styleClass="search-field" />
+                    <TextField fx:id="itemField" promptText="e.g. Rice (5kg sack)" style="-fx-background-color: #d1fae5;" styleClass="search-field" />
                 </VBox>
 
                 <VBox spacing="5" GridPane.rowIndex="1">
                     <Label styleClass="field-label" text="INITIAL QUANTITY" />
-                    <TextField fx:id="initialField" promptText="100" styleClass="search-field" />
+                    <TextField fx:id="initialField" promptText="100" style="-fx-background-color: #d1fae5;" styleClass="search-field" />
                 </VBox>
             <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <children>
-                  <Label styleClass="field-label" text="UPDATED QUANTITY" />
+                  <Label styleClass="field-label" text="ADD QUANTITY" />
                   <TextField fx:id="updatedField" promptText="+100" styleClass="search-field" />
                </children>
             </VBox>

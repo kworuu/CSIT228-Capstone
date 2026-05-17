@@ -8,24 +8,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-/**
- * Unified entry point for the CivicGuard application.
- *
- * <p>Boot sequence:</p>
- * <ol>
- *   <li>Start the local tile server (so Leaflet can fetch cached tiles
- *       from {@code http://localhost:PORT/{z}/{x}/{y}.png}).</li>
- *   <li>Kick off background prefetch of all barangay tiles — non-blocking.</li>
- *   <li>Hand the primary stage to the {@link Router}.</li>
- *   <li>Navigate to {@link Route#KIOSK} as the default landing screen.</li>
- * </ol>
- *
- * <p>This replaces the three separate {@code Application} subclasses
- * ({@code KioskDashboardApplication}, {@code BrgyDashboardApplication},
- * {@code DashboardApplication}) as the canonical launcher. Those classes
- * remain in the codebase for now — they can be safely deleted once the
- * router is verified working end-to-end.</p>
- */
 public class AppLauncher extends Application {
 
     public static void main(String[] args) {
@@ -44,8 +26,6 @@ public class AppLauncher extends Application {
         }
 
         // 2. Kick off background tile prefetch. This is the multithreaded
-        //    work that satisfies rubric criterion 3. Listener runs on the
-        //    FX thread (TilePrefetchService wraps with Platform.runLater).
         TilePrefetchService.getInstance().prefetchAllBarangaysAsync(
                 (done, total, finalResult) -> {
                     if (finalResult != null) {

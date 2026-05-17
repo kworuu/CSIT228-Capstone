@@ -50,7 +50,7 @@ public final class RosterTabHelper {
         }
 
         Tab tab = new Tab();
-        tab.setText("📋 " + site.title());
+        tab.setText(site.title());
         tab.setUserData(site.id());
         tab.setClosable(true);
         tab.setContent(buildRosterContent(site));
@@ -72,7 +72,7 @@ public final class RosterTabHelper {
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
         TextField searchField = new TextField();
-        searchField.setPromptText("🔍 Search evacuee...");
+        searchField.setPromptText("Search evacuee...");
         searchField.getStyleClass().add("search-field");
         searchField.setPrefWidth(220.0);
 

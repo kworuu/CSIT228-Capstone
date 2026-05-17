@@ -2,14 +2,6 @@ package com.example.dashboard_kiosk.session;
 
 import javafx.scene.Node;
 
-/**
- * Bag of node references that {@link SessionMode} strategies operate on.
- *
- * <p>Keeping these references in a dedicated context object means
- * the strategy implementations stay free of FXML coupling and the
- * {@link com.example.dashboard_kiosk.controller.KioskDashboardController}
- * exposes only what the strategy actually needs.</p>
- */
 public final class SessionContext {
 
     private final Node barangayLoginButton;

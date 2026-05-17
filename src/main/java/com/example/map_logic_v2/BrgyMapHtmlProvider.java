@@ -5,6 +5,25 @@ public class BrgyMapHtmlProvider {
     private BrgyMapHtmlProvider() {}
 
     public static String getMapHTML(String centersJson, double brgyLat, double brgyLng, int zoom, int tilePort) {
+        // 1. Read the raw text of the CSS and JS files
+        String localCss = readLocalResource("/leaflet/leaflet.css");
+        String localJs = readLocalResource("/leaflet/leaflet.js");
+
+        String headInjection;
+
+        // 2. INJECT INLINE: If the local files exist, inject them directly into the HTML! 
+        if (localCss != null && localJs != null) {
+            headInjection = "<style>\n" + localCss + "\n</style>\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script>\n" + localJs + "\n</script>\n";
+        } else {
+            // Fallback to internet just in case you haven't clicked "Rebuild Project" yet
+            headInjection = "<link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>\n";
+        }
+
+        // 3. Build the HTML Template
         String htmlTemplate = """
         <!DOCTYPE html>
         <html>
@@ -197,6 +216,7 @@ public class BrgyMapHtmlProvider {
         </html>
         """;
         return htmlTemplate
+                .replace("__HEAD_INJECTION__", headInjection)
                 .replace("__CENTERS_JSON__", centersJson)
                 .replace("__BRGY_LAT__",     String.valueOf(brgyLat))
                 .replace("__BRGY_LNG__",     String.valueOf(brgyLng))
@@ -209,6 +229,24 @@ public class BrgyMapHtmlProvider {
                                         double neLat, double neLng,
                                         double centerLat, double centerLng,
                                         int maxZoom, int tilePort) {
+        // 1. Read the raw text of the CSS and JS files
+        String localCss = readLocalResource("/leaflet/leaflet.css");
+        String localJs = readLocalResource("/leaflet/leaflet.js");
+
+        String headInjection;
+
+        // 2. INJECT INLINE: If the local files exist, inject them directly into the HTML! 
+        if (localCss != null && localJs != null) {
+            headInjection = "<style>\n" + localCss + "\n</style>\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script>\n" + localJs + "\n</script>\n";
+        } else {
+            // Fallback to internet just in case you haven't clicked "Rebuild Project" yet
+            headInjection = "<link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />\n" +
+                            "<script>var L_DISABLE_3D = true;</script>\n" +
+                            "<script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>\n";
+        }
+                                            
         String htmlTemplate = """
         <!DOCTYPE html>
         <html>
@@ -386,6 +424,7 @@ public class BrgyMapHtmlProvider {
         </html>
         """;
         return htmlTemplate
+                .replace("__HEAD_INJECTION__", headInjection)
                 .replace("__CENTERS_JSON__", centersJson)
                 .replace("__SW_LAT__",       String.valueOf(swLat))
                 .replace("__SW_LNG__",       String.valueOf(swLng))

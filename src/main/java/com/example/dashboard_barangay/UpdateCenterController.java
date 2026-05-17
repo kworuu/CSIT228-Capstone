@@ -30,7 +30,7 @@ public class UpdateCenterController {
 
     private long centerId;
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
-    private final EvacuationCenterDao centerDao = new EvacuationCenterDao(); // NEW: For deletion
+    private final EvacuationCenterDao centerDao = new EvacuationCenterDao();
     private final List<SupplyCheckBoxData> checkBoxes = new ArrayList<>();
 
     private record SupplyCheckBoxData(CheckBox checkBox, long itemId) {}
@@ -66,7 +66,6 @@ public class UpdateCenterController {
 
             for (InventoryItem item : items) {
                 CheckBox cb = new CheckBox(item.name());
-                // FIXED: Strip fancy CSS, just use a simple inline style to force white text
                 cb.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 13px;");
 
                 if (currentSupplies.contains(item.name())) {
