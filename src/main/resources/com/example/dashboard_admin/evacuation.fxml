@@ -139,8 +139,8 @@
                                         <HBox styleClass="segmented-control">
                                             <children>
                                                 <Button fx:id="filterAll" mnemonicParsing="false" styleClass="segment, segment-first, segment-active" text="All" />
-                                                <Button fx:id="filterStatusDanger" mnemonicParsing="false" styleClass="segment" text="Pending" />
-                                                <Button fx:id="filterStatusSafe" mnemonicParsing="false" styleClass="segment, segment-last" text="Deployed" />
+                                                <Button fx:id="filterPending" mnemonicParsing="false" styleClass="segment" text="Pending" />
+                                                <Button fx:id="filterApproved" mnemonicParsing="false" styleClass="segment, segment-last" text="Approved" />
                                             </children>
                                         </HBox>
                                     </children>
