@@ -92,12 +92,6 @@ public class DashboardController {
         refreshAlerts(1L); // Adjust hardcoded ID as necessary for session management
     }
 
-    // NEW: Added handleRefresh method
-    public void handleRefresh() {
-        loadData();
-        refreshStats();
-        refreshAlerts(1L); // Using the hardcoded admin ID as in initialize()
-    }
 
     private void setupTable() {
         // NEW: Replaced PropertyValueFactory with safe lambda accessors for records
@@ -264,5 +258,15 @@ public class DashboardController {
         alert.setHeaderText(header);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
+    }
+
+    @FXML private void handleRefresh() {
+        initialize();
     }
 }
