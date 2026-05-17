@@ -17,7 +17,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -37,7 +39,7 @@ public class DashboardController {
     @FXML private Label lblCriticalItem;
     @FXML private VBox alertsContainer;
 
-    // Table components
+    // --- UPDATED TABLE COMPONENTS ---
     @FXML private TableView<SupplyRequest> mainTable;
     @FXML private TableColumn<SupplyRequest, String> colBrgy;
     @FXML private TableColumn<SupplyRequest, String> colItem;
@@ -50,8 +52,10 @@ public class DashboardController {
     private final ObservableList<SupplyRequest> masterData =
             FXCollections.observableArrayList();
 
+    // --- UPDATED DEPENDENCIES ---
     private final SupplyRequestDao requestDao = new SupplyRequestDao();
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
+
 
     @FXML
     public void initialize() {
@@ -72,6 +76,7 @@ public class DashboardController {
                     SceneHelper.switchScene("/com/example/dashboard_admin/map.fxml", btnExpandMap));
         }
 
+        // Safe registration for Modals
         if (btnNewEvacCenter != null) {
             btnNewEvacCenter.setOnAction(event ->
                     SceneHelper.showModal(
@@ -80,14 +85,15 @@ public class DashboardController {
                             btnNewEvacCenter));
         }
 
-        // Data init
+        // Data Initialization
         setupTable();
         loadData();
         refreshStats();
-        refreshAlerts(1L);  // hardcoded admin id for now
+        refreshAlerts(1L); // Adjust hardcoded ID as necessary for session management
     }
 
     private void setupTable() {
+        // NEW: Replaced PropertyValueFactory with safe lambda accessors for records
         colBrgy.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().requestingBarangay()));
 
@@ -154,6 +160,7 @@ public class DashboardController {
 
     private void loadData() {
         try {
+            // Fetch all requests across the system for the Admin
             List<SupplyRequest> requestsList = requestDao.findAll();
             masterData.setAll(requestsList);
             setupSearch();
@@ -182,19 +189,15 @@ public class DashboardController {
     private void setupSearch() {
         if (searchEvacCenter == null || mainTable == null) return;
 
+        // NEW: Used record accessor methods without "get"
         SearchTableUtility.setupSearch(
                 searchEvacCenter,
                 mainTable,
                 masterData,
                 (request, query) ->
-                        (request.requestingBarangay() != null
-                                && request.requestingBarangay().toLowerCase().contains(query)) ||
-                                (request.itemName() != null
-                                        && request.itemName().toLowerCase().contains(query)) ||
-                                (request.notes() != null
-                                        && request.notes().toLowerCase().contains(query)) ||
-                                (request.status() != null
-                                        && request.status().name().toLowerCase().contains(query))
+                        (request.requestingBarangay() != null && request.requestingBarangay().toLowerCase().contains(query)) ||
+                                (request.notes() != null && request.notes().toLowerCase().contains(query)) ||
+                                (request.status() != null && request.status().name().toLowerCase().contains(query))
         );
     }
 

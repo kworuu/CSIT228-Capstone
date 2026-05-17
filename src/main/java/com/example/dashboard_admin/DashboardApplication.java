@@ -15,6 +15,9 @@ public class DashboardApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        com.example.util.Router.getInstance().setPrimaryStage(stage);
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.ADMIN_LOGIN);
+
         FXMLLoader fxmlLoader = new FXMLLoader(DashboardApplication.class.getResource("evacuation.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -34,6 +37,10 @@ public class DashboardApplication extends Application {
         stage.setMaximized(true);
         stage.setScene(scene);
         stage.show();
+
+        stage.show();
     }
+
+
 
 }
