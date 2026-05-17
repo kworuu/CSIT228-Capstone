@@ -9,13 +9,18 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 
@@ -32,10 +37,10 @@ import java.util.ResourceBundle;
 
 public class MapViewController implements Initializable {
 
-    private static final double CEBU_SW_LAT = 10.250;
-    private static final double CEBU_SW_LNG = 123.650;
-    private static final double CEBU_NE_LAT = 10.500;
-    private static final double CEBU_NE_LNG = 123.950;
+    private static final double CEBU_SW_LAT = 10.250429;
+    private static final double CEBU_SW_LNG = 123.864302;
+    private static final double CEBU_NE_LAT = 10.503349;
+    private static final double CEBU_NE_LNG = 123.877159;
 
     private static final double CEBU_CENTER_LAT = (CEBU_SW_LAT + CEBU_NE_LAT) / 2.0;
     private static final double CEBU_CENTER_LNG = (CEBU_SW_LNG + CEBU_NE_LNG) / 2.0;
@@ -53,12 +58,12 @@ public class MapViewController implements Initializable {
     @FXML private Label labelOverlayTimestamp;
     @FXML private Button buttonOverlayClose;
     @FXML private Button btnReturnHome;
+    @FXML private VBox eventsContainer;
 
     @FXML private Button navEvacuations;
     @FXML private Button navInventory;
     @FXML private Button navActivity;
     @FXML private Button btnRefresh;
-    @FXML private Button buttonLogout;
 
     private final List<CenterData> centers = new ArrayList<>();
     private CenterData selectedCenter;
@@ -69,7 +74,7 @@ public class MapViewController implements Initializable {
             long id, String name, String address, String barangay,
             double lat, double lng,
             String eventLabel, List<String> availableItems,
-            String updatedAt, String photoPath) {}
+            String updatedAt, String photoPath, int capacity, int evacuees) {}
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -93,6 +98,7 @@ public class MapViewController implements Initializable {
                 centers.clear();
                 centers.addAll(loaded);
                 setupMap();
+                populateEvents();
             });
         }, "admin-map-centers-loader");
         worker.setDaemon(true);
@@ -106,13 +112,13 @@ public class MapViewController implements Initializable {
         String sql = """
             SELECT
                 ec.id, ec.name, ec.address, u.display_name as barangay, ec.photo_path,
-                ec.latitude, ec.longitude,
-                csu.event_label, csu.available_item_ids, csu.updated_at
+                ec.latitude, ec.longitude, ec.capacity,
+                csu.event_label, csu.available_item_ids, csu.updated_at, csu.evacuees
             FROM evacuation_centers ec
             LEFT JOIN users u ON ec.user_id = u.id
             LEFT JOIN (
                 SELECT center_id,
-                       event_label, available_item_ids, updated_at,
+                       event_label, available_item_ids, updated_at, evacuees,
                        ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
                 FROM center_status_updates
             ) csu ON csu.center_id = ec.id AND csu.rn = 1
@@ -131,6 +137,8 @@ public class MapViewController implements Initializable {
                 String photoPath = rs.getString("photo_path");
                 double lat = rs.getDouble("latitude");
                 double lng = rs.getDouble("longitude");
+                int capacity = rs.getInt("capacity");
+                int evacuees = rs.getInt("evacuees");
 
                 String eventLabel = rs.getString("event_label");
                 if (eventLabel == null) eventLabel = "No active event";
@@ -141,7 +149,7 @@ public class MapViewController implements Initializable {
 
                 String updatedAt = formatTimestamp(rs.getString("updated_at"));
 
-                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath));
+                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity, evacuees));
             }
         } catch (SQLException e) {
             System.err.println("[AdminMap] DB error loading centers: " + e.getMessage());
@@ -276,6 +284,46 @@ public class MapViewController implements Initializable {
         vboxMapOverlay.setManaged(true);
     }
 
+    private void populateEvents() {
+        eventsContainer.getChildren().clear();
+        for (CenterData center : centers) {
+            VBox card = createEventCard(center);
+            eventsContainer.getChildren().add(card);
+        }
+    }
+
+    private VBox createEventCard(CenterData center) {
+        VBox card = new VBox();
+        card.setSpacing(6.0);
+        card.getStyleClass().add("alert-item");
+
+        // Top part: Title and location
+        VBox titleVBox = new VBox();
+        Label title = new Label(center.name());
+        title.getStyleClass().add("alert-title");
+        Label location = new Label(center.barangay() + " · EC-" + center.id());
+        location.getStyleClass().add("alert-location");
+        titleVBox.getChildren().addAll(title, location);
+
+        // Bottom part: Event and timestamp
+        HBox detailsBox = new HBox();
+        detailsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label eventLabel = new Label(center.eventLabel());
+        eventLabel.getStyleClass().add("alert-location"); // Reusing style
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+        String formattedTimestamp = center.updatedAt().replace("Updated: ", "");
+        Label timestampLabel = new Label(formattedTimestamp);
+        timestampLabel.getStyleClass().add("alert-location"); // Reusing style
+        
+        detailsBox.getChildren().addAll(eventLabel, spacer, timestampLabel);
+
+        card.getChildren().addAll(titleVBox, detailsBox);
+        return card;
+    }
+
     private String pillCategory(String name) {
         String lower = name.toLowerCase();
         if (lower.contains("rice") || lower.contains("pancit") || lower.contains("sardine") || lower.contains("food")) return "brgy-pill-food";
@@ -297,11 +345,6 @@ public class MapViewController implements Initializable {
         if (selectedCenter != null) {
             centers.stream().filter(c -> c.id() == selectedCenter.id()).findFirst().ifPresent(this::showOverlay);
         }
-    }
-
-    @FXML private void handleLogout() {
-        new com.example.auth.AuthService().logout();
-        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
     }
 
     @FXML private void handleReturnHome() {

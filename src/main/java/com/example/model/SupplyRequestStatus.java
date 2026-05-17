@@ -1,21 +1,30 @@
 package com.example.model;
 
 public enum SupplyRequestStatus {
-    PENDING,
-    APPROVED,
-    REJECTED,
-    FULFILLED;
+    PENDING("Pending"),
+    APPROVED("Approved"),
+    PARTIALLY_FULFILLED("Partially Fulfilled"),
+    FULFILLED("Fulfilled"),
+    REJECTED("Rejected");
 
-    public static SupplyRequestStatus fromDb(String status) {
-        if (status == null) return PENDING;
-        try {
-            return valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return PENDING;
-        }
+    private final String displayLabel;
+
+    SupplyRequestStatus(String displayLabel) {
+        this.displayLabel = displayLabel;
     }
 
     public String displayLabel() {
-        return name().charAt(0) + name().substring(1).toLowerCase();
+        return displayLabel;
+    }
+
+    public static SupplyRequestStatus fromDb(String dbValue) {
+        if (dbValue == null) return PENDING;
+        return switch (dbValue.toLowerCase()) {
+            case "approved" -> APPROVED;
+            case "partially_fulfilled" -> PARTIALLY_FULFILLED;
+            case "fulfilled" -> FULFILLED;
+            case "rejected" -> REJECTED;
+            default -> PENDING;
+        };
     }
 }
