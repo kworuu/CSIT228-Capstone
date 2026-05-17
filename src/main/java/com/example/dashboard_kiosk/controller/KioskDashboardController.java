@@ -4,7 +4,6 @@ import com.example.dashboard_kiosk.KioskConstants;
 import com.example.dashboard_kiosk.model.EvacuationSite;
 import com.example.dashboard_kiosk.observer.DashboardViewObserver;
 import com.example.dashboard_kiosk.observer.KioskDataSubject;
-import com.example.dashboard_kiosk.service.KioskDataService;
 import com.example.dashboard_kiosk.session.PublicSessionMode;
 import com.example.dashboard_kiosk.session.SessionContext;
 import com.example.dashboard_kiosk.session.SessionMode;
@@ -25,28 +24,23 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
 import java.util.List;
 import java.util.Optional;
 
 public final class KioskDashboardController implements DashboardViewObserver {
 
     // ─── Map ───────────────────────────────────────────────────────────────
-
     @FXML private WebView miniMapWebView;
 
     // ─── Detail modal (injected via fx:include) ────────────────────────────
-
-    @FXML private AnchorPane            detailModal;           // root node from fx:include
-    @FXML private DetailModalController detailModalController; // injected controller
+    @FXML private AnchorPane            detailModal;
+    @FXML private DetailModalController detailModalController;
 
     // ─── Bottom TabPane ────────────────────────────────────────────────────
-
     @FXML private TabPane bottomTabPane;
     @FXML private Tab     tabCentersOverview;
 
     // ─── Centers table ─────────────────────────────────────────────────────
-
     @FXML private TableView<EvacuationSite>           centerTableView;
     @FXML private TableColumn<EvacuationSite, String> colCenterName;
     @FXML private TableColumn<EvacuationSite, String> colCenterAddress;
@@ -55,43 +49,41 @@ public final class KioskDashboardController implements DashboardViewObserver {
     @FXML private TableColumn<EvacuationSite, String> colCenterCreatedAt;
 
     // ─── Header controls ───────────────────────────────────────────────────
-
     @FXML private TextField searchField;
     @FXML private Button    btnBarangayLogin;
     @FXML private Button    btnAdminLogin;
     @FXML private Button    btnEventsToggle;
 
     // ─── Embedded controllers (via <fx:include>) ───────────────────────────
-
     @FXML private EventCellController eventCellController;
 
     // ─── Mutable state ─────────────────────────────────────────────────────
-
-    private final ObservableList<EvacuationSite> centerData  = FXCollections.observableArrayList();
-    private final ObservableList<EvacueeRecord>  evacueeData = FXCollections.observableArrayList();
-    private boolean mapInitialized = false;
-    private String selectedCenterId;
-
+    private final ObservableList<EvacuationSite> centerData =
+            FXCollections.observableArrayList();
+    private final ObservableList<EvacueeRecord> evacueeData =
+            FXCollections.observableArrayList();
+    private String      selectedCenterId;
     private SessionMode sessionMode = new PublicSessionMode();
 
     // Strongly typed to prevent JavaFX garbage collecting the JS bridge
     private KioskMapBridge mapBridge;
-
     private RosterTabHelper rosterTabHelper;
 
-    // ─── Lifecycle ─────────────────────────────────────────────────────────
+    // ─── Map state ─────────────────────────────────────────────────────────
+    private boolean mapInitialized = false; // True after WebView's SUCCEEDED state
+    private boolean mapContentLoaded = false; // True after loadMapWithData() is called
 
+    // ─── Lifecycle ─────────────────────────────────────────────────────────
     @FXML
     public void initialize() {
         configureCenterTableColumns();
         configureSearch();
         applySessionMode();
         registerObservers();
-        loadInitialMap();
+        setupMapShell(); // Prepare WebView, but don't load content yet
         wireEventDrawer();
         wireDetailModal();
-
-        KioskDataSubject.getInstance().refreshAll();
+        KioskDataSubject.getInstance().refreshAll(); // Triggers onCentersRefreshed, which will now load the map
     }
 
     public void setSessionMode(SessionMode mode) {
@@ -101,27 +93,19 @@ public final class KioskDashboardController implements DashboardViewObserver {
     }
 
     // ─── Configuration ─────────────────────────────────────────────────────
-
     private void configureCenterTableColumns() {
-        // colCenterId removed — not shown in kiosk read-only view
         bindStringColumn(colCenterName,      EvacuationSite::title);
         bindStringColumn(colCenterAddress,   EvacuationSite::address);
         bindStringColumn(colCenterBarangay,  EvacuationSite::barangay);
         bindStringColumn(colCenterStatus,    EvacuationSite::status);
         bindStringColumn(colCenterCreatedAt, EvacuationSite::createdAt);
-
-        if (centerTableView != null) {
-            centerTableView.setItems(centerData);
-        }
+        if (centerTableView != null) centerTableView.setItems(centerData);
     }
 
     private void configureSearch() {
         if (searchField == null || centerTableView == null) return;
-
         SearchTableUtility.setupSearch(
-                searchField,
-                centerTableView,
-                centerData,
+                searchField, centerTableView, centerData,
                 (site, query) -> {
                     if (query == null || query.isBlank()) return true;
                     String q = query.toLowerCase();
@@ -140,9 +124,7 @@ public final class KioskDashboardController implements DashboardViewObserver {
     private void registerObservers() {
         KioskDataSubject subject = KioskDataSubject.getInstance();
         subject.registerObserver(this);
-        if (eventCellController != null) {
-            subject.registerObserver(eventCellController);
-        }
+        if (eventCellController != null) subject.registerObserver(eventCellController);
     }
 
     private void wireEventDrawer() {
@@ -151,29 +133,30 @@ public final class KioskDashboardController implements DashboardViewObserver {
     }
 
     private void wireDetailModal() {
-        // Protect static tabs from being closed when tabClosingPolicy="ALL_TABS"
         rosterTabHelper = new RosterTabHelper(bottomTabPane, evacueeData);
         rosterTabHelper.initialize(tabCentersOverview, null);
-
-        // Offset the modal from the bottom-left edge (replaces StackPane.margin
-        // which SceneBuilder cannot apply across fx:include boundaries)
         if (detailModal != null) {
             detailModal.setTranslateX(16.0);
             detailModal.setTranslateY(-16.0);
         }
-
-        // When "View Evacuee Roster" is clicked in the modal, open a closeable tab
         if (detailModalController != null) {
             detailModalController.setOnViewRoster(this::openRosterTab);
         }
     }
 
     // ─── DashboardViewObserver hooks ───────────────────────────────────────
-
     @Override
     public void onCentersRefreshed(List<EvacuationSite> centers) {
         centerData.setAll(centers);
-        refreshMapMarkers(centers);
+
+        // --- FIX: Load map with data on first refresh, like the admin panel does ---
+        if (!mapContentLoaded && !centers.isEmpty()) {
+            loadMapWithData(centers);
+            mapContentLoaded = true;
+        } else if (mapContentLoaded) {
+            // For subsequent updates, use the more efficient JS bridge
+            pushMarkersToMap(centers);
+        }
     }
 
     @Override
@@ -183,7 +166,6 @@ public final class KioskDashboardController implements DashboardViewObserver {
 
     @Override
     public void onCenterEventReceived(CenterEvent event) {
-        // Update the open roster tab for this center if one exists
         if (selectedCenterId != null
                 && String.valueOf(event.centerId()).equals(selectedCenterId)) {
             findCenterById(selectedCenterId).ifPresent(this::openRosterTab);
@@ -191,18 +173,14 @@ public final class KioskDashboardController implements DashboardViewObserver {
     }
 
     // ─── UI event handlers ─────────────────────────────────────────────────
-
     @FXML private void handleMenuClick() {
-        if (eventCellController != null) {
-            eventCellController.toggleDrawer();
-        }
+        if (eventCellController != null) eventCellController.toggleDrawer();
     }
 
-    @FXML private void handleAdminLogin()    { Router.getInstance().navigate(Route.ADMIN_LOGIN); }
+    @FXML private void handleAdminLogin()    { Router.getInstance().navigate(Route.ADMIN_LOGIN);    }
     @FXML private void handleBarangayLogin() { Router.getInstance().navigate(Route.BARANGAY_LOGIN); }
 
     // ─── Detail modal ──────────────────────────────────────────────────────
-
     private void showDetailModal(EvacuationSite site) {
         if (detailModalController == null) return;
         selectedCenterId = site.id();
@@ -216,7 +194,8 @@ public final class KioskDashboardController implements DashboardViewObserver {
 
     // ─── Map ───────────────────────────────────────────────────────────────
 
-    private void loadInitialMap() {
+    /** Prepares the WebView component but does not load any HTML content. */
+    private void setupMapShell() {
         if (miniMapWebView == null) return;
 
         miniMapWebView.getEngine().setJavaScriptEnabled(true);
@@ -225,35 +204,58 @@ public final class KioskDashboardController implements DashboardViewObserver {
                 System.out.println(KioskConstants.LOG_MAP_DEBUG + evt.getData()));
 
         // CRITICAL FIX: JavaFX WebView missing mouse-up bug.
-        // If the user drags the map downward the cursor enters the TabPane below,
-        // JavaFX stops sending mouse events to the WebView, and Leaflet never
-        // receives "mouseup" — the map locks in a dragging state permanently.
-        // Force a synthetic mouseup when the cursor leaves the WebView.
         miniMapWebView.setOnMouseExited(e -> {
             try {
                 miniMapWebView.getEngine().executeScript(
-                        "var evt = new MouseEvent('mouseup', {bubbles:true,cancelable:true,clientX:0,clientY:0});" +
+                        "var evt = new MouseEvent('mouseup'," +
+                                "{bubbles:true,cancelable:true,clientX:0,clientY:0});" +
                                 "document.dispatchEvent(evt);"
                 );
-            } catch (Exception ex) {
-                // Non-fatal — highlight is a non-essential affordance
-            }
+            } catch (Exception ex) { /* non-fatal */ }
         });
+    }
+
+    /**
+     * Loads the map's HTML content, injecting the provided center data from the start.
+     * This is called by the observer once data is available.
+     */
+    private void loadMapWithData(List<EvacuationSite> centers) {
+        if (miniMapWebView == null) return;
 
         miniMapWebView.getEngine().getLoadWorker().stateProperty()
                 .addListener((obs, oldS, newS) -> {
-                    if (newS == Worker.State.SUCCEEDED) {
-                        installJsBridge();
-                    }
+                    if (newS != Worker.State.SUCCEEDED) return;
+                    installJsBridge();
+                    mapInitialized = true;
                 });
 
-        refreshMapMarkers(List.of());
+        int tilePort = startTileServerSafely();
+
+        // Use the same city-wide boundaries as the admin panel for consistency
+        double swLat = 10.250429;
+        double swLng = 123.864302;
+        double neLat = 10.503349;
+        double neLng = 123.877159;
+        double centerLat = (swLat + neLat) / 2.0;
+        double centerLng = (swLng + neLng) / 2.0;
+        int maxZoom = 17;
+
+        String centersJson = buildCentersJson(centers);
+
+        miniMapWebView.getEngine().loadContent(
+                BrgyMapHtmlProvider.getCityMapHTML(
+                        centersJson,
+                        swLat, swLng, neLat, neLng,
+                        centerLat, centerLng,
+                        maxZoom, tilePort
+                )
+        );
     }
 
     private void installJsBridge() {
         try {
             JSObject window = (JSObject) miniMapWebView.getEngine().executeScript("window");
-            this.mapBridge = new KioskMapBridge(this);
+            this.mapBridge  = new KioskMapBridge(this);
             window.setMember(KioskConstants.JS_BRIDGE_MEMBER, this.mapBridge);
         } catch (Exception e) {
             System.err.println(KioskConstants.LOG_PREFIX + "Failed to install JS Bridge: " + e.getMessage());
@@ -264,30 +266,24 @@ public final class KioskDashboardController implements DashboardViewObserver {
         try {
             return TilePrefetchService.getInstance().startServer();
         } catch (Exception ex) {
-            System.err.println(KioskConstants.LOG_PREFIX
-                    + "Tile server start failed: " + ex.getMessage());
+            System.err.println(KioskConstants.LOG_PREFIX + "Tile server start failed: " + ex.getMessage());
             return -1;
         }
     }
 
-    private void refreshMapMarkers(List<EvacuationSite> centers) {
-        if (miniMapWebView == null) return;
-        if (!mapInitialized) {
-            int tilePort = startTileServerSafely();
-            miniMapWebView.getEngine().loadContent(
-                    BrgyMapHtmlProvider.getMapHTML(
-                            buildCentersJson(centers),
-                            KioskConstants.DEFAULT_MAP_LAT,
-                            KioskConstants.DEFAULT_MAP_LNG,
-                            KioskConstants.DEFAULT_MAP_ZOOM,
-                            tilePort));
-            mapInitialized = true;
-            return;
-        }
-        String json = buildCentersJson(centers);
-        Platform.runLater(() ->
-                miniMapWebView.getEngine().executeScript(
-                        "if(window.updateMarkers) window.updateMarkers(" + json + ");"));
+    /** Executes window.updateMarkers(...) in the live page for subsequent data refreshes. */
+    private void pushMarkersToMap(List<EvacuationSite> centers) {
+        if (!mapInitialized) return; // Guard against calls before the map is ready
+
+        String json   = buildCentersJson(centers);
+        String script = "if(window.updateMarkers) window.updateMarkers(" + json + ");";
+        Platform.runLater(() -> {
+            try {
+                miniMapWebView.getEngine().executeScript(script);
+            } catch (Exception e) {
+                System.err.println(KioskConstants.LOG_PREFIX + "updateMarkers failed: " + e.getMessage());
+            }
+        });
     }
 
     private void focusCenterOnMap(String centerId) {
@@ -296,7 +292,7 @@ public final class KioskDashboardController implements DashboardViewObserver {
     }
 
     private void triggerMapMarkerHighlight(String centerId) {
-        if (miniMapWebView == null || centerId == null) return;
+        if (miniMapWebView == null || centerId == null || !mapInitialized) return;
         try {
             miniMapWebView.getEngine().executeScript(
                     String.format(KioskConstants.JS_HIGHLIGHT_MARKER_FMT, centerId));
@@ -313,6 +309,7 @@ public final class KioskDashboardController implements DashboardViewObserver {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < centers.size(); i++) {
             EvacuationSite c = centers.get(i);
+            if (c.latitude() == 0.0 || c.longitude() == 0.0) continue; // Skip invalid locations
             if (i > 0) sb.append(',');
             sb.append(String.format(
                     "{\"id\":\"%s\",\"name\":\"%s\",\"lat\":%s,\"lng\":%s,\"focal\":%b}",
@@ -338,24 +335,14 @@ public final class KioskDashboardController implements DashboardViewObserver {
     }
 
     // ─── JavaScript bridge ─────────────────────────────────────────────────
-
-    /**
-     * Must be public with a public constructor so JavaFX WebEngine
-     * reflection can invoke methods on it from JavaScript.
-     */
     public static class KioskMapBridge {
-
         private final KioskDashboardController controller;
-
         public KioskMapBridge(KioskDashboardController controller) {
             this.controller = controller;
         }
-
         public void onMarkerClick(String centerId) {
-            javafx.application.Platform.runLater(() ->
-                    controller.focusCenterOnMap(centerId));
+            Platform.runLater(() -> controller.focusCenterOnMap(centerId));
         }
-
         public void toggleHomeButton(boolean show) {
             // Intentionally empty for kiosk — prevents JS errors
         }

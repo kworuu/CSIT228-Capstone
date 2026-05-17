@@ -73,7 +73,7 @@ public class BrgyMapHtmlProvider {
 
                 // --- FIX 3: icon factory (lightweight dot at low zoom) ---
                 function makeIcon(c, zoomLevel) {
-                    if (zoomLevel < 14) {
+                    if (zoomLevel < 15) {
                         return L.divIcon({
                             className: '',
                             html: '<div style="width:12px;height:12px;background:#10b981;'
@@ -270,7 +270,7 @@ public class BrgyMapHtmlProvider {
 
                 // --- FIX 3: icon factory (lightweight dot at low zoom) ---
                 function makeIcon(c, zoomLevel) {
-                    if (zoomLevel < 14) {
+                    if (zoomLevel < 15) {
                         return L.divIcon({
                             className: '',
                             html: '<div style="width:12px;height:12px;background:#10b981;'
