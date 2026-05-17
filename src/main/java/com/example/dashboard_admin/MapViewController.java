@@ -9,10 +9,8 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -35,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class MapViewController implements Initializable {
+public class MapViewController implements Initializable, com.example.util.CenterEventObserver {
 
     private static final double CEBU_SW_LAT = 10.250429;
     private static final double CEBU_SW_LNG = 123.864302;
@@ -64,25 +62,30 @@ public class MapViewController implements Initializable {
     @FXML private Button navInventory;
     @FXML private Button navActivity;
     @FXML private Button btnRefresh;
+    @FXML private Button buttonLogout; // Added for logout functionality
 
     private final List<CenterData> centers = new ArrayList<>();
     private CenterData selectedCenter;
     private AdminMapBridge mapBridge;
+    private boolean isMapLoaded = false; // Flag to check if Leaflet needs initialization
 
-    // FIXED: Removed Structural Status from the record to match our new schema
     public record CenterData(
             long id, String name, String address, String barangay,
             double lat, double lng,
             String eventLabel, List<String> availableItems,
-            String updatedAt, String photoPath, int capacity, int evacuees) {}
+            String updatedAt, String photoPath) {}
+
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         navEvacuations.setOnAction(e -> SceneHelper.switchScene("/com/example/dashboard_admin/evacuation.fxml", navEvacuations));
         navInventory.setOnAction(e -> SceneHelper.switchScene("/com/example/dashboard_admin/inventory.fxml", navInventory));
 
-        setupMap();
+        // Start pulling standard database logs right away
         loadCentersAsync();
+
+        // Register to receive live barangay updates instantly!
+        com.example.util.CenterEventManager.getInstance().addObserver(this);
 
         TilePrefetchService.getInstance().prefetchAllBarangaysAsync((done, total, finalResult) -> {
             if (finalResult != null) {
@@ -93,32 +96,69 @@ public class MapViewController implements Initializable {
 
     private void loadCentersAsync() {
         Thread worker = new Thread(() -> {
-            List<CenterData> loaded = queryCentersFromDB();
+            List<CenterData> loadedCenters = queryCentersFromDB();
+            List<com.example.util.CenterEvent> recentLogs = queryRecentLogsFromDB();
+
             Platform.runLater(() -> {
                 centers.clear();
-                centers.addAll(loaded);
-                setupMap();
-                populateEvents();
+                centers.addAll(loadedCenters);
+
+                // Only load the Leaflet HTML container if it hasn't been rendered yet
+                if (!isMapLoaded) {
+                    setupMap();
+                    isMapLoaded = true;
+                } else {
+                    // Optional fallback: If BrgyMapHtmlProvider supports hot-swapping JSON, push data here:
+                    // mapWebView.getEngine().executeScript("if(window.updateMarkers){ window.updateMarkers(" + buildCentersJson() + "); }");
+                }
+
+                // Populates the chronological activity stream independently of map state
+                populateRecentActivityLog(recentLogs);
             });
         }, "admin-map-centers-loader");
         worker.setDaemon(true);
         worker.start();
     }
 
+    private List<com.example.util.CenterEvent> queryRecentLogsFromDB() {
+        List<com.example.util.CenterEvent> events = new ArrayList<>();
+        String sql = """
+            SELECT csu.center_id, csu.event_label, csu.updated_at, ec.name 
+            FROM center_status_updates csu 
+            JOIN evacuation_centers ec ON csu.center_id = ec.id 
+            ORDER BY csu.updated_at DESC LIMIT 15
+            """;
+
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                events.add(new com.example.util.CenterEvent(
+                        rs.getLong("center_id"),
+                        rs.getString("name"),
+                        rs.getString("event_label"),
+                        formatTimestamp(rs.getString("updated_at")).replace("Updated: ", "")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("[AdminMap] Error loading log feed: " + e.getMessage());
+        }
+        return events;
+    }
+
+
     private List<CenterData> queryCentersFromDB() {
         List<CenterData> result = new ArrayList<>();
-
-        // FIXED: Updated query to use center_status_updates table and fetch correct columns!
         String sql = """
             SELECT
                 ec.id, ec.name, ec.address, u.display_name as barangay, ec.photo_path,
-                ec.latitude, ec.longitude, ec.capacity,
-                csu.event_label, csu.available_item_ids, csu.updated_at, csu.evacuees
+                ec.latitude, ec.longitude,
+                csu.event_label, csu.available_item_ids, csu.updated_at
             FROM evacuation_centers ec
             LEFT JOIN users u ON ec.user_id = u.id
             LEFT JOIN (
                 SELECT center_id,
-                       event_label, available_item_ids, updated_at, evacuees,
+                       event_label, available_item_ids, updated_at,
                        ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
                 FROM center_status_updates
             ) csu ON csu.center_id = ec.id AND csu.rn = 1
@@ -137,19 +177,16 @@ public class MapViewController implements Initializable {
                 String photoPath = rs.getString("photo_path");
                 double lat = rs.getDouble("latitude");
                 double lng = rs.getDouble("longitude");
-                int capacity = rs.getInt("capacity");
-                int evacuees = rs.getInt("evacuees");
 
                 String eventLabel = rs.getString("event_label");
                 if (eventLabel == null) eventLabel = "No active event";
 
-                // FIXED: Actually calls the resolver to fetch supply names from the DB!
                 String itemJson = rs.getString("available_item_ids");
                 List<String> items = resolveItemNames(itemJson, conn);
 
                 String updatedAt = formatTimestamp(rs.getString("updated_at"));
 
-                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity, evacuees));
+                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath));
             }
         } catch (SQLException e) {
             System.err.println("[AdminMap] DB error loading centers: " + e.getMessage());
@@ -267,7 +304,6 @@ public class MapViewController implements Initializable {
 
         flowPaneOverlayPillsRow.getChildren().clear();
 
-        // FIXED: Removed structural status rendering completely
         if (c.availableItems().isEmpty()) {
             Label none = new Label("No supplies listed");
             none.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11;");
@@ -284,44 +320,57 @@ public class MapViewController implements Initializable {
         vboxMapOverlay.setManaged(true);
     }
 
-    private void populateEvents() {
+    private void populateRecentActivityLog(List<com.example.util.CenterEvent> events) {
+        if (eventsContainer == null) return;
         eventsContainer.getChildren().clear();
-        for (CenterData center : centers) {
-            VBox card = createEventCard(center);
+
+        if (events.isEmpty()) {
+            Label noEventsLabel = new Label("No recent updates or events logged.");
+            noEventsLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-style: italic; -fx-font-size: 13px; -fx-padding: 10px;");
+            eventsContainer.getChildren().add(noEventsLabel);
+            return;
+        }
+
+        for (com.example.util.CenterEvent event : events) {
+            VBox card = new VBox();
+            card.setSpacing(6.0);
+            card.getStyleClass().add("alert-item");
+            card.setStyle("-fx-cursor: hand;");
+
+            // Clicking an alert shifts the view focus layout drawer directly onto the map pin!
+            card.setOnMouseClicked(e -> onMarkerClicked(String.valueOf(event.centerId())));
+
+            VBox titleVBox = new VBox();
+            titleVBox.setSpacing(2.0);
+            Label title = new Label(event.centerName());
+            title.getStyleClass().add("alert-title");
+            title.setWrapText(true);
+
+            Label eventLabel = new Label("⚠️ " + event.eventLabel());
+            eventLabel.getStyleClass().add("alert-location");
+            eventLabel.setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
+            eventLabel.setWrapText(true);
+            titleVBox.getChildren().addAll(title, eventLabel);
+
+            HBox detailsBox = new HBox();
+            detailsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+            Label timestampLabel = new Label(event.timestamp());
+            timestampLabel.getStyleClass().add("alert-location");
+
+            detailsBox.getChildren().addAll(spacer, timestampLabel);
+            card.getChildren().addAll(titleVBox, detailsBox);
+
             eventsContainer.getChildren().add(card);
         }
     }
 
-    private VBox createEventCard(CenterData center) {
-        VBox card = new VBox();
-        card.setSpacing(6.0);
-        card.getStyleClass().add("alert-item");
-
-        // Top part: Title and location
-        VBox titleVBox = new VBox();
-        Label title = new Label(center.name());
-        title.getStyleClass().add("alert-title");
-        Label location = new Label(center.barangay() + " · EC-" + center.id());
-        location.getStyleClass().add("alert-location");
-        titleVBox.getChildren().addAll(title, location);
-
-        // Bottom part: Event and timestamp
-        HBox detailsBox = new HBox();
-        detailsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        Label eventLabel = new Label(center.eventLabel());
-        eventLabel.getStyleClass().add("alert-location"); // Reusing style
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-
-        String formattedTimestamp = center.updatedAt().replace("Updated: ", "");
-        Label timestampLabel = new Label(formattedTimestamp);
-        timestampLabel.getStyleClass().add("alert-location"); // Reusing style
-        
-        detailsBox.getChildren().addAll(eventLabel, spacer, timestampLabel);
-
-        card.getChildren().addAll(titleVBox, detailsBox);
-        return card;
+    @Override
+    public void onCenterUpdated(com.example.util.CenterEvent event) {
+        Platform.runLater(this::loadCentersAsync);
     }
 
     private String pillCategory(String name) {
@@ -345,6 +394,12 @@ public class MapViewController implements Initializable {
         if (selectedCenter != null) {
             centers.stream().filter(c -> c.id() == selectedCenter.id()).findFirst().ifPresent(this::showOverlay);
         }
+    }
+
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
     }
 
     @FXML private void handleReturnHome() {
