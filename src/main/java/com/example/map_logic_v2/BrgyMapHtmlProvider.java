@@ -4,6 +4,16 @@ public class BrgyMapHtmlProvider {
 
     private BrgyMapHtmlProvider() {}
 
+    private static String readLocalResource(String path) {
+        try (java.io.InputStream is = BrgyMapHtmlProvider.class.getResourceAsStream(path)) {
+            if (is == null) return null;
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            System.err.println("Failed to read local resource: " + path);
+            return null;
+        }
+    }
+
     public static String getMapHTML(String centersJson, double brgyLat, double brgyLng, int zoom, int tilePort) {
         // 1. Read the raw text of the CSS and JS files
         String localCss = readLocalResource("/leaflet/leaflet.css");
@@ -29,11 +39,9 @@ public class BrgyMapHtmlProvider {
         <html>
         <head>
             <meta charset="utf-8" />
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            __HEAD_INJECTION__
             <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
             <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-            <script>var L_DISABLE_3D = true;</script>
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
             <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
             <style>
                 body { padding: 0; margin: 0; background-color: #0f172a; }
@@ -252,11 +260,9 @@ public class BrgyMapHtmlProvider {
         <html>
         <head>
             <meta charset="utf-8" />
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            __HEAD_INJECTION__
             <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
             <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-            <script>var L_DISABLE_3D = true;</script>
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
             <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
             <style>
                 body { padding: 0; margin: 0; background-color: #0f172a; }
