@@ -1,14 +1,18 @@
 package com.example.dashboard_admin;
 
 import com.example.dao.InventoryItemDao;
+import com.example.dashboard_admin.views.EditItemController;
 import com.example.model.InventoryItem;
 import com.example.util.SceneHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -174,7 +178,22 @@ public class InventoryController {
 
     private void handleEdit(InventoryItem item) {
         if (item == null) return;
-        System.out.println("Editing: " + item.name());
+
+        // Use your existing helper to load the FXML and get the loader
+        FXMLLoader loader = SceneHelper.showModalWithController(
+                "/com/example/dashboard_admin/modals/edit-inventory.fxml",
+                "Update Item",
+                mainTable // Passing the table as the owner node
+        );
+
+        if (loader != null) {
+            EditItemController controller = loader.getController();
+            controller.setItemData(item);
+            Parent root = loader.getRoot();
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setOnHiding(event -> loadData());
+            stage.show();
+        }
     }
 
     private void handleDelete(InventoryItem item) {

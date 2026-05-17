@@ -48,13 +48,13 @@
                 <VBox spacing="4.0">
                     <padding><Insets left="12.0" right="12.0" /></padding>
                     <children>
-                        <Button fx:id="buttonNavMap" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavMap" styleClass="brgy-nav-btn, brgy-nav-active" text="🗺  Map View" />
-                        <Button fx:id="buttonNavRegister" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavRegister" styleClass="brgy-nav-btn" text="📋  Registrations" />
-                        <Button fx:id="buttonNavActivity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavActivity" styleClass="brgy-nav-btn" text="📜  Activity Log" textFill="WHITE">
+                        <Button fx:id="buttonNavMap" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavMap" styleClass="brgy-nav-btn, brgy-nav-active" text="Map View" />
+                        <Button fx:id="buttonNavRegister" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavRegister" styleClass="brgy-nav-btn" text="Registrations" />
+                        <Button fx:id="buttonNavActivity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavActivity" styleClass="brgy-nav-btn" text="Activity Log" textFill="WHITE">
                      <VBox.margin>
                         <Insets bottom="5.0" />
                      </VBox.margin></Button>
-                        <Button maxWidth="1.7976931348623157E308" onAction="#handleOpenSupplyRequests" styleClass="brgy-btn-ghost" text="📦 Request Supply" textFill="WHITE" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleOpenSupplyRequests" styleClass="brgy-btn-ghost" text="Request Supply" textFill="WHITE" />
                     </children>
                 </VBox>
 
@@ -88,9 +88,9 @@
                     </children>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="buttonRefresh" mnemonicParsing="false" onAction="#handleRefresh" styleClass="brgy-btn-ghost" text="↻  Refresh" />
+                <Button fx:id="buttonRefresh" mnemonicParsing="false" onAction="#handleRefresh" styleClass="brgy-btn-refresh" text="↻" />
                 <Button fx:id="buttonAddCenter" onAction="#handleAddCenter" styleClass="brgy-btn-add-center" text="+ Add New Center" />
-                <Button fx:id="buttonLogout" mnemonicParsing="false" onAction="#handleLogout" styleClass="brgy-btn-logout-custom" text="⎋  Log Out" />
+                <Button fx:id="buttonLogout" mnemonicParsing="false" onAction="#handleLogout" styleClass="brgy-btn-logout-custom" text="Log Out" />
             </children>
         </HBox>
 
@@ -144,10 +144,10 @@
 
                                         <Label fx:id="labelOverlayTimestamp" styleClass="brgy-overlay-ts" text="Updated: —" />
 
-                                        <Button fx:id="buttonUpdateCenter" text="Update Center Status" maxWidth="Infinity" styleClass="brgy-btn-primary"/>
-                                        <Button fx:id="buttonViewRoster" text="View Evacuee Roster" maxWidth="Infinity" styleClass="brgy-btn-secondary"/>
+                                        <Button fx:id="buttonUpdateCenter" maxWidth="Infinity" styleClass="brgy-btn-primary" text="Update Center Status" />
+                                        <Button fx:id="buttonViewRoster" maxWidth="Infinity" styleClass="brgy-btn-secondary" text="View Evacuee Roster" />
 
-                                        <Button fx:id="buttonDeleteCenter" text="Delete Center" maxWidth="Infinity" styleClass="brgy-btn-danger" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;"/>
+                                        <Button fx:id="buttonDeleteCenter" maxWidth="Infinity" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;" styleClass="brgy-btn-danger" text="Delete Center" />
                                     </children>
                                 </VBox>
                                 <Button fx:id="buttonOverlayClose" mnemonicParsing="false" onAction="#handleOverlayClose" styleClass="brgy-overlay-close" text="✕" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
@@ -205,13 +205,13 @@
                             </children>
                         </HBox>
 
-                        <TableView fx:id="tableViewEvacuees" prefHeight="400.0" VBox.vgrow="ALWAYS" styleClass="brgy-table">
+                        <TableView fx:id="tableViewEvacuees" prefHeight="400.0" styleClass="brgy-table" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="tableColumnEvacId" text="ID" prefWidth="60.0" />
-                                <TableColumn fx:id="tableColumnEvacName" text="Full Name" prefWidth="250.0" />
-                                <TableColumn fx:id="tableColumnEvacCenter" text="Evacuation Center" prefWidth="300.0" />
-                                <TableColumn fx:id="tableColumnEvacBrgy" text="Barangay" prefWidth="200.0" />
-                                <TableColumn fx:id="tableColumnEvacAction" text="Action" prefWidth="150.0" />
+                                <TableColumn fx:id="tableColumnEvacId" prefWidth="60.0" text="ID" />
+                                <TableColumn fx:id="tableColumnEvacName" prefWidth="250.0" text="Full Name" />
+                                <TableColumn fx:id="tableColumnEvacCenter" prefWidth="300.0" text="Evacuation Center" />
+                                <TableColumn fx:id="tableColumnEvacBrgy" prefWidth="200.0" text="Barangay" />
+                                <TableColumn fx:id="tableColumnEvacAction" prefWidth="150.0" text="Action" />
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
