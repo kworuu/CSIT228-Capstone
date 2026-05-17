@@ -22,7 +22,6 @@ public class EvacuationCenterDao {
 
     public List<EvacuationCenter> findByBarangay(String barangayDisplayName) throws SQLException {
         List<EvacuationCenter> centers = new ArrayList<>();
-        // FIXED: Since 'barangay' column is gone, we JOIN the users table to filter by display name!
         String sql = """
             SELECT ec.* FROM evacuation_centers ec
             JOIN users u ON ec.user_id = u.id
@@ -55,7 +54,6 @@ public class EvacuationCenterDao {
     }
 
     public void updateCenterStatus(EvacuationCenter center) throws SQLException {
-        // FIXED: Only update name and address, since capacity and occupancy are gone!
         String sql = "UPDATE evacuation_centers SET name = ?, address = ? WHERE id = ?";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -71,8 +69,6 @@ public class EvacuationCenterDao {
         Double lng = rs.getObject("longitude") != null ? rs.getDouble("longitude") : null;
         Long uId = rs.getObject("user_id") != null ? rs.getLong("user_id") : null;
         Timestamp created = rs.getTimestamp("created_at");
-
-        // FIXED: Uses exact 8-parameter record
         return new EvacuationCenter(
                 rs.getLong("id"), rs.getString("name"), rs.getString("address"),
                 uId, rs.getString("photo_path"), lat, lng,

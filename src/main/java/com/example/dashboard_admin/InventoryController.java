@@ -44,7 +44,6 @@ public class InventoryController {
 
     @FXML
     public void initialize() {
-        // FIX 1: Initialize FilteredList FIRST so setupTableColumns handles it safely
         filteredData = new FilteredList<>(masterData, p -> true);
 
         setupTableColumns();
@@ -128,11 +127,9 @@ public class InventoryController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    // FIX 2: Format status string with space instead of raw underscore text layout
                     setText(status == InventoryItem.StockStatus.CRITICAL ? "CRITICAL" : status.toString());
 
                     getStyleClass().removeAll("status-ok", "status-low", "status-out-of-stock");
-                    // FIX 3: Match your enum variables (OK, LOW, CRITICAL)
                     switch (status) {
                         case GREAT -> getStyleClass().add("status-ok");
                         case LOW -> getStyleClass().add("status-low");
@@ -179,11 +176,10 @@ public class InventoryController {
     private void handleEdit(InventoryItem item) {
         if (item == null) return;
 
-        // Use your existing helper to load the FXML and get the loader
         FXMLLoader loader = SceneHelper.showModalWithController(
                 "/com/example/dashboard_admin/modals/edit-inventory.fxml",
                 "Update Item",
-                mainTable // Passing the table as the owner node
+                mainTable
         );
 
         if (loader != null) {

@@ -16,7 +16,7 @@ public class ActivityTimelineDao {
     public List<ActivityTimelineItem> getBarangayTimeline(String barangayName) throws SQLException {
         List<ActivityTimelineItem> timeline = new ArrayList<>();
 
-        // FIXED: Massive SQL overhaul to fix broken JOINs and grab the real item names!
+
         String sql = """
             -- PART 1: Admin Deployments (Transactions)
             SELECT t.created_at AS event_date,
@@ -25,8 +25,8 @@ public class ActivityTimelineDao {
                    'Central LGU (Admin)' AS center_name,
                    u.display_name AS user_name
             FROM transactions t
-            JOIN users u ON t.destination_id = u.id             -- FIXED: destination_id links to users, not centers!
-            JOIN inventory_items i ON t.item_id = i.id          -- FIXED: Joined inventory to get the item name
+            JOIN users u ON t.destination_id = u.id    
+            JOIN inventory_items i ON t.item_id = i.id 
             WHERE u.display_name = ?
             
             UNION ALL
@@ -39,7 +39,7 @@ public class ActivityTimelineDao {
                    u_req.display_name AS user_name
             FROM supply_requests sr
             JOIN users u_req ON sr.requesting_user_id = u_req.id
-            LEFT JOIN inventory_items i ON sr.item_id = i.id    -- FIXED: Joined inventory to get the item name
+            LEFT JOIN inventory_items i ON sr.item_id = i.id 
             LEFT JOIN evacuation_centers ec ON sr.target_center_id = ec.id
             WHERE u_req.display_name = ?
             

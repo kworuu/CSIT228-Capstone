@@ -15,18 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Data-access service for the kiosk dashboard.
- *
- * <p>This class is the single point of contact between the UI layer and
- * the underlying database. It hides JDBC from controllers so the view
- * layer can be unit-tested with a stub implementation, and so any future
- * migration (JPA, REST, etc.) only changes one file.</p>
- *
- * <p>All public methods are synchronous and intended to be invoked from
- * background threads (the controller schedules them off the FX thread and
- * then marshals results back via {@code Platform.runLater}).</p>
- */
 public final class KioskDataService {
 
     // ── Singleton ──────────────────────────────────────────────────────────
@@ -35,7 +23,6 @@ public final class KioskDataService {
 
     private KioskDataService() { /* singleton */ }
 
-    /** @return the process-wide service instance. */
     public static KioskDataService getInstance() { return INSTANCE; }
 
     // ── SQL ────────────────────────────────────────────────────────────────
@@ -87,11 +74,6 @@ public final class KioskDataService {
 
     // ── Public API ─────────────────────────────────────────────────────────
 
-    /**
-     * Loads every evacuation center, ordered by name.
-     *
-     * @return list of immutable {@link EvacuationSite}s (empty list on error)
-     */
     public List<EvacuationSite> loadAllCenters() {
         List<EvacuationSite> sites = new ArrayList<>();
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
@@ -117,11 +99,6 @@ public final class KioskDataService {
         return sites;
     }
 
-    /**
-     * Loads the 200 most recently registered evacuees across all centers.
-     *
-     * @return list of immutable {@link EvacueeRecord}s (empty list on error)
-     */
     public List<EvacueeRecord> loadAllEvacuees() {
         List<EvacueeRecord> rows = new ArrayList<>();
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
@@ -144,11 +121,6 @@ public final class KioskDataService {
         return rows;
     }
 
-    /**
-     * Loads the 15 most recent center-status events.
-     *
-     * @return list of {@link CenterEvent}s newest-first (empty list on error)
-     */
     public List<CenterEvent> loadRecentEvents() {
         List<CenterEvent> events = new ArrayList<>();
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
@@ -170,12 +142,6 @@ public final class KioskDataService {
         return events;
     }
 
-    /**
-     * Loads up to 50 most recent evacuee names assigned to a given center.
-     *
-     * @param centerId numeric center primary key as a string
-     * @return decoded names newest-first (empty list on error or invalid id)
-     */
     public List<String> loadEvacueeNamesForCenter(String centerId) {
         if (centerId == null || centerId.isBlank()) return Collections.emptyList();
 
@@ -206,10 +172,6 @@ public final class KioskDataService {
 
     // ── Helpers ────────────────────────────────────────────────────────────
 
-    /**
-     * Formats a raw SQL timestamp into the dashboard's display pattern.
-     * Falls back to the raw string on any parse failure.
-     */
     public static String formatTimestamp(String raw) {
         if (raw == null) return "—";
         try {

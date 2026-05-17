@@ -43,7 +43,7 @@
 }
 
 .logo-icon-bg {
-    -fx-background-color: #5A6E4F;
+    -fx-background-color: #064e3b;
     -fx-background-radius: 8;
     -fx-min-width: 34;
     -fx-min-height: 34;
@@ -93,10 +93,6 @@
     -fx-background-color: #064e3b;
     -fx-text-fill: #6ee7b7;
     -fx-font-weight: bold;
-    -fx-border-color: #C8D8C0;
-    -fx-border-width: 0 0 0 3;
-    -fx-border-radius: 0;
-    -fx-background-radius: 0 6 6 0;
 }
 
 .nav-active:hover { -fx-background-color: #065f46; }
@@ -283,6 +279,7 @@
 .table-view .column-header {
     -fx-background-color: transparent;
     -fx-size: 42;
+    -fx-padding: 0 0 0 20;
 }
 
 .table-view .column-header .label {

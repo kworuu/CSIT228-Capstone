@@ -49,7 +49,6 @@ public class RegisterEvacueeController {
         this.currentBarangay = barangay;
         this.onRegistrationSuccess = onSuccess;
 
-        // Change the UI text to look like an Edit Modal
         buttonRegister.setText("Save Changes");
         textFieldName.setText(currentName);
 

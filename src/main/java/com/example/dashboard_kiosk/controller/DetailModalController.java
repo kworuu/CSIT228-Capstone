@@ -131,11 +131,11 @@ public final class DetailModalController {
      */
     private List<String> deriveSupplies(EvacuationSite site) {
         return List.of(
-                "💧 Water",
-                "🍱 Meals",
-                "🛏 Cots",
-                "🧰 First Aid",
-                "👕 Clothing"
+                "Water",
+                "Meals",
+                "Cots",
+                "First Aid",
+                "Clothing"
         );
     }
 
