@@ -213,6 +213,9 @@
                                 <TableColumn fx:id="tableColumnEvacBrgy" text="Barangay" prefWidth="200.0" />
                                 <TableColumn fx:id="tableColumnEvacAction" text="Action" prefWidth="150.0" />
                             </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
                         </TableView>
                     </children>
                 </VBox>

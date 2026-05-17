@@ -9,10 +9,8 @@ import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -64,17 +62,17 @@ public class MapViewController implements Initializable {
     @FXML private Button navInventory;
     @FXML private Button navActivity;
     @FXML private Button btnRefresh;
+    @FXML private Button buttonLogout; // Added for logout functionality
 
     private final List<CenterData> centers = new ArrayList<>();
     private CenterData selectedCenter;
     private AdminMapBridge mapBridge;
 
-    // FIXED: Removed Structural Status from the record to match our new schema
     public record CenterData(
             long id, String name, String address, String barangay,
             double lat, double lng,
             String eventLabel, List<String> availableItems,
-            String updatedAt, String photoPath, int capacity, int evacuees) {}
+            String updatedAt, String photoPath, int capacity) {}
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -108,17 +106,16 @@ public class MapViewController implements Initializable {
     private List<CenterData> queryCentersFromDB() {
         List<CenterData> result = new ArrayList<>();
 
-        // FIXED: Updated query to use center_status_updates table and fetch correct columns!
         String sql = """
             SELECT
                 ec.id, ec.name, ec.address, u.display_name as barangay, ec.photo_path,
                 ec.latitude, ec.longitude, ec.capacity,
-                csu.event_label, csu.available_item_ids, csu.updated_at, csu.evacuees
+                csu.event_label, csu.available_item_ids, csu.updated_at
             FROM evacuation_centers ec
             LEFT JOIN users u ON ec.user_id = u.id
             LEFT JOIN (
                 SELECT center_id,
-                       event_label, available_item_ids, updated_at, evacuees,
+                       event_label, available_item_ids, updated_at,
                        ROW_NUMBER() OVER (PARTITION BY center_id ORDER BY updated_at DESC) AS rn
                 FROM center_status_updates
             ) csu ON csu.center_id = ec.id AND csu.rn = 1
@@ -138,18 +135,16 @@ public class MapViewController implements Initializable {
                 double lat = rs.getDouble("latitude");
                 double lng = rs.getDouble("longitude");
                 int capacity = rs.getInt("capacity");
-                int evacuees = rs.getInt("evacuees");
 
                 String eventLabel = rs.getString("event_label");
                 if (eventLabel == null) eventLabel = "No active event";
 
-                // FIXED: Actually calls the resolver to fetch supply names from the DB!
                 String itemJson = rs.getString("available_item_ids");
                 List<String> items = resolveItemNames(itemJson, conn);
 
                 String updatedAt = formatTimestamp(rs.getString("updated_at"));
 
-                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity, evacuees));
+                result.add(new CenterData(id, name, address, barangay, lat, lng, eventLabel, items, updatedAt, photoPath, capacity));
             }
         } catch (SQLException e) {
             System.err.println("[AdminMap] DB error loading centers: " + e.getMessage());
@@ -267,7 +262,6 @@ public class MapViewController implements Initializable {
 
         flowPaneOverlayPillsRow.getChildren().clear();
 
-        // FIXED: Removed structural status rendering completely
         if (c.availableItems().isEmpty()) {
             Label none = new Label("No supplies listed");
             none.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11;");
@@ -297,7 +291,6 @@ public class MapViewController implements Initializable {
         card.setSpacing(6.0);
         card.getStyleClass().add("alert-item");
 
-        // Top part: Title and location
         VBox titleVBox = new VBox();
         Label title = new Label(center.name());
         title.getStyleClass().add("alert-title");
@@ -305,18 +298,17 @@ public class MapViewController implements Initializable {
         location.getStyleClass().add("alert-location");
         titleVBox.getChildren().addAll(title, location);
 
-        // Bottom part: Event and timestamp
         HBox detailsBox = new HBox();
         detailsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         Label eventLabel = new Label(center.eventLabel());
-        eventLabel.getStyleClass().add("alert-location"); // Reusing style
+        eventLabel.getStyleClass().add("alert-location");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
         String formattedTimestamp = center.updatedAt().replace("Updated: ", "");
         Label timestampLabel = new Label(formattedTimestamp);
-        timestampLabel.getStyleClass().add("alert-location"); // Reusing style
+        timestampLabel.getStyleClass().add("alert-location");
         
         detailsBox.getChildren().addAll(eventLabel, spacer, timestampLabel);
 
@@ -345,6 +337,12 @@ public class MapViewController implements Initializable {
         if (selectedCenter != null) {
             centers.stream().filter(c -> c.id() == selectedCenter.id()).findFirst().ifPresent(this::showOverlay);
         }
+    }
+
+    @FXML
+    private void handleLogout() {
+        new com.example.auth.AuthService().logout();
+        com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
     }
 
     @FXML private void handleReturnHome() {

@@ -1,5 +1,6 @@
 package com.example.dashboard_admin;
 
+import com.example.auth.AuthService;
 import com.example.dao.InventoryItemDao;
 import com.example.dao.SupplyRequestDao;
 import com.example.map_logic.MapHtmlProvider;
@@ -7,6 +8,8 @@ import com.example.model.InventoryItem;
 import com.example.model.SupplyRequest;
 import com.example.model.SupplyRequestStatus;
 import com.example.util.CardAlertHelper;
+import com.example.util.Route;
+import com.example.util.Router;
 import com.example.util.SceneHelper;
 import com.example.util.SearchTableUtility;
 import javafx.beans.property.SimpleStringProperty;
@@ -259,7 +262,8 @@ public class DashboardController {
 
     @FXML
     private void handleLogout() {
-        // Implement logout logic
+        new AuthService().logout();
+        Router.getInstance().navigate(Route.KIOSK);
     }
 
     private void showError(String header, String message) {
