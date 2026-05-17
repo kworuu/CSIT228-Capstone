@@ -1,7 +1,8 @@
 package com.example.dashboard_barangay;
 
-
 import com.example.dao.ActivityTimelineDao;
+import com.example.dao.EvacuationCenterDao;
+import com.example.dao.EvacueeDao;
 import com.example.map_logic_v2.BrgyMapHtmlProvider;
 import com.example.model.ActivityTimelineItem;
 import com.example.util.DBConnectionManager;
@@ -13,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
+import javafx.util.StringConverter; // FIXED IMPORT
 import netscape.javascript.JSObject;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -57,6 +59,7 @@ public class BrgyDashboardController {
     @FXML private Label  labelOverlayTimestamp;
     @FXML private Button buttonUpdateCenter;
     @FXML private Button buttonViewRoster;
+    @FXML private Button buttonDeleteCenter; // NEW
 
     // Center cards strip
     @FXML private HBox   hboxCenterCardsRow;
@@ -116,7 +119,12 @@ public class BrgyDashboardController {
     public record CenterData(
             long id, String name, String address, String barangay,
             double lat, double lng, String photoPath,
-            String eventLabel, List<String> availableItems, String updatedAt) {}
+            String eventLabel, List<String> availableItems, String updatedAt) {
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 
     // ══════════════════════════════════════════════════════════════
     //  INIT
@@ -207,7 +215,7 @@ public class BrgyDashboardController {
         new com.example.auth.AuthService().logout();
         com.example.util.Router.getInstance().navigate(com.example.util.Route.KIOSK);
     }
-    
+
     @FXML
     private void handleReturnHome() {
         btnReturnHome.setVisible(false);
@@ -486,6 +494,8 @@ public class BrgyDashboardController {
                 System.err.println("Failed to open Roster Modal: " + ex.getMessage());
             }
         });
+
+        buttonDeleteCenter.setOnAction(_e -> handleDeleteCenter(c.id()));
     }
 
     private String pillCategory(String name) {
@@ -675,12 +685,27 @@ public class BrgyDashboardController {
     }
 
     private void handleEditEvacuee(EvacueeRow rowData) {
-        // Placeholder for now. We will build the edit modal in the next phase!
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Edit Mode");
-        alert.setHeaderText(null);
-        alert.setContentText("Edit logic for " + rowData.name() + " coming soon!");
-        alert.showAndWait();
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/example/dashboard_barangay/modals/register-evacuee.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            RegisterEvacueeController controller = loader.getController();
+
+            // TRIGGER EDIT MODE
+            long evacueeId = Long.parseLong(rowData.id());
+            controller.initEditData(evacueeId, rowData.name(), CURRENT_BARANGAY, this::loadEvacueesFromDB);
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Edit Evacuee");
+            stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            stage.initOwner(tableViewEvacuees.getScene().getWindow());
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Failed to open Edit Evacuee modal: " + e.getMessage());
+        }
     }
 
     private void loadEvacueesFromDB() {
@@ -744,6 +769,7 @@ public class BrgyDashboardController {
             handleRefresh();
         } catch (Exception e) {
             System.err.println("Failed to open Update Center modal: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -819,7 +845,7 @@ public class BrgyDashboardController {
         public void onMarkerClick(String centerId) {
             Platform.runLater(() -> ctrl.onMarkerClicked(centerId));
         }
-        
+
         public void toggleHomeButton(boolean show) {
             Platform.runLater(() -> {
                 if (ctrl.btnReturnHome != null) {
@@ -867,5 +893,63 @@ public class BrgyDashboardController {
             System.err.println("Failed to open supply requests modal: " + e.getMessage());
         }
     }
+    private void handleDeleteCenter(long centerId) {
+        try {
+            EvacueeDao evacDao = new EvacueeDao();
+            int evacueeCount = evacDao.countByCenter(centerId);
 
+            if (evacueeCount > 0) {
+                // 1. If there are evacuees, grab all OTHER centers in the barangay
+                List<CenterData> otherCenters = centers.stream()
+                        .filter(c -> c.id() != centerId)
+                        .toList();
+
+                if (otherCenters.isEmpty()) {
+                    Alert err = new Alert(Alert.AlertType.ERROR, "Cannot delete! There are " + evacueeCount + " evacuees here, and you have no other centers to transfer them to. Please register a new center first.", ButtonType.OK);
+                    err.showAndWait();
+                    return;
+                }
+
+                // 2. Ask the user where to move them using a native JavaFX ChoiceDialog
+                ChoiceDialog<CenterData> dialog = new ChoiceDialog<>(otherCenters.get(0), otherCenters);
+                dialog.setTitle("Evacuee Mass Reassignment");
+                dialog.setHeaderText("This center currently houses " + evacueeCount + " evacuees.\nYou must reassign them to another center before demolishing this one.");
+                dialog.setContentText("Select destination center:");
+
+                // 3. If they click OK, run the mass migration and delete!
+                dialog.showAndWait().ifPresent(chosenCenter -> {
+                    try {
+                        evacDao.reassignAll(centerId, chosenCenter.id());
+                        new EvacuationCenterDao().delete(centerId);
+
+                        handleOverlayClose();
+                        handleRefresh();       // Refresh the map markers
+                        loadEvacueesFromDB();  // Refresh the main registration table
+
+                        Alert success = new Alert(Alert.AlertType.INFORMATION, "Center deleted! " + evacueeCount + " evacuees were safely transferred to " + chosenCenter.name() + ".", ButtonType.OK);
+                        success.showAndWait();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            } else {
+                // Standard deletion if the building is completely empty
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to permanently delete this empty evacuation center?", ButtonType.YES, ButtonType.NO);
+                alert.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.YES) {
+                        try {
+                            new EvacuationCenterDao().delete(centerId);
+                            handleOverlayClose();
+                            handleRefresh();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

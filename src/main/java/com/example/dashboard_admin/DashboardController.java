@@ -95,7 +95,7 @@ public class DashboardController {
     private void setupTable() {
         // NEW: Replaced PropertyValueFactory with safe lambda accessors for records
         colBrgy.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().requestingBarangay()));
+                new SimpleStringProperty(cellData.getValue().barangay()));
 
         colItem.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().itemName()));
@@ -161,7 +161,7 @@ public class DashboardController {
     private void loadData() {
         try {
             // Fetch all requests across the system for the Admin
-            List<SupplyRequest> requestsList = requestDao.findAll();
+            List<SupplyRequest> requestsList = requestDao.findAllForAdmin();
             masterData.setAll(requestsList);
             setupSearch();
         } catch (SQLException e) {
@@ -195,7 +195,7 @@ public class DashboardController {
                 mainTable,
                 masterData,
                 (request, query) ->
-                        (request.requestingBarangay() != null && request.requestingBarangay().toLowerCase().contains(query)) ||
+                        (request.barangay() != null && request.barangay().toLowerCase().contains(query)) ||
                                 (request.notes() != null && request.notes().toLowerCase().contains(query)) ||
                                 (request.status() != null && request.status().name().toLowerCase().contains(query))
         );

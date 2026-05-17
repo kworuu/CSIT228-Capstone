@@ -31,7 +31,6 @@ public class UpdateCenterController {
     private long centerId;
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
     private final EvacuationCenterDao centerDao = new EvacuationCenterDao(); // NEW: For deletion
-
     private final List<SupplyCheckBoxData> checkBoxes = new ArrayList<>();
 
     private record SupplyCheckBoxData(CheckBox checkBox, long itemId) {}
@@ -97,7 +96,8 @@ public class UpdateCenterController {
                     centerDao.delete(centerId);
                     closeWindow();
                 } catch (SQLException e) {
-                    Alert error = new Alert(Alert.AlertType.ERROR, "Cannot delete this center. It likely has Evacuees registered to it. Please delete them first.", ButtonType.OK);
+                    // SQL Constraints will safely block deletion if evacuees are still inside!
+                    Alert error = new Alert(Alert.AlertType.ERROR, "Cannot delete this center. Evacuees are currently registered here. Please delete or reassign them first.", ButtonType.OK);
                     error.showAndWait();
                 }
             }
