@@ -1,6 +1,7 @@
 package com.example.dashboard_admin;
 
 import com.example.dao.InventoryItemDao;
+import com.example.dao.TransactionDao;
 import com.example.dashboard_admin.views.EditItemController;
 import com.example.model.InventoryItem;
 import com.example.util.SceneHelper;
@@ -39,6 +40,7 @@ public class InventoryController {
     private final ObservableList<InventoryItem> masterData = FXCollections.observableArrayList();
     private FilteredList<InventoryItem> filteredData;
     private final InventoryItemDao inventoryDao = new InventoryItemDao();
+    private final TransactionDao transactionDao = new TransactionDao();
 
     private String currentFilterMode = "ALL";
 
@@ -194,17 +196,43 @@ public class InventoryController {
 
     private void handleDelete(InventoryItem item) {
         if (item == null) return;
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + item.name() + "?", ButtonType.YES, ButtonType.NO);
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.YES) {
-                try {
-                    if (inventoryDao.deleteById(item.id())) {
-                        loadData();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+
+        try {
+            // 1. Check if transactions exist for this item ID
+            if (transactionDao.hasTransactions(item.id())) {
+                // 2. Show the specific alert message requested
+                Alert warning = new Alert(Alert.AlertType.WARNING);
+                warning.setTitle("Action Denied");
+                warning.setHeaderText(null);
+                warning.setContentText("Cant delete item there is transaction history");
+                warning.showAndWait();
+                return; // Exit the method; do not show confirmation or delete
             }
-        });
+
+            // 3. If no transactions, proceed with confirmation and deletion
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + item.name() + "?", ButtonType.YES, ButtonType.NO);
+            alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.YES) {
+                    try {
+                        if (inventoryDao.deleteById(item.id())) {
+                            loadData();
+                        }
+                    } catch (SQLException e) {
+                        showError("Database Error", "Could not delete item.");
+                    }
+                }
+            });
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Connection Error", "Failed to verify transaction history.");
+        }
+    }
+
+    private void showError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }
