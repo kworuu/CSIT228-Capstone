@@ -60,9 +60,9 @@ public class MapHtmlProvider {
                     cursor: pointer;
                 }
                 @keyframes pulse-animation {
-                    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                    0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.7); }
                     70%  { box-shadow: 0 0 0 18px rgba(16, 185, 129, 0); }
-                    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+                    100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0); }
                 }
 
                 /* Secondary pins — smaller, static, color reflects status. */
@@ -100,14 +100,28 @@ public class MapHtmlProvider {
                 setTimeout(function() {
 
                     var map = L.map('map', {
-                        zoomControl: false,
-                        dragging: false,
-                        touchZoom: false,
-                        scrollWheelZoom: false,
-                        doubleClickZoom: false,
-                        zoomAnimation: false,
-                        fadeAnimation: false
+                        zoomControl:      false,
+                        dragging:         false,
+                        touchZoom:        false,
+                        scrollWheelZoom:  false,
+                        doubleClickZoom:  false,
+                        zoomAnimation:    false,
+                        fadeAnimation:    false
                     }).setView([9.8828, 123.5953], 13);
+
+                    // --- FIX 2: pause pulse animation while panning ---
+                    // (dragging is disabled on this minimap, but these guards
+                    //  are kept in case dragging is ever re-enabled)
+                    map.on('movestart', function() {
+                        document.querySelectorAll('.pulse-marker').forEach(function(el) {
+                            el.style.animationPlayState = 'paused';
+                        });
+                    });
+                    map.on('moveend', function() {
+                        document.querySelectorAll('.pulse-marker').forEach(function(el) {
+                            el.style.animationPlayState = 'running';
+                        });
+                    });
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
@@ -128,8 +142,8 @@ public class MapHtmlProvider {
 
                         var icon = L.divIcon({
                             className: 'custom-leaflet-icon',
-                            html: iconHtml,
-                            iconSize: iconSize,
+                            html:       iconHtml,
+                            iconSize:   iconSize,
                             iconAnchor: [iconSize[0] / 2, iconSize[1] / 2]
                         });
 
@@ -154,7 +168,7 @@ public class MapHtmlProvider {
         </body>
         </html>
         """;
-        
+
         return htmlTemplate.replace("__CENTERS_JSON__", centersJson);
     }
 }
