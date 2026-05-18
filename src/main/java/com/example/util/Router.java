@@ -105,11 +105,11 @@ public final class Router {
      */
     private String resolveFxml(Route route) {
         return switch (route) {
-            case KIOSK              -> "/com/example/dashboard_kiosk/controller/barangay-user.fxml";
+            case KIOSK              -> "/com/example/dashboard_kiosk/controller/dashboard-user.fxml";
             case ADMIN_LOGIN        -> "/com/example/auth/admin-login.fxml";
             case BARANGAY_LOGIN     -> "/com/example/auth/barangay-login.fxml";
             case ADMIN_DASHBOARD    -> "/com/example/dashboard_admin/evacuation.fxml";
-            case BARANGAY_DASHBOARD -> "/com/example/dashboard_barangay/BrgyDashboard.fxml";
+            case BARANGAY_DASHBOARD -> "/com/example/dashboard_barangay/dashboard-barangay.fxml";
         };
     }
 }
