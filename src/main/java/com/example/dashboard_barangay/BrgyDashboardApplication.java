@@ -15,7 +15,7 @@ public class BrgyDashboardApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(BrgyDashboardApplication.class.getResource("BrgyDashboard.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(BrgyDashboardApplication.class.getResource("dashboard-barangay.fxml"));
         Parent root = fxmlLoader.load();
 
         //stage.initStyle(StageStyle.UNDECORATED);
