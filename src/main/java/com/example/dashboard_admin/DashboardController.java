@@ -71,6 +71,7 @@ public class DashboardController {
     private final StringProperty selectedStatusFilter = new SimpleStringProperty("ALL");
 
 
+
     @FXML
     public void initialize() {
         // Navigation
@@ -147,7 +148,11 @@ public class DashboardController {
 
     private void refreshStats() {
         try {
-            if (lblTotalEvacValue != null) lblTotalEvacValue.setText(String.valueOf(masterData.size()));
+            List<com.example.model.EvacuationCenter> centers = evacuationCenter Dao.findAll();
+
+            if (lblTotalEvacValue != null) {
+                lblTotalEvacValue.setText(String.valueOf(centers.size()));
+            }
             if (lblCriticalItem != null) lblCriticalItem.setText(String.valueOf(InventoryItemDao.getAdminCriticalCount()));
         } catch (SQLException e) {
             System.err.println("Error loading stats: " + e.getMessage());
