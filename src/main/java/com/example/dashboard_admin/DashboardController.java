@@ -1,6 +1,7 @@
 package com.example.dashboard_admin;
 
 import com.example.auth.AuthService;
+import com.example.dao.EvacuationCenterDao;
 import com.example.dao.InventoryItemDao;
 import com.example.dao.SupplyRequestDao;
 import com.example.dao.TransactionDao;
@@ -69,7 +70,7 @@ public class DashboardController {
 
     //Observable Property so listeners update items automatically
     private final StringProperty selectedStatusFilter = new SimpleStringProperty("ALL");
-
+    private final EvacuationCenterDao evacuationCenterDao = new EvacuationCenterDao();
 
 
     @FXML
@@ -148,7 +149,7 @@ public class DashboardController {
 
     private void refreshStats() {
         try {
-            List<com.example.model.EvacuationCenter> centers = evacuationCenter Dao.findAll();
+            List<com.example.model.EvacuationCenter> centers = evacuationCenterDao.findAll();
 
             if (lblTotalEvacValue != null) {
                 lblTotalEvacValue.setText(String.valueOf(centers.size()));
