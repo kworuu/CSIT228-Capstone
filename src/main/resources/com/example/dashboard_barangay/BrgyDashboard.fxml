@@ -144,10 +144,9 @@
 
                                         <Label fx:id="labelOverlayTimestamp" styleClass="brgy-overlay-ts" text="Updated: —" />
 
-                                        <Button fx:id="buttonUpdateCenter" maxWidth="Infinity" styleClass="brgy-btn-primary" text="Update Center Status" />
-                                        <Button fx:id="buttonViewRoster" maxWidth="Infinity" styleClass="brgy-btn-secondary" text="View Evacuee Roster" />
-
-                                        <Button fx:id="buttonDeleteCenter" maxWidth="Infinity" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand;" styleClass="brgy-btn-danger" text="Delete Center" />
+                                        <Button fx:id="buttonUpdateCenter" maxWidth="Infinity" mnemonicParsing="false" text="Update Center Status" styleClass="brgy-btn-primary, success" />
+                                        <Button fx:id="buttonViewRoster" maxWidth="Infinity" mnemonicParsing="false" text="View Evacuee Roster" styleClass="brgy-btn-primary, neutral" />
+                                        <Button fx:id="buttonDeleteCenter" maxWidth="Infinity" mnemonicParsing="false" text="Delete Center" styleClass="brgy-btn-primary, danger" />
                                     </children>
                                 </VBox>
                                 <Button fx:id="buttonOverlayClose" mnemonicParsing="false" onAction="#handleOverlayClose" styleClass="brgy-overlay-close" text="✕" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
