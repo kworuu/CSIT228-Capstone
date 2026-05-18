@@ -32,6 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.HashSet;
 
 public class MapViewController implements Initializable, com.example.util.CenterEventObserver {
 
@@ -331,42 +333,48 @@ public class MapViewController implements Initializable, com.example.util.Center
             return;
         }
 
+        Set<String> alreadyDisplayedCenters = new HashSet<>();
+
         for (com.example.util.CenterEvent event : events) {
-            VBox card = new VBox();
-            card.setSpacing(6.0);
-            card.getStyleClass().add("alert-item");
-            card.setStyle("-fx-cursor: hand;");
+            if (!alreadyDisplayedCenters.contains(event.centerName())) {
+                alreadyDisplayedCenters.add(event.centerName());
 
-            // Clicking an alert shifts the view focus layout drawer directly onto the map pin!
-            card.setOnMouseClicked(e -> onMarkerClicked(String.valueOf(event.centerId())));
+                VBox card = new VBox();
+                card.setSpacing(6.0);
+                card.getStyleClass().add("alert-item");
+                card.setStyle("-fx-cursor: hand;");
 
-            VBox titleVBox = new VBox();
-            titleVBox.setSpacing(2.0);
-            Label title = new Label(event.centerName());
-            title.getStyleClass().add("alert-title");
-            title.setStyle("-fx-text-fill: #ffffff;");
-            title.setWrapText(true);
+                // Clicking an alert shifts the view focus layout drawer directly onto the map pin!
+                card.setOnMouseClicked(e -> onMarkerClicked(String.valueOf(event.centerId())));
 
-            Label eventLabel = new Label(event.eventLabel());
-            eventLabel.getStyleClass().add("alert-location");
-            eventLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
-            eventLabel.setWrapText(true);
-            titleVBox.getChildren().addAll(title, eventLabel);
+                VBox titleVBox = new VBox();
+                titleVBox.setSpacing(2.0);
+                Label title = new Label(event.centerName());
+                title.getStyleClass().add("alert-title");
+                title.setStyle("-fx-text-fill: #ffffff;");
+                title.setWrapText(true);
 
-            HBox detailsBox = new HBox();
-            detailsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                Label eventLabel = new Label(event.eventLabel());
+                eventLabel.getStyleClass().add("alert-location");
+                eventLabel.setStyle("-fx-text-fill: #059669; -fx-font-weight: bold;");
+                eventLabel.setWrapText(true);
+                titleVBox.getChildren().addAll(title, eventLabel);
 
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                HBox detailsBox = new HBox();
+                detailsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-            Label timestampLabel = new Label(event.timestamp());
-            timestampLabel.getStyleClass().add("alert-location");
-            timestampLabel.setStyle("-fx-text-fill: #ffffff;");
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-            detailsBox.getChildren().addAll(spacer, timestampLabel);
-            card.getChildren().addAll(titleVBox, detailsBox);
+                Label timestampLabel = new Label(event.timestamp());
+                timestampLabel.getStyleClass().add("alert-location");
+                timestampLabel.setStyle("-fx-text-fill: #ffffff;");
 
-            eventsContainer.getChildren().add(card);
+                detailsBox.getChildren().addAll(spacer, timestampLabel);
+                card.getChildren().addAll(titleVBox, detailsBox);
+
+                eventsContainer.getChildren().add(card);
+            }
         }
     }
 
