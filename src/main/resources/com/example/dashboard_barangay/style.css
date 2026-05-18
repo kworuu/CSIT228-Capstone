@@ -181,18 +181,46 @@
     -fx-background-color: #047857; /* Slightly darker green for hover effect */
 }
 
+/* --- BUTTON VARIATIONS --- */
+
+/* The Base Primary Button Structure */
 .brgy-btn-primary {
-    -fx-background-color: #059669;
-    -fx-text-fill: white;
+    -fx-background-color: #1e293b; /* Default theme color (Slate Dark) */
+    -fx-text-fill: #f8fafc;
+    -fx-background-radius: 6px;
     -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 9 18;
-    -fx-font-size: 12;
     -fx-cursor: hand;
+    -fx-padding: 10px 20px;
+}
+.brgy-btn-primary:hover {
+    -fx-background-color: #334155;
 }
 
-.brgy-btn-primary:hover {
+/* Success/Green Variation */
+.brgy-btn-primary.success {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+}
+.brgy-btn-primary.success:hover {
     -fx-background-color: #047857;
+}
+
+/* Neutral Variation (Shares structure, explicitly keeps slate background) */
+.brgy-btn-primary.neutral {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #f8fafc;
+}
+.brgy-btn-primary.neutral:hover {
+    -fx-background-color: #334155;
+}
+
+/* Danger/Red Variation (Overrides the background color to alert red) */
+.brgy-btn-primary.danger {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: #ffffff;
+}
+.brgy-btn-primary.danger:hover {
+    -fx-background-color: #dc2626; /* Darker red on hover */
 }
 
 .brgy-btn-ghost {

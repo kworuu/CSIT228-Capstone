@@ -103,8 +103,7 @@
                                         <Label fx:id="lblTotalEvacValue" styleClass="stat-value" text="4,218" />
                                         <HBox alignment="CENTER_LEFT" spacing="4.0">
                                             <children>
-                                                <Label styleClass="trend-indicator, trend-up" text="↑ 3.4%" />
-                                                <Label styleClass="stat-trend-text" text="since 06:00" />
+                                                <Label styleClass="stat-trend-text" text="As of 2026 information" textFill="#0fb51d" />
                                             </children>
                                         </HBox>
                                     </children>

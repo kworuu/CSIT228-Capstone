@@ -7,6 +7,16 @@ import java.sql.*;
 import java.util.List;
 
 public class TransactionDao {
+    public boolean hasTransactions(long itemId) throws SQLException {
+        String sql = "SELECT 1 FROM transactions WHERE item_id = ? LIMIT 1";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, itemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Returns true if a record is found
+            }
+        }
+    }
 
     public List<Transaction> findAll() throws SQLException {
         List<Transaction> transactions = new java.util.ArrayList<>();
@@ -17,10 +27,13 @@ public class TransactionDao {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
+                // Safely check if item_id is NULL in the database
+                long itemId = rs.getObject("item_id") != null ? rs.getLong("item_id") : 0L;
+
                 transactions.add(new Transaction(
                         rs.getLong("id"),
                         rs.getString("direction"),
-                        rs.getLong("item_id"),
+                        itemId, // Pass the nullable Long instead of rs.getLong()
                         rs.getInt("quantity"),
                         rs.getObject("destination_id") != null ? rs.getLong("destination_id") : null,
                         rs.getString("created_by"),
