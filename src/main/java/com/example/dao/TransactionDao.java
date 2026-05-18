@@ -7,6 +7,16 @@ import java.sql.*;
 import java.util.List;
 
 public class TransactionDao {
+    public boolean hasTransactions(long itemId) throws SQLException {
+        String sql = "SELECT 1 FROM transactions WHERE item_id = ? LIMIT 1";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, itemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Returns true if a record is found
+            }
+        }
+    }
 
     public List<Transaction> findAll() throws SQLException {
         List<Transaction> transactions = new java.util.ArrayList<>();
